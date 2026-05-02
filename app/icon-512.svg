@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" fill="#0d1117"/>
+  <g transform="translate(256, 256)" stroke="#58a6ff" stroke-width="14" stroke-linejoin="round" fill="none">
+    <path d="M -140 22 L -140 128 L 140 128 L 140 22 L 0 -112 Z"/>
+    <rect x="-32" y="36" width="64" height="92" fill="#58a6ff" stroke="none"/>
+    <rect x="-96" y="14" width="38" height="38" fill="#58a6ff" stroke="none"/>
+    <rect x="58" y="14" width="38" height="38" fill="#58a6ff" stroke="none"/>
+    <path d="M 76 -76 q 0 -22 16 -22 q 16 0 16 -22 q 0 -22 16 -22" stroke="#3fb950" stroke-width="10" fill="none"/>
+  </g>
+  <text x="256" y="478" font-family="-apple-system,system-ui,sans-serif" font-size="36" font-weight="600" fill="#8b949e" text-anchor="middle">Wildhaven AI Homes</text>
+</svg>

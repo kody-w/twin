@@ -1,0 +1,94 @@
+All Rights Reserved.
+
+Copyright (c) 2026 Kody Wildfeuer.
+
+This repository is **source-available**, **not open-source**.
+
+It is published in public so that the brand it represents — Wildhaven AI
+Homes — can operate, iterate, and be evaluated transparently before the
+company incorporates. The build-in-public bet is to *show the thinking*,
+not to *give away the work*.
+
+────────────────────────────────────────────────────────────────────────
+
+## What you may do
+
+- Read the contents of this repository.
+- Quote brief, attributed excerpts (a few sentences, with a link back),
+  the way you'd quote any public writing.
+- Open issues and pull requests against this repository to engage with
+  the brand or propose refinements. Submitted contributions are subject
+  to a contributor license assignment that will be finalized when the
+  company incorporates; until then, by submitting a PR you grant Kody
+  Wildfeuer a perpetual, irrevocable, royalty-free license to use,
+  modify, and relicense your contribution as part of this repo.
+- Discuss, link to, and reference this repository in your own work.
+
+## What you may not do
+
+- Copy, modify, redistribute, or sublicense any portion of this
+  repository (in whole or in part) for any purpose, commercial or
+  non-commercial.
+- Operate a competing product, service, or brand that uses any
+  portion of this repository's text, design, agent definitions,
+  body_function code, or vision document.
+- Use the names "Wildhaven", "Wildhaven AI Homes", "AI Homes",
+  any associated logos, or any confusingly similar marks to identify
+  any product, service, or organization. These names are claimed as
+  trademarks of Kody Wildfeuer and (in the future) the Wildhaven AI
+  Homes legal entity.
+- Train a machine-learning model on the contents of this repository
+  for the purpose of producing a competing brand-twin or a competing
+  Pre-Founder twin product.
+- Present any fork, copy, or derivative as being affiliated with,
+  endorsed by, or originating from Wildhaven AI Homes.
+
+## What about the platform underneath?
+
+This repository is a **variant** of the RAPP digital-organism platform
+([kody-w/RAPP](https://github.com/kody-w/RAPP)). Lineage is recorded
+in [`rappid.json`](./rappid.json) and follows the variant lineage
+protocol of RAPP's Constitution Article XXXIV.
+
+The RAPP platform itself is independently licensed by its own repository.
+Nothing in this LICENSE restricts what you may do with the upstream RAPP
+platform — that is governed by RAPP's own license terms.
+
+The pattern this repo demonstrates — **a Pre-Founder twin operating in
+public as a RAPP variant** — is conceptual and freely reusable. You are
+welcome to build your own Pre-Founder twin for your own brand. You are
+not welcome to copy *this* one's content.
+
+## Future licensing
+
+When Wildhaven AI Homes Inc. (or successor entity) is incorporated,
+this LICENSE will be superseded by the company's chosen licensing
+structure. The expected shape — though not a commitment — is a split
+license:
+
+- **Code** (agents, body_functions, utilities) → a permissive
+  open-source license (e.g., Apache 2.0).
+- **Brand prose** (README, MANIFEST, soul, vision documents) →
+  Creative Commons BY-NC-ND or equivalent.
+- **Trademarks** (Wildhaven, Wildhaven AI Homes, logos) → retained
+  by the company, separately enforced.
+
+Until that incorporation moment, all rights are reserved.
+
+## Requesting use
+
+If you want to use anything in this repository for any purpose not
+covered above — research, analysis, integration, partnership, content
+licensing, fork-with-permission — please open an issue at
+https://github.com/kody-w/wildhaven-ai-homes-twin/issues describing
+what you want to do, and we will respond.
+
+## Disclaimer
+
+This repository is provided "as is", without warranty of any kind,
+express or implied, including but not limited to the warranties of
+merchantability, fitness for a particular purpose, and noninfringement.
+In no event shall the authors or copyright holders be liable for any
+claim, damages, or other liability, whether in an action of contract,
+tort, or otherwise, arising from, out of, or in connection with this
+repository or the use or other dealings in this repository.
