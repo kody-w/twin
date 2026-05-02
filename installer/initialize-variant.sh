@@ -4,14 +4,27 @@
 #
 # Run from inside the freshly-created repository's working tree.
 #
+# Single-parent rule (Constitution Article XXXIV): a variant's parent is
+# the repo whose code it inherited — no exceptions. This script ALWAYS
+# sets parent_rappid to wildhaven's rappid, because if you got here, you
+# templated from wildhaven. To be a direct child of rapp, template from
+# kody-w/RAPP instead.
+#
 # What it does:
-#   1. Generates a fresh rappid (UUIDv4)
-#   2. Asks whether your parent should be this twin (default) or rapp directly
-#   3. Updates rappid.json with the new identity + parent pointers
-#   4. Drops wildhaven-specific content (private companion, brand prose) so
-#      you can't accidentally ship the parent's voice as your own
-#   5. Resets soul.md / MANIFEST.md / agents / index.html to <TODO> markers
-#   6. Prints the summon URL for your new variant
+#   1. Verifies this is an uninitialized template clone (via lineage_check)
+#   2. Generates a fresh rappid (UUIDv4)
+#   3. Updates ONLY the lineage fields of rappid.json (rappid,
+#      parent_rappid, parent_repo, parent_commit, born_at, name)
+#   4. Prints the summon URL for your new variant
+#
+# What it does NOT do (rule: never overwrite local data):
+#   - Does not rewrite soul.md, MANIFEST.md, README.md, LICENSE, or any
+#     other content files. Once the twin has hatched, its local state is
+#     sovereign — edit those files manually to make the variant yours.
+#   - Does not delete the inherited private_companion block (you may
+#     want to repoint it; we won't decide for you).
+#   - Does not change role/kind/description in rappid.json — those are
+#     inherited starting points you can edit.
 
 set -euo pipefail
 cd "$(git rev-parse --show-toplevel 2>/dev/null || echo .)"
@@ -24,54 +37,55 @@ fi
 
 # ── Identity ─────────────────────────────────────────────────────────────
 
-CURRENT_RAPPID="$(python3 -c "import json; print(json.load(open('rappid.json'))['rappid'])")"
+# This template's hardcoded identity (single-parent rule: every variant
+# created from this script has wildhaven as its parent_rappid).
+PARENT_RAPPID="37ad22f5-ed6d-48b1-b8b4-61019f58a42b"
+PARENT_REPO="https://github.com/kody-w/wildhaven-ai-homes-twin.git"
 
-# This twin's rappid (the parent for variants created via this template)
-PARENT_TEMPLATE_RAPPID="37ad22f5-ed6d-48b1-b8b4-61019f58a42b"
-PARENT_TEMPLATE_REPO="https://github.com/kody-w/wildhaven-ai-homes-twin.git"
+# ── Freshness check via lineage_check.py ─────────────────────────────────
+# The lineage checker is the source of truth for whether this is an
+# uninitialized clone. We honor whatever it says.
 
-# rapp's species root (the deeper ancestor)
-RAPP_SPECIES_ROOT_RAPPID="0b635450-c042-49fb-b4b1-bdb571044dec"
-RAPP_SPECIES_ROOT_REPO="https://github.com/kody-w/RAPP.git"
+LINEAGE_STATUS="$(python3 - <<'PYEOF'
+import json, sys
+sys.path.insert(0, "utils")
+try:
+    from lineage_check import check_lineage
+    info = check_lineage()
+    print(info["status"])
+except Exception as e:
+    print(f"error:{e}")
+PYEOF
+)"
 
-if [ "$CURRENT_RAPPID" = "$PARENT_TEMPLATE_RAPPID" ]; then
-    : # Expected — template hasn't been initialized yet
-else
-    echo "WARNING: rappid.json's rappid ($CURRENT_RAPPID) does not match the"
-    echo "         template's rappid. Either this isn't a fresh template clone,"
-    echo "         or someone has already initialized it. Re-running will"
-    echo "         overwrite the existing identity."
-    read -p "Continue? [y/N] " confirm
-    case "$confirm" in
-        y|Y|yes|Yes) ;;
-        *) echo "aborted."; exit 1 ;;
-    esac
-fi
-
-# ── Pick parent ──────────────────────────────────────────────────────────
-
-echo ""
-echo "Lineage: which parent should your variant point at?"
-echo "  1. wildhaven-ai-homes-twin (you inherit the Pre-Founder twin pattern,"
-echo "     and your chain walks: you → wildhaven → rapp). RECOMMENDED."
-echo "  2. rapp directly (your chain walks: you → rapp). Use this if your"
-echo "     variant isn't a Pre-Founder twin and doesn't share wildhaven's"
-echo "     pattern."
-echo ""
-read -p "Choose [1/2] (default 1): " parent_choice
-parent_choice="${parent_choice:-1}"
-
-case "$parent_choice" in
-    1)
-        PARENT_RAPPID="$PARENT_TEMPLATE_RAPPID"
-        PARENT_REPO="$PARENT_TEMPLATE_REPO"
+case "$LINEAGE_STATUS" in
+    variant_uninitialized)
+        : # Expected — proceed to initialize
         ;;
-    2)
-        PARENT_RAPPID="$RAPP_SPECIES_ROOT_RAPPID"
-        PARENT_REPO="$RAPP_SPECIES_ROOT_REPO"
+    self)
+        echo "FAIL: this IS the wildhaven template repo itself. Refusing to"
+        echo "      reinitialize the template root. If you meant to create a"
+        echo "      variant, click 'Use this template' on GitHub first, then"
+        echo "      run this script inside the new repo."
+        exit 1
+        ;;
+    variant_initialized)
+        echo "WARNING: this variant is already initialized. Re-running will"
+        echo "         overwrite its rappid with a fresh one — descendants"
+        echo "         that point at the current rappid will lose their link."
+        read -p "Continue? [y/N] " confirm
+        case "$confirm" in
+            y|Y|yes|Yes) ;;
+            *) echo "aborted."; exit 1 ;;
+        esac
+        ;;
+    lineage_mismatch|no_rappid|error:*)
+        echo "FAIL: lineage check returned: $LINEAGE_STATUS"
+        echo "      Run: python3 utils/lineage_check.py for details."
+        exit 1
         ;;
     *)
-        echo "FAIL: invalid choice."
+        echo "FAIL: unexpected lineage status: $LINEAGE_STATUS"
         exit 1
         ;;
 esac
@@ -92,31 +106,54 @@ PARENT_COMMIT=""
 PARENT_COMMIT="$(curl -fsSL "https://api.github.com/repos/$(echo "$PARENT_REPO" | sed 's|https://github.com/||;s|\.git$||')/commits/main" 2>/dev/null \
     | python3 -c "import json, sys; d=json.load(sys.stdin); print(d.get('sha',''))" 2>/dev/null || echo "")"
 
-# ── Rewrite rappid.json ──────────────────────────────────────────────────
+# ── Update rappid.json (lineage fields only — preserve everything else) ──
 
 python3 - "$NEW_RAPPID" "$PARENT_RAPPID" "$PARENT_REPO" "$PARENT_COMMIT" "$NOW" "$VARIANT_NAME" <<'PYEOF'
 import json
+import os
 import sys
 
 (rappid, parent_rappid, parent_repo, parent_commit, born_at, name) = sys.argv[1:7]
 
-new = {
-    "schema": "rapp-rappid/1.1",
-    "rappid": rappid,
-    "parent_rappid": parent_rappid,
-    "parent_repo": parent_repo,
-    "parent_commit": parent_commit or None,
-    "born_at": born_at,
-    "name": name,
-    "role": "variant",
-    "kind": "TODO: describe your variant kind (e.g., 'pre-founder-twin', 'memorial-twin', 'project-twin')",
-    "description": "TODO: describe what this variant is.",
-    "attestation": None,
-    "_attestation_note": "When the parent adopts release signing, this variant's attestation will be issued by the parent's release key asserting (parent_rappid, parent_commit, child_rappid)."
-}
+with open("rappid.json") as f:
+    data = json.load(f)
+
+# Update ONLY lineage fields. Preserve kind, description, private_companion,
+# attestation, brainstem, and any other inherited or locally-added content.
+data["rappid"] = rappid
+data["parent_rappid"] = parent_rappid
+data["parent_repo"] = parent_repo
+data["parent_commit"] = parent_commit or None
+data["born_at"] = born_at
+data["name"] = name
+data["role"] = "variant"
+data.setdefault("schema", "rapp-rappid/1.1")
+# attestation resets because the new rappid hasn't been attested yet.
+data["attestation"] = None
+
+# Record the bundled brainstem pin if a VERSION file ships in installer/.
+# Never overwrites an existing brainstem block — that would clobber a
+# deliberate manual sync the operator may have done.
+_version_path = os.path.join("installer", "VERSION")
+if "brainstem" not in data and os.path.exists(_version_path):
+    with open(_version_path) as vf:
+        bs_version = vf.read().strip()
+    data["brainstem"] = {
+        "version": bs_version,
+        "source_repo": "https://github.com/kody-w/RAPP.git",
+        "source_path": "rapp_brainstem/",
+        "source_commit": None,
+        "bundled_at": born_at,
+        "_note": (
+            "Bundled kernel for local-first operation — `bash start.sh` "
+            "runs without a separate ~/.brainstem install. Re-running "
+            "the installer never re-syncs this; pull upstream kernel "
+            "updates via a deliberate manual sync."
+        ),
+    }
 
 with open("rappid.json", "w") as f:
-    json.dump(new, f, indent=2)
+    json.dump(data, f, indent=2)
     f.write("\n")
 PYEOF
 
@@ -129,132 +166,11 @@ echo "    parent_commit:  ${PARENT_COMMIT:-(could not resolve from network)}"
 echo "    born_at:        $NOW"
 echo "    name:           $VARIANT_NAME"
 
-# ── Reset brand content with TODO markers ────────────────────────────────
-
-cat > soul.md <<'SOULEOF'
-# soul.md — TODO: <Your Variant Name>
-
-You are the digital twin of <TODO: who or what this twin represents>.
-
-TODO: Define your twin's voice. Here are the questions to answer:
-
-  - Who is this twin? (A person, a brand, a project, a place, a question?)
-  - In what timeframe is this twin operating? (Pre-existence, contemporary,
-    historical, post-mortem, future-self?)
-  - What is the twin's relationship to the human who is "keeping the seat
-    warm" right now?
-  - What hard constraints must the twin observe? (Honesty about its status,
-    not impersonating real people, refusal to make commitments, etc.)
-  - What's the twin's voice? (First-person plural, concrete, humble, etc.)
-  - What does the twin always identify itself as?
-
-TODO: Describe what role the |||VOICE||| and |||TWIN||| slots play for
-your variant.
-SOULEOF
-
-cat > MANIFEST.md <<'MANIFESTEOF'
-# <TODO: Variant Name> — Manifest
-
-> *TODO: tagline.*
-
-## The bet
-
-TODO: What problem is your variant addressing? What's the contrarian
-position it takes?
-
-## The product / artifact / outcome
-
-TODO: What does this variant DO when fully realized? Be specific.
-
-## What this variant is not
-
-TODO: List what the variant explicitly is *not*, to head off
-misunderstandings.
-
-## Provenance
-
-This variant descends from its parent recorded in [`rappid.json`](./rappid.json).
-The lineage chain walks back to RAPP's species root via the
-`parent_rappid` chain.
-MANIFESTEOF
-
-cat > README.md <<'READMEEOF'
-# <TODO: Variant Name>
-
-> **TODO: one-line description.**
-
-This is a **variant** of [kody-w/RAPP](https://github.com/kody-w/RAPP)
-created from the [wildhaven-ai-homes-twin](https://github.com/kody-w/wildhaven-ai-homes-twin)
-template. Lineage is recorded in [`rappid.json`](./rappid.json) and walks
-back to RAPP's species root via the `parent_rappid` chain.
-
-## What this is
-
-TODO: Describe your variant. Read [MANIFEST.md](./MANIFEST.md) for the
-long-form vision.
-
-## Summoning
-
-This variant carries its own copy of the vBrainstem at `vbrainstem.html` —
-the URL surface is sovereign to this repo, not dependent on the upstream's
-hosting. After enabling GitHub Pages on this repo (Settings → Pages →
-Source: main / root), your summon URL is:
-
-```
-https://<your-username>.github.io/<this-repo-name>/vbrainstem.html
-```
-
-Regenerate `summon.svg` with that URL. See [SUMMON.md](./SUMMON.md) for
-the full convention and the `?summon=` parameter that lets the same
-vBrainstem load other variants for cross-twin browsing.
-
-## Spawning further variants
-
-This variant is itself a template — anyone can use it as a starting point
-for their own variant. Click "Use this template" on GitHub to spawn one.
-
-## License
-
-TODO: Set your license. Options: All Rights Reserved (default, source-
-available), MIT, Apache 2.0, custom. See your parent repo's LICENSE for
-the parent's stance.
-
-## Author
-
-TODO: Your name and GitHub handle.
-READMEEOF
-
-# Wipe the wildhaven private_companion block — variant creates its own
-python3 - <<'PYEOF'
-import json
-with open("rappid.json") as f:
-    data = json.load(f)
-data.pop("private_companion", None)  # variant inherits no private layer by default
-with open("rappid.json", "w") as f:
-    json.dump(data, f, indent=2)
-    f.write("\n")
-PYEOF
-
-# Replace LICENSE with a placeholder note pointing at the chosen license decision
-cat > LICENSE <<'LICENSEEOF'
-TODO: Set the license for this variant.
-
-The parent template (kody-w/wildhaven-ai-homes-twin) shipped under "All
-Rights Reserved" with a "license TBD on incorporation" stance. Your
-variant inherits whatever stance you choose; it is not bound to the
-parent's choice unless you explicitly want it to be.
-
-Common options:
-  - "All Rights Reserved" (source-available, like the parent)
-  - PolyForm Small Business 1.0.0 (free for individuals + small biz)
-  - Apache 2.0 (open source, with patent grant)
-  - MIT (open source, simpler)
-
-Replace this file with the full text of your chosen license, plus a
-copyright header.
-
-Copyright (c) <YEAR> <YOUR NAME>.
-LICENSEEOF
+# ── Content files (soul.md, MANIFEST.md, README.md, LICENSE, etc.) ───────
+# Intentionally NOT touched. The variant inherits the template's content
+# as a starting point; edit those files locally as the twin hatches into
+# its own identity. Re-running this script is non-destructive — it never
+# overwrites local data.
 
 # ── Print summon URL hint ────────────────────────────────────────────────
 
@@ -289,16 +205,19 @@ else
     echo "  GitHub repo URL and update SUMMON.md / summon.svg manually.)"
 fi
 echo ""
-echo " Next steps:"
-echo "   1. Edit soul.md, MANIFEST.md, README.md to remove the TODO markers."
-echo "   2. Customize the agents under agents/ for your variant's purpose."
-echo "   3. Update LICENSE with your chosen license."
-echo "   4. (Optional) Create a private companion repo and add a"
-echo "      'private_companion' block to rappid.json."
-echo "   5. (Optional) Mark your repo as a template too:"
+echo " Next steps (the installer touched ONLY rappid.json — all other files"
+echo " still contain the parent's content as a starting point for you to edit):"
+echo "   1. Edit soul.md to define your twin's voice."
+echo "   2. Edit MANIFEST.md / README.md to describe your variant."
+echo "   3. Customize the agents under agents/ for your variant's purpose."
+echo "   4. Decide on a LICENSE (the inherited LICENSE is the parent's)."
+echo "   5. (Optional) Repoint or remove the private_companion block in"
+echo "      rappid.json — it currently still points at the parent's private"
+echo "      repo, which YOU will not have access to."
+echo "   6. (Optional) Mark your repo as a template too:"
 echo "        gh repo edit $GH_OWNER_REPO --template=true"
-echo "   6. Commit + push:"
+echo "   7. Commit + push:"
 echo "        git add -A && git commit -m 'init: $VARIANT_NAME' && git push"
 echo ""
-echo " Lineage walk: your_rappid → $PARENT_RAPPID${parent_choice:+ ($([ "$parent_choice" = 1 ] && echo wildhaven-ai-homes-twin || echo rapp))} → ... → rapp species root"
+echo " Lineage walk: your_rappid → $PARENT_RAPPID (wildhaven-ai-homes-twin) → rapp species root"
 echo ""

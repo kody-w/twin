@@ -1,4 +1,19 @@
 import os
+import sys
+
+# Lineage guard: any agent loading triggers a check that this repo's
+# rappid.json identity matches its git location. An uninitialized
+# template clone refuses to boot. See utils/lineage_check.py.
+try:
+    _utils = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "utils")
+    if _utils not in sys.path:
+        sys.path.insert(0, _utils)
+    from lineage_check import assert_initialized as _assert_lineage  # type: ignore
+    _assert_lineage()
+except SystemExit:
+    raise
+except Exception as _e:
+    print(f"[lineage] check skipped: {_e}", file=sys.stderr)
 
 
 class BasicAgent:
