@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>@kody-w's twin — front gate</title>
+<meta name="description" content="Front-gate trio for @kody-w's digital twin: tether QR + holocard + 7-word incantation. All three resolve to the same rappid.">
+<link rel="canonical" href="https://kody-w.github.io/twin/front.html">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ctext y='26' font-size='28'%3E🧬%3C/text%3E%3C/svg%3E">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #0d1117; --s1: #161b22; --s2: #21262d; --bd: #30363d;
+  --tx: #e6edf3; --dim: #8b949e; --mut: #6e7681;
+  --acc: #58a6ff; --grn: #3fb950; --org: #d29922; --pur: #d2a8ff;
+}
+body { font-family: -apple-system, system-ui, sans-serif; background: var(--bg); color: var(--tx); margin: 0; line-height: 1.5; }
+.shell { max-width: 880px; margin: 0 auto; padding: 48px 22px; }
+header h1 { font-size: 1.6rem; margin-bottom: 8px; display: flex; align-items: center; gap: 10px; }
+header .tag { color: var(--dim); margin-bottom: 18px; }
+.rappid-line { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 0.74rem; color: var(--acc); word-break: break-all; background: var(--s1); padding: 10px 14px; border-radius: 8px; border: 1px solid var(--bd); margin-bottom: 24px; }
+.trio { display: grid; gap: 18px; grid-template-columns: 1fr; }
+@media (min-width: 720px) { .trio { grid-template-columns: 1fr 1fr; } }
+@media (min-width: 1000px) { .trio { grid-template-columns: 1fr 1fr 1fr; } }
+.panel { background: var(--s1); border: 1px solid var(--bd); border-radius: 12px; padding: 20px; text-align: center; }
+.panel h2 { font-size: 0.78rem; color: var(--dim); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 14px; }
+#qr-canvas { background: #fff; padding: 8px; border-radius: 8px; }
+.qr-fallback { background: #fff; color: #000; padding: 12px; border-radius: 8px; font-family: monospace; font-size: 0.7rem; word-break: break-all; }
+.holocard { background: linear-gradient(180deg, #161b22, #0d1117); border: 2px solid var(--acc); border-radius: 10px; padding: 14px; font-size: 0.86rem; text-align: left; }
+.holocard.tier-official { border-color: var(--org); }
+.holocard.tier-verified { border-color: var(--grn); }
+.holocard .row { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 4px; }
+.holocard .name { font-weight: 700; font-size: 1rem; }
+.holocard .tier { font-size: 0.62rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+.holocard .type-line { font-size: 0.7rem; color: var(--mut); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
+.holocard .stats { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 6px; margin: 8px 0; }
+.holocard .stat { background: rgba(0,0,0,0.3); border-radius: 4px; padding: 4px 6px; font-size: 0.7rem; text-align: center; }
+.holocard .stat .v { font-weight: 700; color: var(--acc); }
+.holocard .stat .k { color: var(--mut); font-size: 0.6rem; }
+.holocard .types { display: flex; gap: 6px; flex-wrap: wrap; margin: 6px 0; }
+.holocard .type { font-size: 0.62rem; font-weight: 700; padding: 2px 7px; border-radius: 999px; background: var(--bd); color: var(--tx); }
+.holocard .flavor { font-style: italic; font-size: 0.74rem; color: var(--dim); margin: 8px 0; padding: 6px 0; border-top: 1px dashed var(--bd); border-bottom: 1px dashed var(--bd); }
+.holocard .meta { font-size: 0.62rem; color: var(--mut); font-family: ui-monospace, monospace; margin-top: 6px; }
+.incantation { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 1.1rem; color: var(--acc); letter-spacing: 0.4px; line-height: 1.6; background: rgba(0,0,0,0.4); padding: 14px; border-radius: 8px; border: 1px dashed var(--acc); margin: 8px 0; word-break: break-word; }
+.hint { font-size: 0.74rem; color: var(--mut); margin-top: 10px; line-height: 1.4; }
+.hint a { color: var(--acc); text-decoration: none; }
+footer { margin-top: 36px; font-size: 0.82rem; color: var(--mut); text-align: center; }
+footer a { color: var(--acc); }
+</style>
+</head>
+<body>
+<div class="shell">
+
+<header>
+  <h1>🧬 @kody-w's twin</h1>
+  <p class="tag">Front gate · three summoning surfaces (QR + holocard + incantation) · all resolve to the same rappid.</p>
+</header>
+
+<div class="rappid-line" id="rappid-line">loading rappid…</div>
+
+<div class="trio">
+
+  <div class="panel">
+    <h2>📷 Scan QR</h2>
+    <canvas id="qr-canvas"></canvas>
+    <p class="hint">Camera-scan from any RAPP tether's Scan mode. The QR encodes the twin invite egg.</p>
+  </div>
+
+  <div class="panel">
+    <h2>🎴 Holocard</h2>
+    <div id="holocard-target"><div style="color:var(--mut);font-style:italic">loading card.json…</div></div>
+    <p class="hint">Visual identity from <code>card.json</code> (rapp-card/1.1.2).</p>
+  </div>
+
+  <div class="panel">
+    <h2>🔮 Incantation</h2>
+    <div class="incantation" id="incantation-target">…</div>
+    <p class="hint">Memorize these 7 words. Spin them on any RAPP tether's <a href="https://kody-w.github.io/RAPP/pages/tether.html">Dial wheel</a> to summon this twin — no network needed for the resolution itself.</p>
+  </div>
+
+</div>
+
+<footer>
+  <p><a href="index.html">← back to the twin's interactive UI</a> ·
+     <a href="https://github.com/kody-w/twin">source</a> ·
+     <a href="https://kody-w.github.io/RAPP/pages/tether.html">public tether</a></p>
+</footer>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/qrious@4.0.2/dist/qrious.min.js"></script>
+<script>
+const MNEMONIC_URL = 'https://raw.githubusercontent.com/kody-w/RAR/main/rapp_sdk.py';
+const MNEMONIC_CACHE = 'rapp.mnemonic.words.v1';
+
+async function fetchMnemonic() {
+  try { const c = localStorage.getItem(MNEMONIC_CACHE); if (c) { const a = JSON.parse(c); if (a.length === 1024) return a; } } catch (e) {}
+  try {
+    const src = await (await fetch(MNEMONIC_URL)).text();
+    const m = src.match(/MNEMONIC_WORDS\s*=\s*"""([\s\S]*?)"""/);
+    if (!m) return null;
+    const w = m[1].split(/\s+/).filter(Boolean).map(s => s.toUpperCase());
+    try { localStorage.setItem(MNEMONIC_CACHE, JSON.stringify(w)); } catch (e) {}
+    return w;
+  } catch (e) { return null; }
+}
+
+function deriveIncantationFromRappid(rappid, words) {
+  const m = rappid.match(/:([a-f0-9]+)@/);
+  if (!m || !words || words.length !== 1024) return null;
+  let seed = BigInt('0x' + m[1].slice(0, 16).padEnd(16, '0'));
+  const o = [];
+  for (let i = 0; i < 7; i++) { o.push(words[Number(seed & 1023n)]); seed >>= 10n; }
+  return o.join(' ');
+}
+
+function renderHolocard(card) {
+  const tier = (card.quality_tier || card.rarity_tier || card.tier || 'community').toLowerCase();
+  const types = (card.agent_types || []).map(t => `<span class="type">${t}</span>`).join('');
+  const stats = card.stats || {};
+  const statBlocks = ['atk','def','spd','int']
+    .filter(k => stats[k] !== undefined)
+    .map(k => `<div class="stat"><div class="v">${stats[k]}</div><div class="k">${k.toUpperCase()}</div></div>`).join('');
+  const hp = card.hp !== undefined ? `<div class="stat" style="grid-column:span 4;background:rgba(63,185,80,0.15)"><div class="v" style="color:var(--grn)">HP ${card.hp}</div></div>` : '';
+  return `<div class="holocard tier-${tier}">
+    <div class="row">
+      <span class="name">${card.display_name || card.name || card.title || '?'}</span>
+      <span class="tier" style="color:var(--${tier==='official'?'org':tier==='verified'?'grn':'mut'})">${tier}</span>
+    </div>
+    <div class="type-line">${card.type_line || card.category || (card.agent_types||[]).join(' / ') || ''}</div>
+    ${types ? `<div class="types">${types}</div>` : ''}
+    ${(statBlocks || hp) ? `<div class="stats">${hp}${statBlocks}</div>` : ''}
+    ${card.flavor || card.title ? `<div class="flavor">"${card.flavor || card.title}"</div>` : ''}
+    <div class="meta">seed=${(card.seed||'?').toString().slice(0,16)}… · v${card.version||'?'}</div>
+  </div>`;
+}
+
+async function boot() {
+  // ── Rappid + URL for QR ────────────────────────────
+  let rappidData = null;
+  try { rappidData = await (await fetch('rappid.json', {cache:'no-cache'})).json(); } catch (e) {}
+  const rappid = rappidData?.rappid || '(rappid.json missing)';
+  document.getElementById('rappid-line').textContent = rappid;
+
+  // ── QR ─────────────────────────────────────────────
+  const base = (location.origin && location.origin !== 'null'
+                  ? location.origin + location.pathname.replace(/\/[^/]*$/, '')
+                  : 'https://kody-w.github.io/twin');
+  const url = base + '/.well-known/twin.egg';
+  if (typeof QRious !== 'undefined') {
+    new QRious({ element: document.getElementById('qr-canvas'), value: url, size: 200, background: '#ffffff', foreground: '#000000', level: 'M' });
+  } else {
+    const c = document.getElementById('qr-canvas');
+    c.outerHTML = `<div class="qr-fallback">QRious offline — paste this:<br><b>${url}</b></div>`;
+  }
+
+  // ── Card + Incantation (prefer card.incantation if present) ────
+  let card = null;
+  try { card = await (await fetch('card.json', {cache:'no-cache'})).json(); } catch (e) {}
+  if (card) {
+    document.getElementById('holocard-target').innerHTML = renderHolocard(card);
+  } else {
+    document.getElementById('holocard-target').innerHTML = '<div style="color:var(--mut);font-style:italic">card.json missing or unreachable</div>';
+  }
+  let incantation = card?.incantation;
+  if (!incantation && rappidData?.rappid) {
+    // Fall back to deriving from the rappid hash
+    const words = await fetchMnemonic();
+    incantation = deriveIncantationFromRappid(rappidData.rappid, words);
+  }
+  document.getElementById('incantation-target').textContent = incantation || '(no card.incantation; mnemonic dictionary unreachable for fallback)';
+}
+boot();
+</script>
+</body>
+</html>
