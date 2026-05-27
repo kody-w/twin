@@ -32,7 +32,7 @@ Optional cartridges, install on demand:
 
 ## The dashboard
 
-`console.html` — original Xbox 360 launch dashboard aesthetic. Horizontal blade tabs at top: My Cartridges · Twin Estate · Marketplace · System. Click a cartridge tile → modal with chat panel scoped to that cartridge.
+`console.html` — a 2005-era 'blades' dashboard aesthetic. Horizontal blade tabs at top: My Cartridges · Twin Estate · Marketplace · System. Click a cartridge tile → modal with chat panel scoped to that cartridge.
 
 ## SPEC
 
