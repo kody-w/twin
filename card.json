@@ -1,5 +1,25 @@
 {
   "schema": "rappcards/1.1.2",
+  "twin": {
+    "schema": "rapp-twin-card/1.0",
+    "twinId": "10712fa0-59b0-4c4c-b798-8cac0b23ce1a",
+    "who": "Kody Wildfeuer",
+    "primary": true,
+    "rappid": "rappid:@kody-w/twin:257afa7958982c28258c1d97701182b1",
+    "pubkey": {
+      "alg": "Ed25519",
+      "raw_b64": "JSV5EXkOexwWW5/lJgrg90bthRwTfs4hioMzmuyzvBA=",
+      "pem": "-----BEGIN PUBLIC KEY-----\nMCowBQYDK2VwAyEAJSV5EXkOexwWW5/lJgrg90bthRwTfs4hioMzmuyzvBA=\n-----END PUBLIC KEY-----\n"
+    },
+    "surfaces": [
+      { "kind": "gate", "url": "https://kody-w.github.io/twin/" },
+      { "kind": "lookup", "url": "https://kody-w.github.io/twin/lookup.html" },
+      { "kind": "gallery", "url": "https://kody-w.github.io/twin/gallery/" },
+      { "kind": "pulse", "url": "https://kody-w.github.io/twin/feed.xml" },
+      { "kind": "repo", "url": "https://github.com/kody-w/twin" }
+    ],
+    "_note": "The public half of the twin: who it represents, its signing pubkey, and its primary surfaces. Every broadcast frame in frames/ is signed by the on-device (private) half; edges verify against this pubkey. Address scheme: expand('kody-w/twin') -> this card. Trust the hash, not the host."
+  },
   "id": "@kody-w/twin",
   "name": "Twin",
   "title": "Brainstem \u2014 AI / Twin",

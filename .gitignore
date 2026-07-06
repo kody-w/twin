@@ -8,6 +8,12 @@ __pycache__/
 # accidentally added here would leak when the public twin is pushed.
 .private/
 
+# Twin signing key — the on-device twin's PRIVATE Ed25519 half.
+# CRITICAL: this is the sealed substance that NEVER travels in the bones.
+# Only the public half (keys/twin.pub + card.json twin.pubkey) is published.
+keys/twin.key
+keys/*.key
+
 # Brainstem state — runtime, not source
 .brainstem_data/
 .copilot_token
