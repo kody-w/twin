@@ -71,25 +71,65 @@ bash ~/.brainstem/src/rapp_brainstem/start.sh
 
 For the richer twin (this brain repo's depth), make sure your local environment has a GitHub token reachable via `WAH_PRIVATE_TOKEN` env > `GITHUB_TOKEN` env > `gh auth token` CLI.
 
-## The pulse — the twin's public bones, broadcast
+## The pulse — this repo is a DOG (`rapp-twin-pulse/1.0`)
 
-The twin has two halves. The **private half** — soul depth, vault notes, agents — is sealed and lives on-device (it never travels). The **public half** is the twin's *bones*: no PII, publishable, content-addressed. The bones broadcast as a **pulse** — a static, RSS/Atom-like feed of signed frames served straight from this repo, no server, hydra-mirrorable.
+This repo is a **DOG — a Distributed Object, Global**: the twin's public
+**bones**, broadcast to the whole planet as static, SHA-chained, optionally
+Ed25519-signed frames served straight from GitHub raw. No server, no auth to
+read. **Bones only — never sensitive data.** The private half of the twin
+(soul depth, vault notes, agents, secrets) is the **GOD** (Grail Object on
+Device); it fuses the public bones with your private data and **never leaves
+the device**. Only bones ever go up.
+
+The pulse conforms to `rapp-twin-pulse/1.0`: each
+frame is a **`rapp-frame/2.0`** object with **`kind: "twin.pulse"`**. A frame's
+identity is `sha256` = **SHA-256 over the RFC 8785 (JCS) canonical serialization
+of its `payload`**, and `parent_sha` chains each frame to the one before it into
+an append-only history. Because the canonical form is byte-reproducible across
+runtimes (a checked-in JCS golden vector proves it), a Python `brainstem.py` and
+a browser Pyodide `vbrainstem` derive the **same** `sha256` — the chain verifies
+anywhere.
 
 | Surface | What it is |
 |---|---|
-| [`feed.xml`](./feed.xml) | The pulse — an Atom feed of signed frames. Edges subscribe, verify, assimilate. |
-| [`frames/`](./frames/) | Append-only history. Each frame `{sha, prevSha, ts, kind, cart\|delta, sig}` as `<seq>-<sha8>.json`; `HEAD` points at the latest. |
-| [`lookup.html`](./lookup.html) | `/twin` global lookup — `expand('owner/name')` → the person behind the twin. |
-| [`gallery/`](./gallery/index.html) | A static portfolio hosted purely from the bones. |
-| [`card.json`](./card.json) | The bones' identity card, incl. `twin.{twinId, who, pubkey, surfaces, primary}`. |
+| [`feed.json`](./feed.json) | The subscription entry point — `kind: twin.pulse.feed`, the newest **N = 64** frames, `head_sha`, `count`, `twin_id`. |
+| [`frames/<seq>.json`](./frames/) | The full immutable frame for each `seq` (genesis is `0.json`, `parent_sha: null`). Full history is kept forever. |
+| [`feed.xml`](./feed.xml) | An **Atom mirror** of `feed.json` — one `<entry>` per frame with `<id>` = that frame's `sha256`, so any RSS reader can subscribe to the twin. |
+| [`bones/`](./bones/) | The curated **public projection** the pulse broadcasts: `soul.md`, public card stats, facets, rappid, public notes. No PII, no `vault/`. |
+| [`keys/pulse.ed25519.pub`](./keys/pulse.ed25519.pub) | The committed public key. A signed frame verifies against it; the private half (`keys/*.key`) is gitignored and never travels. |
 
-Every frame is **signed by the on-device twin** (Ed25519) and **content-addressed** as `twin@<sha8>`. The private signing key (`keys/twin.key`) never leaves the device — only the public key ships in the bones (`card.json`, `keys/twin.pub`). So anyone can verify a frame from the bones alone:
+Signing is **optional** — identity is content-addressed by SHA-256, so a twin
+with no keypair is a first-class twin. Attach a `sig` when you need *authorship*
+proof. The tooling is pure-stdlib Python:
 
 ```bash
-node tools/verify-frame.mjs frames/0-<sha8>.json   # OK — tamper a byte → non-zero exit
-node tools/pulse.mjs                                # regenerate feed.xml from frames/
-node tools/seed-frame.mjs                           # snapshot the current bones as frame 0
+python3 scripts/pulse_verify.py     # recompute the whole chain; exit 0 iff intact
+python3 scripts/pulse_sign.py       # diff bones/, mint the next frame, refresh feed.json + feed.xml
+python3 scripts/pulse_sign.py --sign  # also attach a detached Ed25519 signature
 ```
+
+`pulse_verify.py` recomputes every `sha256` from `payload`, walks `parent_sha`
+from genesis, verifies any present signature against the committed pubkey, and
+checks the JCS golden vector — **flipping a single byte in any frame makes it
+exit non-zero.**
+
+### The hydra read path
+
+The DOG is served from three CDNs off the same immutable bytes — a subscriber
+falls through in order, so no single host is load-bearing (trust the hash, not
+the host):
+
+```
+raw.githubusercontent.com/kody-w/twin/main/feed.json      (origin)
+  → cdn.jsdelivr.net/gh/kody-w/twin@main/feed.json        (CDN mirror)
+    → raw.githack.com/kody-w/twin/main/feed.json           (fallback)
+```
+
+> **RAPP is not an AI — RAPP is an AI Medium.** Every other stack (Claude,
+> Copilot, Cursor) is one side of the twin: the model side.
+> RAPP owns both sides of the twin plus the wire between them — RAPP is an AI Medium.
+> The DOG is the public skeleton anyone can invoke; the GOD is the living local
+> twin; this pulse is the wire that keeps every copy the same living thing.
 
 ### The /twin address — trust the hash, not the host
 

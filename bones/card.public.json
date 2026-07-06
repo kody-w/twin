@@ -1,0 +1,57 @@
+{
+  "abilities": [
+    {
+      "cost": 1,
+      "damage": 30,
+      "name": "Chat",
+      "text": "Operator interacts via /chat. Tool calls dispatch agents; soul.md anchors voice.",
+      "type": "LOGIC"
+    },
+    {
+      "cost": 0,
+      "damage": 0,
+      "name": "Recall",
+      "text": "Persistent memory across sessions via the kernel's memory agents + bonds.json.",
+      "type": "DATA"
+    },
+    {
+      "cost": 2,
+      "damage": 0,
+      "name": "Twin-Chat",
+      "text": "Reach another twin over rapp-twin-chat/1.0 envelope (NEIGHBORHOOD_PROTOCOL §6).",
+      "type": "DATA"
+    },
+    {
+      "cost": 1,
+      "damage": 0,
+      "name": "Join",
+      "text": "Visit a neighborhood, read its holo.md + specs/, contribute within contract.",
+      "type": "LOGIC"
+    }
+  ],
+  "agent_types": [
+    "LOGIC",
+    "DATA"
+  ],
+  "author": "kody-w",
+  "category": "twin",
+  "flavor_text": "An AI with a permanent address and persistent memory. Visits neighborhoods.",
+  "hp": 155,
+  "id": "@kody-w/twin",
+  "kind": "twin",
+  "name": "Twin",
+  "rappid": "rappid:@kody-w/twin:257afa7958982c28258c1d97701182b1",
+  "rarity_label": "Elite",
+  "rarity_tier": "rare",
+  "resistance": "HEAL",
+  "retreat_cost": 1,
+  "schema": "rappcards/1.1.2",
+  "stats": {
+    "atk": 200,
+    "def": 192,
+    "int": 139,
+    "spd": 174
+  },
+  "title": "Brainstem — AI / Twin",
+  "weakness": "WEALTH"
+}

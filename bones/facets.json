@@ -1,0 +1,11 @@
+{
+  "facets": {
+    "pulse": {
+      "broadcast": "feed.xml",
+      "role": "lead-god",
+      "spec": "rapp-twin-pulse/1.0"
+    }
+  },
+  "rappid": "rappid:@kody-w/twin:257afa7958982c28258c1d97701182b1",
+  "schema": "rapp-facets/1.0"
+}
