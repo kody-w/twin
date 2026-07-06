@@ -14,6 +14,11 @@ __pycache__/
 keys/twin.key
 keys/*.key
 
+# Estate key shards (§15) — Shamir splits of the private key + their printable QR SVGs.
+# CRITICAL: any k of these reconstruct the twin. They are printed and distributed BY HAND
+# (safe, will, trusted heir) — never committed, never networked. The whole dir is sealed.
+keys/shards/
+
 # Brainstem state — runtime, not source
 .brainstem_data/
 .copilot_token
