@@ -1,0 +1,22 @@
+{
+  "sha": "d2fe9f2d3dc9ac3fa8bc81e55483f3a309512203b0e414972ed5c3879efe60d4",
+  "prevSha": null,
+  "ts": "2026-07-06",
+  "kind": "seed",
+  "cart": {
+    "spec": "hologram-cartridge/1.0",
+    "note": "genesis pulse — the twin's current bones, content-addressed",
+    "twinId": "10712fa0-59b0-4c4c-b798-8cac0b23ce1a",
+    "rappid": "rappid:@kody-w/twin:257afa7958982c28258c1d97701182b1",
+    "bones": {
+      "card.json": "0f4b9674493f8d9b79431d7b8d95b7a326d2dabb7f4d093b516685fad6cb1d20",
+      "facets.json": "f812928da489c4021dbd6a72be5d606528922884361c1a408a0b6c918e2c2531",
+      "holo.svg": "bdbb211eea24fe46d8e3669c6439c05ce6d4baf13d9fa0637e76a2a45dcac401",
+      "holo.md": "10efe156994381b924e7947d7bd3337b4a794093d2cd9db1f4d8ad30a575d9d2",
+      "members.json": "7ecd197698531b728cd3f75d16f8fd8204cb530fd368b4271bf4f91d06fe5d4b",
+      "soul.md": "1dff046351cf42803fa03575162b33440f315f140abe33e26d8ea39da3e812ba",
+      "public-notes.json": "38cff737db8bb58ceac94b571fe11c134389198de01d0574a7b50514968164e3"
+    }
+  },
+  "sig": "Tupf2Mby90s0jUKArCV9dDH57T4jRa94zRjHaQ0D/pRrQq3OW+ELzgqzZEE1mWnNbPq+rkaCgJtrsb/z6Jv8CQ=="
+}

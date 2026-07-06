@@ -20,6 +20,13 @@ function xml(s) {
     .replace(/'/g, "&apos;");
 }
 
+// Frame `ts` is DAY precision (§13) — a bare `YYYY-MM-DD`. Atom requires an RFC3339
+// date-time, so we render the day as midnight UTC: valid Atom, still zero sub-day info.
+function toAtomDate(ts) {
+  const d = new Date(ts);
+  return Number.isNaN(d.getTime()) ? ts : d.toISOString();
+}
+
 // Bones give us the feed identity (who / surfaces). All PII-free, already public.
 let who = "the twin";
 let gate = "https://kody-w.github.io/twin/";
@@ -41,7 +48,7 @@ if (files.length === 0) {
 
 // Newest first (Atom convention).
 const frames = files.map((f) => ({ file: f, frame: readFrameFile(path.join(FRAMES_DIR, f)) })).reverse();
-const latestTs = frames[0].frame.ts;
+const latestTs = toAtomDate(frames[0].frame.ts);
 const year = new Date(latestTs).getUTCFullYear();
 
 const entries = frames
@@ -58,8 +65,8 @@ const entries = frames
     return `  <entry>
     <id>${xml(id)}</id>
     <title>${xml(title)}</title>
-    <updated>${xml(frame.ts)}</updated>
-    <published>${xml(frame.ts)}</published>
+    <updated>${xml(toAtomDate(frame.ts))}</updated>
+    <published>${xml(toAtomDate(frame.ts))}</published>
     <category term="${xml(frame.kind)}"/>
     <link rel="alternate" type="application/json" href="${xml(rawUrl)}"/>
     <summary type="text">${xml(summary)}</summary>

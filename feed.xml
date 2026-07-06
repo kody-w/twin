@@ -3,23 +3,23 @@
   <title>the pulse — @kody-w/twin</title>
   <subtitle>A broadcast of signed, content-addressed frames. Static-only; trust the hash, not the host.</subtitle>
   <id>https://kody-w.github.io/twin/</id>
-  <updated>2026-07-06T02:36:09.722Z</updated>
+  <updated>2026-07-06T00:00:00.000Z</updated>
   <link rel="self" type="application/atom+xml" href="https://kody-w.github.io/twin/feed.xml"/>
   <link rel="alternate" type="text/html" href="https://kody-w.github.io/twin/"/>
   <author><name>Kody Wildfeuer</name></author>
   <generator uri="https://github.com/kody-w/twin" version="1.0">tools/pulse.mjs</generator>
   <entry>
-    <id>tag:kody-w.github.io,2026:twin/frame/f2b0bbd3fd7800de890a0acdd3a9910cae4934f411883a2816fb27c578cf24f3</id>
-    <title>[seed] twin@f2b0bbd3</title>
-    <updated>2026-07-06T02:36:09.722Z</updated>
-    <published>2026-07-06T02:36:09.722Z</published>
+    <id>tag:kody-w.github.io,2026:twin/frame/d2fe9f2d3dc9ac3fa8bc81e55483f3a309512203b0e414972ed5c3879efe60d4</id>
+    <title>[seed] twin@d2fe9f2d</title>
+    <updated>2026-07-06T00:00:00.000Z</updated>
+    <published>2026-07-06T00:00:00.000Z</published>
     <category term="seed"/>
-    <link rel="alternate" type="application/json" href="https://raw.githubusercontent.com/kody-w/twin/main/frames/0-f2b0bbd3.json"/>
-    <summary type="text">seed frame, content-addressed twin@f2b0bbd3. prevSha genesis. Ed25519-signed; verify with tools/verify-frame.mjs.</summary>
+    <link rel="alternate" type="application/json" href="https://raw.githubusercontent.com/kody-w/twin/main/frames/0-d2fe9f2d.json"/>
+    <summary type="text">seed frame, content-addressed twin@d2fe9f2d. prevSha genesis. Ed25519-signed; verify with tools/verify-frame.mjs.</summary>
     <content type="text">{
-  &quot;sha&quot;: &quot;f2b0bbd3fd7800de890a0acdd3a9910cae4934f411883a2816fb27c578cf24f3&quot;,
+  &quot;sha&quot;: &quot;d2fe9f2d3dc9ac3fa8bc81e55483f3a309512203b0e414972ed5c3879efe60d4&quot;,
   &quot;prevSha&quot;: null,
-  &quot;ts&quot;: &quot;2026-07-06T02:36:09.722Z&quot;,
+  &quot;ts&quot;: &quot;2026-07-06&quot;,
   &quot;kind&quot;: &quot;seed&quot;,
   &quot;cart&quot;: {
     &quot;spec&quot;: &quot;hologram-cartridge/1.0&quot;,
@@ -36,7 +36,7 @@
       &quot;public-notes.json&quot;: &quot;38cff737db8bb58ceac94b571fe11c134389198de01d0574a7b50514968164e3&quot;
     }
   },
-  &quot;sig&quot;: &quot;LyrNFYdmyMHvbD4LuUsc95NmKKvWHRExCJXCU8JvW94cuastizAvB86gpsofoZlybMQiqa2HknpaEp4MUBjNBQ==&quot;
+  &quot;sig&quot;: &quot;Tupf2Mby90s0jUKArCV9dDH57T4jRa94zRjHaQ0D/pRrQq3OW+ELzgqzZEE1mWnNbPq+rkaCgJtrsb/z6Jv8CQ==&quot;
 }</content>
   </entry>
 </feed>
