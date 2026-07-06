@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>twin gallery — hosted from the bones</title>
+<meta name="description" content="A static portfolio gallery hosted purely from a twin's public bones (card.json + facets.json + holo.svg). Generic — works for any twin repo. Anonymous visitors see the public half; an authenticated owner session connects the on-device dimension.">
+<meta name="theme-color" content="#0d1117">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ctext y='26' font-size='28'%3E🧬%3C/text%3E%3C/svg%3E">
+<style>
+  * { box-sizing:border-box; margin:0; padding:0; }
+  :root {
+    --bg:#0d1117; --s1:#161b22; --s2:#21262d; --bd:#30363d;
+    --tx:#e6edf3; --dim:#8b949e; --mut:#6e7681;
+    --acc:#58a6ff; --grn:#3fb950; --org:#d29922; --pur:#d2a8ff; --creat:#7209b7;
+  }
+  html, body { background:var(--bg); color:var(--tx); font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif; line-height:1.55; -webkit-font-smoothing:antialiased; }
+  .shell { max-width:900px; margin:0 auto; padding:0 20px 96px; }
+  a { color:var(--acc); text-decoration:none; }
+  a:hover { text-decoration:underline; }
+  .mono { font-family:ui-monospace, "SF Mono", Menlo, monospace; }
+
+  /* hero — quiet, creature-forward */
+  .hero { display:flex; align-items:center; gap:26px; padding:56px 0 34px; border-bottom:1px solid var(--bd); margin-bottom:34px; flex-wrap:wrap; }
+  .hero .sigil { width:132px; height:132px; flex:0 0 132px; border-radius:20px; overflow:hidden; background:radial-gradient(circle at 50% 40%, #10203a, #05070d); box-shadow:0 0 60px -18px var(--creat); }
+  .hero .sigil svg, .hero .sigil img { width:100%; height:100%; display:block; }
+  .hero h1 { font-size:2.1rem; letter-spacing:-0.02em; line-height:1.1; }
+  .hero .who { color:var(--dim); font-size:1.05rem; margin-top:4px; }
+  .hero .badges { margin-top:12px; display:flex; gap:7px; flex-wrap:wrap; }
+  .badge { display:inline-block; background:var(--s2); border:1px solid var(--bd); border-radius:999px; padding:4px 12px; font-size:0.7rem; color:var(--dim); }
+  .badge.primary { color:var(--pur); border-color:var(--creat); }
+  .badge.official { color:var(--org); border-color:var(--org); }
+  .badge.verified { color:var(--grn); border-color:var(--grn); }
+
+  section { margin-bottom:34px; }
+  section > h2 { font-size:0.74rem; text-transform:uppercase; letter-spacing:1.2px; color:var(--mut); margin-bottom:14px; font-weight:600; }
+  .grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(150px,1fr)); gap:12px; }
+  .tile { background:var(--s1); border:1px solid var(--bd); border-radius:12px; padding:16px; }
+  .tile .v { font-size:1.5rem; font-weight:700; color:var(--acc); }
+  .tile .k { color:var(--mut); font-size:0.68rem; text-transform:uppercase; letter-spacing:0.6px; margin-top:2px; }
+  .abilities { display:grid; gap:12px; }
+  .ability { background:var(--s1); border:1px solid var(--bd); border-radius:12px; padding:16px; }
+  .ability .top { display:flex; justify-content:space-between; align-items:baseline; gap:10px; }
+  .ability .name { font-weight:700; }
+  .ability .type { font-size:0.62rem; text-transform:uppercase; letter-spacing:0.5px; color:var(--pur); border:1px solid var(--creat); border-radius:999px; padding:2px 8px; }
+  .ability .text { color:var(--dim); font-size:0.86rem; margin-top:8px; }
+  .chips { display:flex; flex-wrap:wrap; gap:8px; }
+  .chip { background:var(--s2); border:1px solid var(--bd); border-radius:8px; padding:6px 12px; font-size:0.82rem; }
+  .empty { color:var(--mut); font-size:0.86rem; font-style:italic; background:var(--s1); border:1px dashed var(--bd); border-radius:10px; padding:16px; }
+  .flavor { font-style:italic; color:var(--dim); border-left:3px solid var(--creat); padding:10px 16px; background:var(--s1); border-radius:0 8px 8px 0; }
+  .note { display:grid; gap:6px; background:var(--s1); border:1px solid var(--bd); border-radius:12px; padding:16px; }
+  .note .nt { font-weight:600; }
+  .note .nb { color:var(--dim); font-size:0.9rem; }
+  .note .nm { color:var(--mut); font-size:0.7rem; }
+
+  /* auth stub — clearly marked, no fake auth */
+  .auth-stub { border:1px dashed var(--creat); background:linear-gradient(180deg, rgba(114,9,183,0.06), transparent); border-radius:12px; padding:18px 20px; }
+  .auth-stub .lbl { font-size:0.64rem; text-transform:uppercase; letter-spacing:1px; color:var(--pur); font-weight:700; }
+  .auth-stub h3 { margin:6px 0 8px; font-size:1.05rem; }
+  .auth-stub p { color:var(--dim); font-size:0.88rem; }
+  .auth-stub .fake { display:inline-block; margin-top:12px; background:var(--s2); border:1px solid var(--bd); color:var(--mut); border-radius:8px; padding:8px 14px; font-size:0.82rem; cursor:not-allowed; }
+
+  .err { background:rgba(210,73,73,0.08); border:1px solid #6e2b2b; color:#f0b0b0; border-radius:10px; padding:16px; }
+  footer { margin-top:20px; padding-top:20px; border-top:1px solid var(--bd); color:var(--mut); font-size:0.8rem; display:flex; gap:14px; flex-wrap:wrap; }
+  .src { color:var(--mut); font-size:0.72rem; margin-top:26px; word-break:break-all; }
+</style>
+</head>
+<body>
+<div class="shell">
+  <div id="app"><div class="hero"><div class="who" style="padding:56px 0">loading the bones…</div></div></div>
+  <footer id="footer"></footer>
+</div>
+
+<script>
+// The gallery is hosted PURELY from a twin's public bones. It is generic: it
+// reads card.json / facets.json / holo.svg RELATIVE to a base, so it works for
+// any twin repo layout. Zero deps, no CDN. Nothing private is ever fetched —
+// vault/ is never touched; only bones + explicitly-published notes appear.
+const params = new URLSearchParams(location.search);
+
+// Resolve the bones base:
+//   ?repo=owner/name  -> that twin's raw bones (hash-trust; any mirror is a door)
+//   ?base=<url>       -> explicit base
+//   (default)         -> ".." (bones sit one level up from gallery/)
+function bonesBase() {
+  const repo = params.get("repo");
+  if (repo) {
+    const p = repo.trim().replace(/^\/+/, "").split("/").filter(Boolean);
+    const owner = p.length >= 2 ? p[0] : "kody-w";
+    const name = p.length >= 2 ? p[1] : p[0];
+    return { base: `https://raw.githubusercontent.com/${owner}/${name}/main`, label: `${owner}/${name} (raw bones)` };
+  }
+  const base = params.get("base") || "..";
+  return { base, label: base === ".." ? "this twin (../)" : base };
+}
+
+function esc(s){ return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
+
+async function getJSON(url){ const r = await fetch(url, { cache:"no-store" }); if(!r.ok) throw new Error(`${url} → HTTP ${r.status}`); return r.json(); }
+async function getText(url){ try { const r = await fetch(url, { cache:"no-store" }); return r.ok ? await r.text() : null; } catch { return null; } }
+
+function tierOf(card){ return (card.quality_tier || card.rarity_tier || card.meta?.quality_tier || "community").toLowerCase(); }
+
+function render(card, facets, holoSvg, notes, srcLabel) {
+  const t = card.twin || {};
+  const tier = tierOf(card);
+  const sigil = holoSvg || card.avatar_svg || "";
+  const stats = card.stats || {};
+  const abilities = card.abilities || [];
+  const types = card.agent_types || [];
+  const authLocal = params.get("auth") === "local";
+
+  const statTiles = Object.keys(stats).map(k =>
+    `<div class="tile"><div class="v">${esc(stats[k])}</div><div class="k">${esc(k)}</div></div>`).join("")
+    + (card.hp!=null ? `<div class="tile"><div class="v">${esc(card.hp)}</div><div class="k">hp</div></div>` : "");
+
+  const abilityCards = abilities.map(a => `
+    <div class="ability">
+      <div class="top"><span class="name">${esc(a.name)}</span>${a.type?`<span class="type">${esc(a.type)}</span>`:""}</div>
+      <div class="text">${esc(a.text || "")}</div>
+    </div>`).join("");
+
+  const facetKeys = facets && facets.facets ? Object.keys(facets.facets) : [];
+  const facetsHtml = facetKeys.length
+    ? `<div class="chips">${facetKeys.map(k=>`<span class="chip mono">${esc(k)}</span>`).join("")}</div>`
+    : `<div class="empty">No capability facets are published yet — this twin declares them in <span class="mono">facets.json</span> over time.</div>`;
+
+  const notesHtml = (notes && notes.length)
+    ? notes.map(n => `<div class="note"><div class="nt">${esc(n.title||"note")}</div><div class="nb">${esc(n.body||n.html||"")}</div>${n.ts?`<div class="nm mono">${esc(n.ts)}</div>`:""}</div>`).join("")
+    : `<div class="empty">No public notes are marked for display. The gallery only surfaces notes explicitly published to the bones (a <span class="mono">public-notes.json</span>); the private vault never travels here.</div>`;
+
+  const authHtml = `
+    <div class="auth-stub">
+      <div class="lbl">on-device dimension · stub</div>
+      <h3>${authLocal ? "authenticated owner session (stub)" : "connect the on-device twin"}</h3>
+      <p>Anonymous visitors see the public half — the bones on this page. An authenticated owner's
+      session would attach the <strong>on-device twin</strong> here: sealed memories, agents, and the
+      live brainstem, assimilated <em>on top of</em> these bones (bones + sealed = the full being).
+      This is a marked stub — <strong>no authentication is performed</strong>.</p>
+      <span class="fake" title="stub — no real auth wired">${authLocal ? "◐ local session (stub — inert)" : "sign in on-device (stub — inert)"}</span>
+    </div>`;
+
+  const surfaces = (t.surfaces || []).filter(s=>s.kind!=="gallery").map(s =>
+    `<a href="${esc(s.url)}">${esc(s.kind)} ↗</a>`).join("");
+
+  document.getElementById("app").innerHTML = `
+    <div class="hero">
+      <div class="sigil">${sigil}</div>
+      <div>
+        <h1>${esc(card.name || "twin")}</h1>
+        <div class="who">${esc(t.who || card.meta?.author || "")}${card.title?` · ${esc(card.title)}`:""}</div>
+        <div class="badges">
+          ${t.primary?`<span class="badge primary">primary twin</span>`:""}
+          <span class="badge ${esc(tier)}">${esc(tier)}</span>
+          ${card.rarity_label?`<span class="badge">${esc(card.rarity_label)}</span>`:""}
+          ${types.map(x=>`<span class="badge">${esc(x)}</span>`).join("")}
+        </div>
+      </div>
+    </div>
+
+    ${card.flavor_text?`<section><div class="flavor">${esc(card.flavor_text)}</div></section>`:""}
+    ${statTiles?`<section><h2>stats</h2><div class="grid">${statTiles}</div></section>`:""}
+    ${abilityCards?`<section><h2>abilities</h2><div class="abilities">${abilityCards}</div></section>`:""}
+    <section><h2>published facets</h2>${facetsHtml}</section>
+    <section><h2>public notes</h2>${notesHtml}</section>
+    <section><h2>the other dimension</h2>${authHtml}</section>
+
+    <div class="src">hosted from the bones · <span class="mono">${esc(srcLabel)}</span></div>`;
+
+  document.getElementById("footer").innerHTML =
+    `${surfaces} <span style="color:var(--mut)">· a static portfolio from the public bones — no server</span>`;
+}
+
+async function main() {
+  const { base } = bonesBase();
+  try {
+    const card = await getJSON(`${base}/card.json`);
+    // facets + holo.svg + public notes are best-effort — a twin may not have them.
+    const [facets, holoSvg, notesRaw] = await Promise.all([
+      getJSON(`${base}/facets.json`).catch(()=>null),
+      getText(`${base}/holo.svg`),
+      getJSON(`${base}/public-notes.json`).catch(()=>null),
+    ]);
+    const notes = Array.isArray(notesRaw) ? notesRaw : (notesRaw && Array.isArray(notesRaw.notes) ? notesRaw.notes : null);
+    render(card, facets, holoSvg, notes, `${base}/card.json`);
+  } catch (err) {
+    document.getElementById("app").innerHTML =
+      `<div class="hero"><div class="err"><strong>could not load the bones.</strong> ${esc(err.message)}<br>
+      <span style="color:var(--mut)">base: ${esc(base)} — serve the repo root (the gallery reads bones relative).</span></div></div>`;
+  }
+}
+main();
+</script>
+</body>
+</html>
