@@ -129,3 +129,7 @@ The twin then answers at <http://127.0.0.1:7071/>. To spawn *your own* twin from
 
 - [Constitution Article XXXIV](https://github.com/kody-w/RAPP/blob/main/CONSTITUTION.md) — variant lineage protocol
 - [`vault/00 Index/Home.md`](./vault/00%20Index/Home.md) — the entry point into the brain
+
+## Licensing
+
+Tools & runtime: MIT. **The Bones — this twin's public identity — travel under the [TWIN LICENSE](./TWIN-LICENSE.md):** render, verify, mirror, splice freely; never impersonate, never pass modified bones as authentic, never clone the person.
