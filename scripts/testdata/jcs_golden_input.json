@@ -1,0 +1,23 @@
+{
+  "": "empty-key",
+  "arr": [
+    1,
+    2,
+    3,
+    -4,
+    0
+  ],
+  "big": 12345678901234567890,
+  "bool": [
+    true,
+    false,
+    null
+  ],
+  "esc": "quote:\" backslash:\\ slash:/ tab:\t nl:\n ctrl:\u0001 unicode:\u20ac",
+  "nested": {
+    "Z": 3,
+    "a": 1,
+    "b": 2
+  },
+  "\u00e9": "unicode-key"
+}

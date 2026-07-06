@@ -1,0 +1,32 @@
+{
+  "spec": "rapp-frame/2.0",
+  "kind": "twin.pulse",
+  "seq": 1,
+  "ts": "2026-07-06T13:33:00Z",
+  "twin_id": "rappid:@kody-w/twin:257afa7958982c28258c1d97701182b1",
+  "kernel_version": "0.6.0",
+  "payload": {
+    "bones": {
+      "public-notes.json": {
+        "op": "set",
+        "value": {
+          "notes": [
+            {
+              "body": "This twin now broadcasts a conformant rapp-twin-pulse/1.0 pulse: SHA-chained, Ed25519-signable bones over rapp-frame/2.0. Trust the hash, not the host.",
+              "title": "DOG online",
+              "ts": "2026-07-06T13:33:00Z"
+            }
+          ],
+          "rappid": "rappid:@kody-w/twin:257afa7958982c28258c1d97701182b1",
+          "schema": "rapp-public-notes/1.0"
+        }
+      }
+    }
+  },
+  "sha256": "52a59f1f23c039349a8c78024923d295a501e96f9337fb72cb8b36489c94894d",
+  "parent_sha": "5364dd2ad1585a7810e99a7395026a7f92e69b42d0354250477a98b8887507c0",
+  "sig": {
+    "alg": "ed25519",
+    "sig": "12249262802c7fa12c240067a871775de485766288f516a87c50a130663f03cba787c80ae74ac69e5408f2fa9082a82e1af0c0b0fd3803bc94089f1bf28e5e0b"
+  }
+}

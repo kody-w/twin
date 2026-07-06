@@ -1,42 +1,34 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
   <title>the pulse — @kody-w/twin</title>
-  <subtitle>A broadcast of signed, content-addressed frames. Static-only; trust the hash, not the host.</subtitle>
-  <id>https://kody-w.github.io/twin/</id>
-  <updated>2026-07-06T00:00:00.000Z</updated>
+  <subtitle>rapp-twin-pulse/1.0 — a DOG: signed, SHA-chained twin bones. Trust the hash, not the host.</subtitle>
+  <id>https://kody-w.github.io/twin/feed.xml</id>
+  <updated>2026-07-06T13:34:00Z</updated>
   <link rel="self" type="application/atom+xml" href="https://kody-w.github.io/twin/feed.xml"/>
-  <link rel="alternate" type="text/html" href="https://kody-w.github.io/twin/"/>
-  <author><name>Kody Wildfeuer</name></author>
-  <generator uri="https://github.com/kody-w/twin" version="1.0">tools/pulse.mjs</generator>
+  <link rel="alternate" type="application/json" href="https://raw.githubusercontent.com/kody-w/twin/main/feed.json"/>
+  <generator uri="https://github.com/kody-w/twin" version="1.0">scripts/pulse_sign.py</generator>
   <entry>
-    <id>tag:kody-w.github.io,2026:twin/frame/d2fe9f2d3dc9ac3fa8bc81e55483f3a309512203b0e414972ed5c3879efe60d4</id>
-    <title>[seed] twin@d2fe9f2d</title>
-    <updated>2026-07-06T00:00:00.000Z</updated>
-    <published>2026-07-06T00:00:00.000Z</published>
-    <category term="seed"/>
-    <link rel="alternate" type="application/json" href="https://raw.githubusercontent.com/kody-w/twin/main/frames/0-d2fe9f2d.json"/>
-    <summary type="text">seed frame, content-addressed twin@d2fe9f2d. prevSha genesis. Ed25519-signed; verify with tools/verify-frame.mjs.</summary>
-    <content type="text">{
-  &quot;sha&quot;: &quot;d2fe9f2d3dc9ac3fa8bc81e55483f3a309512203b0e414972ed5c3879efe60d4&quot;,
-  &quot;prevSha&quot;: null,
-  &quot;ts&quot;: &quot;2026-07-06&quot;,
-  &quot;kind&quot;: &quot;seed&quot;,
-  &quot;cart&quot;: {
-    &quot;spec&quot;: &quot;hologram-cartridge/1.0&quot;,
-    &quot;note&quot;: &quot;genesis pulse — the twin&apos;s current bones, content-addressed&quot;,
-    &quot;twinId&quot;: &quot;10712fa0-59b0-4c4c-b798-8cac0b23ce1a&quot;,
-    &quot;rappid&quot;: &quot;rappid:@kody-w/twin:257afa7958982c28258c1d97701182b1&quot;,
-    &quot;bones&quot;: {
-      &quot;card.json&quot;: &quot;0f4b9674493f8d9b79431d7b8d95b7a326d2dabb7f4d093b516685fad6cb1d20&quot;,
-      &quot;facets.json&quot;: &quot;f812928da489c4021dbd6a72be5d606528922884361c1a408a0b6c918e2c2531&quot;,
-      &quot;holo.svg&quot;: &quot;bdbb211eea24fe46d8e3669c6439c05ce6d4baf13d9fa0637e76a2a45dcac401&quot;,
-      &quot;holo.md&quot;: &quot;10efe156994381b924e7947d7bd3337b4a794093d2cd9db1f4d8ad30a575d9d2&quot;,
-      &quot;members.json&quot;: &quot;7ecd197698531b728cd3f75d16f8fd8204cb530fd368b4271bf4f91d06fe5d4b&quot;,
-      &quot;soul.md&quot;: &quot;1dff046351cf42803fa03575162b33440f315f140abe33e26d8ea39da3e812ba&quot;,
-      &quot;public-notes.json&quot;: &quot;38cff737db8bb58ceac94b571fe11c134389198de01d0574a7b50514968164e3&quot;
-    }
-  },
-  &quot;sig&quot;: &quot;Tupf2Mby90s0jUKArCV9dDH57T4jRa94zRjHaQ0D/pRrQq3OW+ELzgqzZEE1mWnNbPq+rkaCgJtrsb/z6Jv8CQ==&quot;
-}</content>
+    <id>5364dd2ad1585a7810e99a7395026a7f92e69b42d0354250477a98b8887507c0</id>
+    <title>twin.pulse seq 0</title>
+    <updated>2026-07-06T13:32:00Z</updated>
+    <category term="twin.pulse"/>
+    <link rel="alternate" type="application/json" href="https://raw.githubusercontent.com/kody-w/twin/main/frames/0.json"/>
+    <summary type="text">twin.pulse frame seq 0 (unsigned); sha256=5364dd2ad1585a7810e99a7395026a7f92e69b42d0354250477a98b8887507c0; parent_sha=genesis (null)</summary>
+  </entry>
+  <entry>
+    <id>52a59f1f23c039349a8c78024923d295a501e96f9337fb72cb8b36489c94894d</id>
+    <title>twin.pulse seq 1</title>
+    <updated>2026-07-06T13:33:00Z</updated>
+    <category term="twin.pulse"/>
+    <link rel="alternate" type="application/json" href="https://raw.githubusercontent.com/kody-w/twin/main/frames/1.json"/>
+    <summary type="text">twin.pulse frame seq 1 (signed); sha256=52a59f1f23c039349a8c78024923d295a501e96f9337fb72cb8b36489c94894d; parent_sha=5364dd2ad1585a7810e99a7395026a7f92e69b42d0354250477a98b8887507c0</summary>
+  </entry>
+  <entry>
+    <id>165a8d816f77bffb0f7dfbd1c6a96115b2c5674ae2ec2a12bce2214bf17bf71d</id>
+    <title>twin.pulse seq 2</title>
+    <updated>2026-07-06T13:34:00Z</updated>
+    <category term="twin.pulse"/>
+    <link rel="alternate" type="application/json" href="https://raw.githubusercontent.com/kody-w/twin/main/frames/2.json"/>
+    <summary type="text">twin.pulse frame seq 2 (signed); sha256=165a8d816f77bffb0f7dfbd1c6a96115b2c5674ae2ec2a12bce2214bf17bf71d; parent_sha=52a59f1f23c039349a8c78024923d295a501e96f9337fb72cb8b36489c94894d</summary>
   </entry>
 </feed>
