@@ -71,6 +71,54 @@ bash ~/.brainstem/src/rapp_brainstem/start.sh
 
 For the richer twin (this brain repo's depth), make sure your local environment has a GitHub token reachable via `WAH_PRIVATE_TOKEN` env > `GITHUB_TOKEN` env > `gh auth token` CLI.
 
+## The pulse — the twin's public bones, broadcast
+
+The twin has two halves. The **private half** — soul depth, vault notes, agents — is sealed and lives on-device (it never travels). The **public half** is the twin's *bones*: no PII, publishable, content-addressed. The bones broadcast as a **pulse** — a static, RSS/Atom-like feed of signed frames served straight from this repo, no server, hydra-mirrorable.
+
+| Surface | What it is |
+|---|---|
+| [`feed.xml`](./feed.xml) | The pulse — an Atom feed of signed frames. Edges subscribe, verify, assimilate. |
+| [`frames/`](./frames/) | Append-only history. Each frame `{sha, prevSha, ts, kind, cart\|delta, sig}` as `<seq>-<sha8>.json`; `HEAD` points at the latest. |
+| [`lookup.html`](./lookup.html) | `/twin` global lookup — `expand('owner/name')` → the person behind the twin. |
+| [`gallery/`](./gallery/index.html) | A static portfolio hosted purely from the bones. |
+| [`card.json`](./card.json) | The bones' identity card, incl. `twin.{twinId, who, pubkey, surfaces, primary}`. |
+
+Every frame is **signed by the on-device twin** (Ed25519) and **content-addressed** as `twin@<sha8>`. The private signing key (`keys/twin.key`) never leaves the device — only the public key ships in the bones (`card.json`, `keys/twin.pub`). So anyone can verify a frame from the bones alone:
+
+```bash
+node tools/verify-frame.mjs frames/0-<sha8>.json   # OK — tamper a byte → non-zero exit
+node tools/pulse.mjs                                # regenerate feed.xml from frames/
+node tools/seed-frame.mjs                           # snapshot the current bones as frame 0
+```
+
+### The /twin address — trust the hash, not the host
+
+Every twin on earth shares one address scheme: `owner/name`. `expand('kody-w/twin')` resolves to this repo's bones the same way `owner/repo` implies github.com — the host lives in one place a human never types:
+
+```
+expand('kody-w/twin')
+  → gate  https://kody-w.github.io/twin/
+  → card  https://raw.githubusercontent.com/kody-w/twin/main/card.json
+```
+
+The address is a **label**; the bones are the source of truth, content-addressed and mirrorable. Any mirror that serves the same bytes is a valid door — there is no central resolver to trust. Open [`lookup.html`](./lookup.html) and expand any twin with `lookup.html?repo=owner/name`.
+
+## Hatch the twin (one line)
+
+The bundled brainstem makes this repo a runnable organism. Two copy-pasteable forms:
+
+```bash
+# (a) directly — from inside the repo, boot the bundled brainstem:
+bash installer/start.sh
+```
+
+```bash
+# (b) the Copilot genie — one line clones-if-missing, hatches, starts, and reports PULSE OK:
+copilot --model claude-opus-4.8 -p "Clone https://github.com/kody-w/twin into ~/twin if it isn't already there, cd into it, run 'bash installer/start.sh', wait until http://127.0.0.1:7071/ answers, then print PULSE OK." --allow-all-tools
+```
+
+The twin then answers at <http://127.0.0.1:7071/>. To spawn *your own* twin from this one, see [TEMPLATE.md](./TEMPLATE.md) — fork, run the one-liner, done.
+
 ## Specs this repo conforms to
 
 - [`rapp-twin-spec/1.0`](https://github.com/kody-w/rapp-egg-hub/blob/main/SPEC.md) — the digital twin contract

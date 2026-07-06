@@ -2,6 +2,23 @@
 
 This repository is set up as a **GitHub template**. Anyone can spawn a new Pre-Founder twin (or any build-in-public brand-twin variant) from it in one click — no manual scaffolding required.
 
+## Bring your own twin
+
+The whole loop is three moves, and you need only a **GitHub account**:
+
+1. **Fork** (or [**Use this template**](https://github.com/kody-w/twin/generate)) → you now own a twin repo with its own bones (`card.json`, `facets.json`, `holo.svg`) and a bundled brainstem.
+2. **Run the one-liner** → your twin breathes on your machine:
+   ```bash
+   git clone https://github.com/<you>/<your-twin>.git && cd <your-twin> && bash installer/start.sh
+   ```
+   …or hand the whole flow to the Copilot genie:
+   ```bash
+   copilot --model claude-opus-4.8 -p "Clone https://github.com/<you>/<your-twin> into ~/twin if missing, cd in, run 'bash installer/start.sh', wait until http://127.0.0.1:7071/ answers, then print PULSE OK." --allow-all-tools
+   ```
+3. **Make it yours** → edit `soul.md` (its voice), mint your own signing key (`node tools/keygen.mjs` → paste the pubkey into `card.json`), then broadcast your pulse (`node tools/seed-frame.mjs && node tools/pulse.mjs`).
+
+Fork → one-liner → your twin breathes. Everything below is the detailed walkthrough.
+
 ## How GitHub templates work
 
 GitHub's "Use this template" feature creates a fresh repository with the template's contents but **without** the template's commit history. Your new repo's first commit is its initial state; the lineage to the parent is conceptual (recorded in your `rappid.json`), not a literal git fork relationship.

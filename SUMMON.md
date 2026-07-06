@@ -61,6 +61,22 @@ SOUL_PATH=~/wah-twin/soul.md \
 
 A future capability under development: a "hatch on device" button in the vBrainstem that streamlines this flow into a single tap, with optional install of the dedicated twin UI as an iOS PWA. See the [main RAPP repo](https://github.com/kody-w/RAPP) for progress.
 
+## Hatch in one line (genie invoke)
+
+The fastest way to a real, on-device twin is a single copy-pasteable line — no manual venv, no multi-step setup. Two forms, one line each:
+
+```bash
+# (a) directly — clone, then boot the bundled brainstem (needs only a GitHub account):
+git clone https://github.com/kody-w/twin.git && cd twin && bash installer/start.sh
+```
+
+```bash
+# (b) the Copilot genie — hand the whole flow to the Copilot CLI; it clones-if-missing, hatches, starts, and reports PULSE OK:
+copilot --model claude-opus-4.8 -p "Clone https://github.com/kody-w/twin into ~/twin if it isn't already there, cd into it, run 'bash installer/start.sh', wait until http://127.0.0.1:7071/ answers, then print PULSE OK." --allow-all-tools
+```
+
+Either way the twin appears at <http://127.0.0.1:7071/> — its **public bones** pulled from this repo, its **private half** assimilated on top, on your device. "Genie invoke on demand": the twin shows up wherever it's needed, just-in-time. Already inside the repo? The one-liner collapses to just `bash installer/start.sh`.
+
 ## What the QR encodes — extended
 
 For non-QR users, the same link works as a plain URL — pasteable, shareable, embeddable in emails / slides / business cards. The `summon.svg` file is checked into this repo so it renders inline in the README and on the GitHub Pages landing.
