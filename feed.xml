@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title>the pulse — @kody-w/twin</title>
+  <subtitle>A broadcast of signed, content-addressed frames. Static-only; trust the hash, not the host.</subtitle>
+  <id>https://kody-w.github.io/twin/</id>
+  <updated>2026-07-06T02:36:09.722Z</updated>
+  <link rel="self" type="application/atom+xml" href="https://kody-w.github.io/twin/feed.xml"/>
+  <link rel="alternate" type="text/html" href="https://kody-w.github.io/twin/"/>
+  <author><name>Kody Wildfeuer</name></author>
+  <generator uri="https://github.com/kody-w/twin" version="1.0">tools/pulse.mjs</generator>
+  <entry>
+    <id>tag:kody-w.github.io,2026:twin/frame/f2b0bbd3fd7800de890a0acdd3a9910cae4934f411883a2816fb27c578cf24f3</id>
+    <title>[seed] twin@f2b0bbd3</title>
+    <updated>2026-07-06T02:36:09.722Z</updated>
+    <published>2026-07-06T02:36:09.722Z</published>
+    <category term="seed"/>
+    <link rel="alternate" type="application/json" href="https://raw.githubusercontent.com/kody-w/twin/main/frames/0-f2b0bbd3.json"/>
+    <summary type="text">seed frame, content-addressed twin@f2b0bbd3. prevSha genesis. Ed25519-signed; verify with tools/verify-frame.mjs.</summary>
+    <content type="text">{
+  &quot;sha&quot;: &quot;f2b0bbd3fd7800de890a0acdd3a9910cae4934f411883a2816fb27c578cf24f3&quot;,
+  &quot;prevSha&quot;: null,
+  &quot;ts&quot;: &quot;2026-07-06T02:36:09.722Z&quot;,
+  &quot;kind&quot;: &quot;seed&quot;,
+  &quot;cart&quot;: {
+    &quot;spec&quot;: &quot;hologram-cartridge/1.0&quot;,
+    &quot;note&quot;: &quot;genesis pulse — the twin&apos;s current bones, content-addressed&quot;,
+    &quot;twinId&quot;: &quot;10712fa0-59b0-4c4c-b798-8cac0b23ce1a&quot;,
+    &quot;rappid&quot;: &quot;rappid:@kody-w/twin:257afa7958982c28258c1d97701182b1&quot;,
+    &quot;bones&quot;: {
+      &quot;card.json&quot;: &quot;0f4b9674493f8d9b79431d7b8d95b7a326d2dabb7f4d093b516685fad6cb1d20&quot;,
+      &quot;facets.json&quot;: &quot;f812928da489c4021dbd6a72be5d606528922884361c1a408a0b6c918e2c2531&quot;,
+      &quot;holo.svg&quot;: &quot;bdbb211eea24fe46d8e3669c6439c05ce6d4baf13d9fa0637e76a2a45dcac401&quot;,
+      &quot;holo.md&quot;: &quot;10efe156994381b924e7947d7bd3337b4a794093d2cd9db1f4d8ad30a575d9d2&quot;,
+      &quot;members.json&quot;: &quot;7ecd197698531b728cd3f75d16f8fd8204cb530fd368b4271bf4f91d06fe5d4b&quot;,
+      &quot;soul.md&quot;: &quot;1dff046351cf42803fa03575162b33440f315f140abe33e26d8ea39da3e812ba&quot;,
+      &quot;public-notes.json&quot;: &quot;38cff737db8bb58ceac94b571fe11c134389198de01d0574a7b50514968164e3&quot;
+    }
+  },
+  &quot;sig&quot;: &quot;LyrNFYdmyMHvbD4LuUsc95NmKKvWHRExCJXCU8JvW94cuastizAvB86gpsofoZlybMQiqa2HknpaEp4MUBjNBQ==&quot;
+}</content>
+  </entry>
+</feed>
