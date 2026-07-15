@@ -1,10 +1,9 @@
 {
   "spec": "rapp/1",
   "kind": "twin.pulse",
+  "stream_id": "rappid:@kody-w/twin:5714cdf964b6a6936b44420aa8e8589b2ee9342e10810cdf12fc3c7be7667c30",
   "seq": 2,
-  "ts": "2026-07-06T13:34:00Z",
-  "twin_id": "rappid:@kody-w/twin:5714cdf964b6a6936b44420aa8e8589b2ee9342e10810cdf12fc3c7be7667c30",
-  "kernel_version": "0.6.0",
+  "utc": "2026-07-06T13:34:00.000Z",
   "payload": {
     "bones": {
       "facets.json": {
@@ -24,6 +23,8 @@
     }
   },
   "payload_hash": "464e64bb0ce271351fa4109ffdc592b7aa755be10ffcbedaceb05edfcfcde317",
-  "prev_hash": "7210f7557bc3e6916e37b76bd93ddd4d85412d20e2679fb4d97c364be2e9042e",
-  "frame_hash": "f459b238d549b8ddd83d995dcace25a4718312156b0cc0e0bc670df2b8884dab"
+  "prev": "51aa77b7ecc0ce2595afcd1e354c4c44a2aee9c9e814cba54766a8b524c57b54",
+  "prev_wave": null,
+  "sig": null,
+  "frame_hash": "2492e87f1e5baaddb4596e9e4fd20bce80459bd33d148944aaafe472fee7152a"
 }
