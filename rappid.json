@@ -6,7 +6,7 @@
   "display_name": "Twin",
   "github": "https://github.com/kody-w/twin",
   "url": "https://kody-w.github.io/twin/",
-  "parent_rappid": "rappid:@kody-w/kody-twin:91d006ca7bd052bfa5021d623122012f",
+  "parent_rappid": "rappid:@kody-w/kody-twin:923bfa1ae2d27b758672d7c91ca55d85cf5580bb36421f18fe9e56e3a63ef421",
   "parent_repo": "https://github.com/kody-w/RAPP",
   "planted_by": "kody-w",
   "planted_at": "2026-05-09T22:11:21Z",
@@ -18,5 +18,6 @@
   "_migrated_from": [
     "rappid:@kody-w/twin:257afa7958982c28258c1d97701182b1",
     "rappid:v2:twin:@kody-w/twin:257afa7958982c28258c1d97701182b1@github.com/kody-w/twin"
-  ]
+  ],
+  "_parent_migrated_from": "rappid:@kody-w/kody-twin:91d006ca7bd052bfa5021d623122012f"
 }
