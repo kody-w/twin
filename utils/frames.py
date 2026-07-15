@@ -6,38 +6,45 @@ state change — is an atomic FRAME. Frames are the unit the dreamcatcher
 (Rappter engine, private) reconciles when divergent incarnations of a
 twin are assimilated back into the home twin.
 
-Schema (canonical RAPP content-addressing, spec §3/§5):
+The frame envelope is the canonical RAPP/1 §7 frame — EXACTLY eleven keys,
+verifiable by the reference kody-w/rapp-1 · rapp.py::verify_frame:
 
     {
       "spec":         "rapp/1",
-      "frame_id":     "uuid4",
-      "rappid":       "rappid:@kody-w/twin:<64-hex>",
-      "stream_id":    "stream-<entropy>",   ← per-incarnation, never packed
-      "local_vt":     12345,                ← monotonic counter within stream
-      "utc":          "2026-04-28T01:23:45.678Z",
-      "kind":         "chat" | "agent_install" | "rapp_open" | ...,
+      "kind":         "twin.pulse" | "twin.chat" | ...,   ← §7 dotted grammar
+      "stream_id":    "rappid:@kody-w/twin:<64-hex>",     ← the identity owns the stream
+      "seq":          0, 1, 2, …                          ← contiguous from genesis
+      "utc":          "2026-04-28T01:23:45.678Z",         ← fixed millisecond form
       "payload":      { ... },
-      "payload_hash": "H('rapp/1:particle', payload)",   ← the particle/worldline address
-      "prev_hash":    "<frame_hash of the previous frame, or null at genesis>",
-      "frame_hash":   "H('rapp/1:wave', frame-without-frame_hash)",  ← the wave/wire address
-      "assimilated":  null                  ← set by dreamcatcher on merge
+      "payload_hash": "H('rapp/1:particle', payload)",    ← the particle address
+      "frame_hash":   "H('rapp/1:wave', frame-without-frame_hash-and-sig)",  ← the wave address
+      "prev":         "<payload_hash of the previous frame, or null at genesis>",  ← §7 chain (particle)
+      "prev_wave":    null,                               ← null off the swarm (net:*)
+      "sig":          null                                ← owner sig over frame_hash (optional layer)
     }
 
-payload_hash / frame_hash / prev_hash make the log content-addressed and
-hash-chained the RAPP way — the same bytes anyone else canonicalizes turn
-into the same addresses, and a tampered frame breaks the chain at its
-frame_hash. Signing (an owner signature over frame_hash) is a separate,
-optional layer and is not minted here.
+payload_hash / frame_hash / prev make the log content-addressed and hash-chained
+the RAPP way — the same bytes anyone canonicalizes turn into the same addresses,
+and a tampered frame breaks the chain at its frame_hash. NB: §7's `prev` links to
+the previous frame's PARTICLE (payload_hash), not its wave.
+
+The dreamcatcher's per-incarnation sync metadata (frame_id, local_vt, the
+incarnation stream token, and the post-merge `assimilated` flag) lives in a
+SIDECAR, keyed by the frame's payload_hash — NOT in the §7 envelope. That keeps
+the envelope immutable and exactly eleven keys, and lets `assimilated` be set on
+merge without invalidating any frame_hash.
 
 Storage:
-    .brainstem_data/frames.jsonl   ← append-only log, ONE LINE PER FRAME
-    .brainstem_data/stream.json    ← per-incarnation stream_id, NEVER packed
+    .brainstem_data/frames.jsonl       ← append-only §7 frame log, ONE LINE PER FRAME
+    .brainstem_data/frames-meta.jsonl  ← sidecar: {payload_hash, frame_id, local_vt,
+                                          incarnation_stream, assimilated}
+    .brainstem_data/stream.json        ← per-incarnation stream token, NEVER packed
 
-stream.json is in the egg exclusion list (utils/egg.py _NEVER_PACK_DIRS
-+ explicit name) — when a twin egg is summoned onto a new brainstem,
-the new brainstem mints its OWN stream_id but inherits the source's
-RAPPID. That's the parallel-omniscience invariant: same twin, different
-incarnations, frames clearly attributable to which device produced them.
+stream.json is in the egg exclusion list — when a twin egg is summoned onto a new
+brainstem, the new brainstem mints its OWN incarnation token (recorded in the
+sidecar) but inherits the source's RAPPID (the §7 stream_id). That's the
+parallel-omniscience invariant: same twin, different incarnations, frames
+attributable to which device produced them via the sidecar.
 
 This module is a pure utility. No Flask. Imported by brainstem.py.
 """
@@ -93,6 +100,7 @@ _UNMINTED_RAPPID = "rappid:@anon/unminted:" + "0" * 64
 _BRAINSTEM_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 _DATA_DIR = os.path.join(_BRAINSTEM_ROOT, ".brainstem_data")
 _FRAMES_LOG = os.path.join(_DATA_DIR, "frames.jsonl")
+_FRAMES_META = os.path.join(_DATA_DIR, "frames-meta.jsonl")
 _STREAM_FILE = os.path.join(_DATA_DIR, "stream.json")
 _IDENTITY_FILE = os.path.join(_DATA_DIR, "identity.json")
 
@@ -140,12 +148,12 @@ def _next_local_vt() -> int:
     if _vt_counter is not None:
         _vt_counter += 1
         return _vt_counter
-    if not os.path.exists(_FRAMES_LOG):
+    if not os.path.exists(_FRAMES_META):
         _vt_counter = 1
         return 1
     last_vt = 0
     try:
-        with open(_FRAMES_LOG, "rb") as f:
+        with open(_FRAMES_META, "rb") as f:
             f.seek(0, os.SEEK_END)
             size = f.tell()
             # Read last ~4KB to find the last newline-terminated record
@@ -164,9 +172,8 @@ def _next_local_vt() -> int:
     return _vt_counter
 
 
-def _last_frame_hash() -> Optional[str]:
-    """frame_hash of the most recent frame in the log, or None at genesis.
-    Falls back to None for pre-canonical frames that predate content-addressing."""
+def _last_frame_field(field: str):
+    """Read `field` from the most recent §7 frame in the log, or None at genesis."""
     if not os.path.exists(_FRAMES_LOG):
         return None
     try:
@@ -178,41 +185,62 @@ def _last_frame_hash() -> Optional[str]:
             tail = f.read().decode("utf-8", "ignore")
         last_line = tail.rstrip("\n").split("\n")[-1] if tail.strip() else ""
         if last_line:
-            return json.loads(last_line).get("frame_hash")
+            return json.loads(last_line).get(field)
     except Exception:
         return None
     return None
 
 
-def record_frame(kind: str, payload: dict) -> dict:
-    """Append a content-addressed, hash-chained frame to the log.
+def _next_seq() -> int:
+    """The next §7 seq: last frame's seq + 1, or 0 at genesis (contiguous)."""
+    last = _last_frame_field("seq")
+    return 0 if last is None else int(last) + 1
 
-    Returns the frame written. The frame carries the canonical RAPP
-    addresses: payload_hash (particle) and frame_hash (wave), with prev_hash
-    linking it to the frame before it."""
-    rappid = _read_identity_rappid() or _UNMINTED_RAPPID
-    stream_id = get_or_create_stream_id()
+
+def record_frame(kind: str, payload: dict) -> dict:
+    """Append a canonical RAPP/1 §7 frame to the log; return the frame written.
+
+    The eleven-key envelope verifies against rapp.py::verify_frame. `prev` links
+    to the previous frame's PARTICLE (payload_hash), `seq` is contiguous from the
+    genesis (0). Per-incarnation dreamcatcher metadata is written to the sidecar
+    (frames-meta.jsonl), keyed by payload_hash — never in the immutable envelope."""
+    rappid = _read_identity_rappid() or _UNMINTED_RAPPID   # the §7 stream_id (identity owns the stream)
+    incarnation = get_or_create_stream_id()                # per-device token → sidecar, not the envelope
+    now = datetime.now(timezone.utc)
+    utc = now.strftime("%Y-%m-%dT%H:%M:%S.") + f"{now.microsecond // 1000:03d}Z"
     with _lock:
+        seq = _next_seq()
+        prev = _last_frame_field("payload_hash")           # §7: chain on the previous PARTICLE
         local_vt = _next_local_vt()
-        prev_hash = _last_frame_hash()
+        payload_hash = _H("rapp/1:particle", payload)
         frame = {
             "spec":         "rapp/1",
-            "frame_id":     uuid.uuid4().hex,
-            "rappid":       rappid,
-            "stream_id":    stream_id,
-            "local_vt":     local_vt,
-            "utc":          datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%fZ")[:-4] + "Z",
             "kind":         kind,
+            "stream_id":    rappid,
+            "seq":          seq,
+            "utc":          utc,
             "payload":      payload,
-            "payload_hash": _H("rapp/1:particle", payload),
-            "prev_hash":    prev_hash,
-            "assimilated":  None,
+            "payload_hash": payload_hash,
+            "prev":         prev,
+            "prev_wave":    None,          # null off the swarm (non-net: stream)
+            "sig":          None,          # unsigned; owner sig is a separate layer
         }
-        # frame_hash is the wave address over the frame WITHOUT frame_hash itself.
-        frame["frame_hash"] = _H("rapp/1:wave", frame)
+        # wave = H over the frame WITHOUT frame_hash AND sig (§7.3)
+        pre = {k: frame[k] for k in frame if k not in ("frame_hash", "sig")}
+        frame["frame_hash"] = _H("rapp/1:wave", pre)
         os.makedirs(_DATA_DIR, exist_ok=True)
         with open(_FRAMES_LOG, "a", encoding="utf-8") as f:
             f.write(json.dumps(frame) + "\n")
+        # sidecar: dreamcatcher sync metadata, joined to the frame by payload_hash
+        meta = {
+            "payload_hash":       payload_hash,
+            "frame_id":           uuid.uuid4().hex,
+            "local_vt":           local_vt,
+            "incarnation_stream": incarnation,
+            "assimilated":        None,     # set on merge — sidecar keeps the envelope immutable
+        }
+        with open(_FRAMES_META, "a", encoding="utf-8") as f:
+            f.write(json.dumps(meta) + "\n")
     return frame
 
 
