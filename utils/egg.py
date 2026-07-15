@@ -63,6 +63,7 @@ import os
 import re
 import secrets
 import time
+import uuid
 import zipfile
 from typing import Optional
 
@@ -88,21 +89,34 @@ EGG_SCHEMA_V1 = "rapp-egg/1.0"  # legacy binder format
 # anyone can verify "this is that twin." The host is mortal. The RAPPID
 # is not.
 #
-# Format:  rappid:<type>:<publisher>/<slug>:<entropy>
-#   type      twin | rapp | swarm
-#   publisher GitHub-style handle, e.g. @kody-w or @rapp
-#   slug      human-readable name within the publisher namespace
-#   entropy   16 hex chars from secrets.token_hex(8) — irreproducible
+# Format (canonical RAPP, spec §6.1):  rappid:@<owner>/<slug>:<64-hex>
+#   owner   GitHub-style handle without the @, e.g. kody-w
+#   slug    lowercase [a-z0-9] with internal hyphens (no underscores)
+#   tail    64 hex — the keyless mint Hb("rapp/1:rappid", uuid4_bytes),
+#           domain separated; NEVER a hash of the name (spec §6.2)
+# An organism's kind (twin/rapp/swarm) lives in its manifest, not the string.
 #
 # Storage: .brainstem_data/identity.json
-#   { "twin": "rappid:twin:@kody-w/personal:f7a3b2c1d4e5a8b9",
-#     "rapps": {"kanban": "rappid:rapp:@kody-w/kanban:9d8e7f6a5b4c3d2e"} }
+#   { "twin": "rappid:@kody-w/personal:<64-hex>",
+#     "rapps": {"kanban": "rappid:@kody-w/kanban:<64-hex>"} }
 #
 # A snapshot egg packs identity.json so the destination brainstem inherits
 # the source's RAPPIDs. Re-hatching ≠ new identity.
 
 _IDENTITY_FILE = os.path.join(_DATA_DIR, "identity.json")
-_RAPPID_RE = re.compile(r"^rappid:(twin|rapp|swarm):(@[\w-]+)/([\w-]+):([0-9a-f]{16})$")
+# Canonical RAPP grammar (spec §6.1): rappid:@<owner>/<slug>:<64-hex>.
+_CANON_RAPPID_RE = re.compile(
+    r"^rappid:@([a-z0-9]+(?:-[a-z0-9]+)*)/([a-z0-9]+(?:-[a-z0-9]+)*):([0-9a-f]{64})$")
+# Legacy pre-RAPP form (rappid:<type>:@pub/slug:<16-hex>). Retained ONLY so a
+# brainstem that already stored a legacy identity is still recognized and NOT
+# re-minted (which would lose its identity). New mints are always canonical.
+_LEGACY_RAPPID_RE = re.compile(r"^rappid:(twin|rapp|swarm):(@[\w-]+)/([\w-]+):([0-9a-f]{16})$")
+
+
+def _is_known_rappid(s: str) -> bool:
+    """True if `s` is a rappid we recognize — canonical (preferred) or a
+    legacy stored form we must not clobber."""
+    return bool(isinstance(s, str) and (_CANON_RAPPID_RE.match(s) or _LEGACY_RAPPID_RE.match(s)))
 
 
 def _read_identity() -> dict:
@@ -126,21 +140,32 @@ def _write_identity(data: dict) -> None:
         json.dump(data, f, indent=2)
 
 
+def _canon_label(s: str, fallback: str) -> str:
+    """Coerce to a canonical §6.1 label: lowercase [a-z0-9] with single
+    internal hyphens, no leading/trailing/double hyphens, no underscores."""
+    s = re.sub(r"[^a-z0-9]+", "-", (s or "").lower()).strip("-")
+    return re.sub(r"-+", "-", s) or fallback
+
+
 def _make_rappid(type_: str, publisher: str, slug: str) -> str:
-    """Generate a fresh RAPPID. Called ONCE per organism, ever."""
-    if not publisher.startswith("@"):
-        publisher = "@" + publisher
-    publisher = re.sub(r"[^@\w-]", "", publisher) or "@anon"
-    slug = re.sub(r"[^\w-]", "_", slug or "unnamed").strip("_") or "unnamed"
-    entropy = secrets.token_hex(8)
-    return f"rappid:{type_}:{publisher}/{slug}:{entropy}"
+    """Mint a fresh canonical rappid (spec §6.2, keyless). Called ONCE per
+    organism, ever.
+
+    The tail is ``Hb("rapp/1:rappid", uuid4_bytes)`` — 64 hex, domain
+    separated — never a hash of the name. ``type_`` (twin/rapp/swarm) is the
+    caller's bookkeeping only; an organism's kind lives in its manifest, not
+    inside the rappid string, so it is not encoded here."""
+    pub = _canon_label(publisher.lstrip("@"), "anon")
+    slug = _canon_label(slug, "unnamed")
+    tail = hashlib.sha256(b"rapp/1:rappid" + b"\x0a" + uuid.uuid4().bytes).hexdigest()
+    return f"rappid:@{pub}/{slug}:{tail}"
 
 
 def get_or_create_twin_rappid(publisher: str = "@anon",
                               slug: str = "personal") -> str:
     """Return this brainstem's twin RAPPID, minting one on first call."""
     ident = _read_identity()
-    if ident.get("twin") and _RAPPID_RE.match(ident["twin"]):
+    if ident.get("twin") and _is_known_rappid(ident["twin"]):
         return ident["twin"]
     new = _make_rappid("twin", publisher, slug)
     ident["twin"] = new
@@ -152,7 +177,7 @@ def get_or_create_rapp_rappid(rapp_id: str, publisher: str = "@anon") -> str:
     """Return a rapp's RAPPID, minting one on first call. Per-rapp scope."""
     ident = _read_identity()
     rapps = ident.setdefault("rapps", {})
-    if rapps.get(rapp_id) and _RAPPID_RE.match(rapps[rapp_id]):
+    if rapps.get(rapp_id) and _is_known_rappid(rapps[rapp_id]):
         return rapps[rapp_id]
     new = _make_rappid("rapp", publisher, rapp_id)
     rapps[rapp_id] = new
@@ -161,16 +186,31 @@ def get_or_create_rapp_rappid(rapp_id: str, publisher: str = "@anon") -> str:
 
 
 def parse_rappid(rappid: str) -> Optional[dict]:
-    """Decompose a RAPPID string into its components, or None if invalid."""
+    """Decompose a rappid string into its components, or None if invalid.
+
+    Accepts the canonical form (spec §6.1) and, for back-compat, the legacy
+    ``rappid:<type>:@pub/slug:<16-hex>`` form. `hash` is the identity tail;
+    `type` is None for canonical rappids (kind lives in the manifest)."""
     if not isinstance(rappid, str):
         return None
-    m = _RAPPID_RE.match(rappid)
+    m = _CANON_RAPPID_RE.match(rappid)
+    if m:
+        return {
+            "type":      None,
+            "publisher": "@" + m.group(1),
+            "slug":      m.group(2),
+            "hash":      m.group(3),
+            "entropy":   m.group(3),   # compat alias
+            "rappid":    rappid,
+        }
+    m = _LEGACY_RAPPID_RE.match(rappid)
     if not m:
         return None
     return {
         "type":      m.group(1),
         "publisher": m.group(2),
         "slug":      m.group(3),
+        "hash":      m.group(4),
         "entropy":   m.group(4),
         "rappid":    rappid,
     }
@@ -771,7 +811,7 @@ def pack_twin_from_repo(repo_path: str,
         manifest = {
             "schema": EGG_SCHEMA_V2_1,
             "type": "twin",
-            "rappid": rj.get("name") and f"rappid:twin:@source/{rj['name']}:{secrets.token_hex(8)}" or None,
+            "rappid": rappid_uuid,  # the source twin's real canonical rappid (never mint a fresh sibling)
             "exported_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
             "source": {
                 "rappid_uuid": rappid_uuid,
