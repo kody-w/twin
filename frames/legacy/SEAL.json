@@ -1,0 +1,7 @@
+{
+  "spec": "rapp/1",
+  "sealed": "rapp-frame/2.0 chain (seq 0-2)",
+  "head_sha": "165a8d816f77bffb0f7dfbd1c6a96115b2c5674ae2ec2a12bce2214bf17bf71d",
+  "seal": "69634944e5be59bbb5485f23ba4327c9d2ed6a61794eda1d1536e91f93dbf0f0",
+  "reanchored_to": "rappid:@kody-w/twin:5714cdf964b6a6936b44420aa8e8589b2ee9342e10810cdf12fc3c7be7667c30"
+}

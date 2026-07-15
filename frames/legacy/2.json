@@ -1,0 +1,32 @@
+{
+  "spec": "rapp-frame/2.0",
+  "kind": "twin.pulse",
+  "seq": 2,
+  "ts": "2026-07-06T13:34:00Z",
+  "twin_id": "rappid:@kody-w/twin:257afa7958982c28258c1d97701182b1",
+  "kernel_version": "0.6.0",
+  "payload": {
+    "bones": {
+      "facets.json": {
+        "op": "set",
+        "value": {
+          "facets": {
+            "pulse": {
+              "broadcast": "feed.xml",
+              "role": "lead-god",
+              "spec": "rapp-twin-pulse/1.0"
+            }
+          },
+          "rappid": "rappid:@kody-w/twin:257afa7958982c28258c1d97701182b1",
+          "schema": "rapp-facets/1.0"
+        }
+      }
+    }
+  },
+  "sha256": "165a8d816f77bffb0f7dfbd1c6a96115b2c5674ae2ec2a12bce2214bf17bf71d",
+  "parent_sha": "52a59f1f23c039349a8c78024923d295a501e96f9337fb72cb8b36489c94894d",
+  "sig": {
+    "alg": "ed25519",
+    "sig": "aec7ee67f7736e5f697a836749c62e0ed81e8babc3ecd7fa4ff4c743bc528a8a6cadea42b33bd3752ceac64aeb395dbfdf5268b1de855ba398cc59fad2c14c09"
+  }
+}

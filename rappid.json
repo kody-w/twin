@@ -14,7 +14,7 @@
   "_planted_by_agent": "backfill_seeds",
   "_backfilled_at": "2026-05-09T22:11:21Z",
   "_backfill_reason": "Article XLVI compliance pass",
-  "_backfill_reason_parent": "Article XLVI.6 — parent_rappid for rebuild",
+  "_backfill_reason_parent": "Article XLVI.6 \u2014 parent_rappid for rebuild",
   "_migrated_from": [
     "rappid:@kody-w/twin:257afa7958982c28258c1d97701182b1",
     "rappid:v2:twin:@kody-w/twin:257afa7958982c28258c1d97701182b1@github.com/kody-w/twin"
