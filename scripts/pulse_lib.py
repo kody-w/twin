@@ -33,7 +33,7 @@ import re
 SPEC = "rapp-frame/2.0"
 FRAME_KIND = "twin.pulse"
 FEED_KIND = "twin.pulse.feed"
-TWIN_ID = "rappid:@kody-w/twin:257afa7958982c28258c1d97701182b1"
+TWIN_ID = "rappid:@kody-w/twin:5714cdf964b6a6936b44420aa8e8589b2ee9342e10810cdf12fc3c7be7667c30"
 KERNEL_VERSION = "0.6.0"
 N = 64  # feed window: newest N frames live in feed.json; frames/ keeps all.
 

@@ -5,7 +5,7 @@
     "twinId": "10712fa0-59b0-4c4c-b798-8cac0b23ce1a",
     "who": "Kody Wildfeuer",
     "primary": true,
-    "rappid": "rappid:@kody-w/twin:257afa7958982c28258c1d97701182b1",
+    "rappid": "rappid:@kody-w/twin:5714cdf964b6a6936b44420aa8e8589b2ee9342e10810cdf12fc3c7be7667c30",
     "pubkey": {
       "alg": "Ed25519",
       "raw_b64": "JSV5EXkOexwWW5/lJgrg90bthRwTfs4hioMzmuyzvBA=",
@@ -79,7 +79,7 @@
     "quality_tier": "verified",
     "license": "PolyForm-Small-Business",
     "kind": "twin",
-    "rappid": "rappid:@kody-w/twin:257afa7958982c28258c1d97701182b1",
+    "rappid": "rappid:@kody-w/twin:5714cdf964b6a6936b44420aa8e8589b2ee9342e10810cdf12fc3c7be7667c30",
     "_migrated_from": "rappid:v2:twin:@kody-w/twin:257afa7958982c28258c1d97701182b1@github.com/kody-w/twin",
     "gate_url": "https://kody-w.github.io/twin/",
     "summon_url": "https://kody-w.github.io/RAPPcards/#summon&seed=9149294335606062994",

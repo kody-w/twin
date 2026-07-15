@@ -1,6 +1,6 @@
 {
-  "schema": "rapp-rappid/2.0",
-  "rappid": "rappid:@kody-w/twin:257afa7958982c28258c1d97701182b1",
+  "schema": "rapp/1",
+  "rappid": "rappid:@kody-w/twin:5714cdf964b6a6936b44420aa8e8589b2ee9342e10810cdf12fc3c7be7667c30",
   "kind": "twin",
   "name": "twin",
   "display_name": "Twin",
@@ -14,6 +14,9 @@
   "_planted_by_agent": "backfill_seeds",
   "_backfilled_at": "2026-05-09T22:11:21Z",
   "_backfill_reason": "Article XLVI compliance pass",
-  "_backfill_reason_parent": "Article XLVI.6 \u2014 parent_rappid for rebuild",
-  "_migrated_from": "rappid:v2:twin:@kody-w/twin:257afa7958982c28258c1d97701182b1@github.com/kody-w/twin"
+  "_backfill_reason_parent": "Article XLVI.6 — parent_rappid for rebuild",
+  "_migrated_from": [
+    "rappid:@kody-w/twin:257afa7958982c28258c1d97701182b1",
+    "rappid:v2:twin:@kody-w/twin:257afa7958982c28258c1d97701182b1@github.com/kody-w/twin"
+  ]
 }

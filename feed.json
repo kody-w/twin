@@ -1,7 +1,7 @@
 {
   "spec": "rapp-frame/2.0",
   "kind": "twin.pulse.feed",
-  "twin_id": "rappid:@kody-w/twin:257afa7958982c28258c1d97701182b1",
+  "twin_id": "rappid:@kody-w/twin:5714cdf964b6a6936b44420aa8e8589b2ee9342e10810cdf12fc3c7be7667c30",
   "head_sha": "165a8d816f77bffb0f7dfbd1c6a96115b2c5674ae2ec2a12bce2214bf17bf71d",
   "count": 3,
   "frames": [
@@ -10,7 +10,7 @@
       "kind": "twin.pulse",
       "seq": 0,
       "ts": "2026-07-06T13:32:00Z",
-      "twin_id": "rappid:@kody-w/twin:257afa7958982c28258c1d97701182b1",
+      "twin_id": "rappid:@kody-w/twin:5714cdf964b6a6936b44420aa8e8589b2ee9342e10810cdf12fc3c7be7667c30",
       "kernel_version": "0.6.0",
       "payload": {
         "bones": {
@@ -58,7 +58,7 @@
               "id": "@kody-w/twin",
               "kind": "twin",
               "name": "Twin",
-              "rappid": "rappid:@kody-w/twin:257afa7958982c28258c1d97701182b1",
+              "rappid": "rappid:@kody-w/twin:5714cdf964b6a6936b44420aa8e8589b2ee9342e10810cdf12fc3c7be7667c30",
               "rarity_label": "Elite",
               "rarity_tier": "rare",
               "resistance": "HEAL",
@@ -78,7 +78,7 @@
             "op": "set",
             "value": {
               "facets": {},
-              "rappid": "rappid:@kody-w/twin:257afa7958982c28258c1d97701182b1",
+              "rappid": "rappid:@kody-w/twin:5714cdf964b6a6936b44420aa8e8589b2ee9342e10810cdf12fc3c7be7667c30",
               "schema": "rapp-facets/1.0"
             }
           },
@@ -86,7 +86,7 @@
             "op": "set",
             "value": {
               "notes": [],
-              "rappid": "rappid:@kody-w/twin:257afa7958982c28258c1d97701182b1",
+              "rappid": "rappid:@kody-w/twin:5714cdf964b6a6936b44420aa8e8589b2ee9342e10810cdf12fc3c7be7667c30",
               "schema": "rapp-public-notes/1.0"
             }
           },
@@ -98,7 +98,7 @@
               "kernel_version": "0.6.0",
               "kind": "twin",
               "name": "twin",
-              "rappid": "rappid:@kody-w/twin:257afa7958982c28258c1d97701182b1",
+              "rappid": "rappid:@kody-w/twin:5714cdf964b6a6936b44420aa8e8589b2ee9342e10810cdf12fc3c7be7667c30",
               "schema": "rapp-rappid/2.0",
               "url": "https://kody-w.github.io/twin/"
             }
@@ -118,7 +118,7 @@
       "kind": "twin.pulse",
       "seq": 1,
       "ts": "2026-07-06T13:33:00Z",
-      "twin_id": "rappid:@kody-w/twin:257afa7958982c28258c1d97701182b1",
+      "twin_id": "rappid:@kody-w/twin:5714cdf964b6a6936b44420aa8e8589b2ee9342e10810cdf12fc3c7be7667c30",
       "kernel_version": "0.6.0",
       "payload": {
         "bones": {
@@ -132,7 +132,7 @@
                   "ts": "2026-07-06T13:33:00Z"
                 }
               ],
-              "rappid": "rappid:@kody-w/twin:257afa7958982c28258c1d97701182b1",
+              "rappid": "rappid:@kody-w/twin:5714cdf964b6a6936b44420aa8e8589b2ee9342e10810cdf12fc3c7be7667c30",
               "schema": "rapp-public-notes/1.0"
             }
           }
@@ -150,7 +150,7 @@
       "kind": "twin.pulse",
       "seq": 2,
       "ts": "2026-07-06T13:34:00Z",
-      "twin_id": "rappid:@kody-w/twin:257afa7958982c28258c1d97701182b1",
+      "twin_id": "rappid:@kody-w/twin:5714cdf964b6a6936b44420aa8e8589b2ee9342e10810cdf12fc3c7be7667c30",
       "kernel_version": "0.6.0",
       "payload": {
         "bones": {
@@ -164,7 +164,7 @@
                   "spec": "rapp-twin-pulse/1.0"
                 }
               },
-              "rappid": "rappid:@kody-w/twin:257afa7958982c28258c1d97701182b1",
+              "rappid": "rappid:@kody-w/twin:5714cdf964b6a6936b44420aa8e8589b2ee9342e10810cdf12fc3c7be7667c30",
               "schema": "rapp-facets/1.0"
             }
           }
