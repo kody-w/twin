@@ -202,7 +202,7 @@ def _contact() -> dict:
 def _lineage() -> dict:
     rappid_data = _read_rappid()
     return {
-        "schema": "rapp-rappid/1.1",
+        "schema": "rapp/1",
         "rappid": rappid_data.get("rappid"),
         "parent_rappid": rappid_data.get("parent_rappid"),
         "parent_repo": rappid_data.get("parent_repo"),
