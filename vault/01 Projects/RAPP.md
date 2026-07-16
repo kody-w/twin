@@ -8,7 +8,7 @@ github: https://github.com/kody-w/RAPP
 
 # RAPP
 
-**Rapid Agent Prototyping Platform.** The species root. Where the [[Brainstem]] kernel lives. The substrate every other project descends from via the [[Rappid]] lineage chain.
+**Rapid Agent Prototype Platform.** The species root. Where the [[Brainstem]] kernel lives. The substrate every other project descends from via the [[Rappid]] lineage chain.
 
 ## What it is
 
