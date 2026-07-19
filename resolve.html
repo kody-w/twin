@@ -102,6 +102,8 @@ let NS = {
   ]
 };
 const esc = s => String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const BASE = "https://raw.githubusercontent.com/kody-w/twin/claude/platform-engineering-ai-notes-t6psev/";
+let OBJIDX = {};  /* content-address -> {path,kind,snapshot,seq}, from objects/index.json */
 
 /* ---- LOCAL content-addressed store (the hidden-lookups substrate) ---- */
 const LKEY = "rapp-cas/v1";
@@ -118,6 +120,13 @@ function lookup(rawkey){
     if(o.key === key) return { o, via:"rappid (name is the path)", matched:key };
     if(o.genesis && (o.genesis.payload_hash===key || o.genesis.frame_hash===key))
       return { o, via:"content hash (particle/wave address)", matched:key };
+  }
+  if(/^[0-9a-f]{8,64}$/i.test(key)){
+    const oi = OBJIDX[key];
+    if(oi) return { o:{ key, kind:oi.kind, slug:oi.snapshot, seq:oi.seq, raw_object: BASE+oi.path,
+                        raw: BASE+"snapshots/"+oi.snapshot+"/" }, via:"objects index ("+oi.kind+")", object:true, matched:key };
+    return { o:{ key, kind:"frame.wave", raw_object: BASE+"objects/"+key.slice(0,2)+"/"+key+".json", constructed:true },
+             via:"constructed objects path (frame_hash = filename)", object:true, matched:key };
   }
   const m = key.match(/^rappid:@([^/]+)\/([^:]+):[0-9a-f]{6,64}$/i);
   if(m) return { o:{ key, kind:"twin", slug:m[2], raw:`${NS.root}/${NS.repo}/claude/platform-engineering-ai-notes-t6psev/snapshots/${m[2]}/`, constructed:true },
@@ -140,9 +149,11 @@ function resolveKey(){
     <div class="kv">
       <div><b>key</b> <code>${esc(o.key||r.matched)}</code></div>
       <div><b>resolved via</b> ${esc(r.via)}</div>
-      <div><b>raw URL</b> <span class="url"><a href="${esc(o.raw)}" target="_blank" rel="noopener">${esc(o.raw)}</a></span></div>
+      ${o.raw?`<div><b>raw URL</b> <span class="url"><a href="${esc(o.raw)}" target="_blank" rel="noopener">${esc(o.raw)}</a></span></div>`:''}
+      ${o.raw_object?`<div><b>object</b> <span class="url"><a href="${esc(o.raw_object)}" target="_blank" rel="noopener">${esc(o.raw_object)}</a></span></div>`:''}
+      ${typeof o.seq!=='undefined'?`<div><b>frame</b> ${esc(o.snapshot||o.slug||'')} · seq ${o.seq}</div>`:''}
       ${o.genesis?`<div><b>genesis particle</b> <code>${esc(o.genesis.payload_hash)}</code></div>`:''}
-      ${o.constructed?`<div><b>note</b> constructed deterministically from the rappid — no index needed</div>`:''}
+      ${o.constructed?`<div><b>note</b> constructed deterministically — the key is the address, no index needed</div>`:''}
     </div>
     <div style="color:${r.local?'var(--local)':'var(--dim)'};font-size:13px">${r.local
       ? 'You already hold this monument of time — learned from local-only data. A global fetch is optional, not required.'
@@ -154,16 +165,19 @@ async function fetchVerify(){
   const v = document.getElementById("verify"); v.style.display="block";
   if(!r){ v.innerHTML=`<span class="bad">Resolve a valid key first.</span>`; return; }
   if(r.local){ v.innerHTML=`<span class="loc">🧠 already known locally — no network needed. That's the hidden lookup.</span>`; return; }
-  const url = r.o.raw + "rappid.public.json";
+  const isObj = !!r.object;
+  const url = isObj ? r.o.raw_object : (r.o.raw + "rappid.public.json");
   v.innerHTML = `Fetching <code>${esc(url)}</code> …`;
   try{
     const resp = await fetch(url, {cache:"no-store"}); if(!resp.ok) throw new Error("HTTP "+resp.status);
-    const doc = await resp.json(); const declared = doc.rappid || "";
-    const ok = declared === (r.o.key||r.matched);
+    const doc = await resp.json(); const key = r.matched;
+    let declared, ok;
+    if(isObj){ ok = (doc.frame_hash===key || doc.payload_hash===key); declared = doc.frame_hash===key ? doc.frame_hash : doc.payload_hash; }
+    else { declared = doc.rappid || ""; ok = declared === key; }
     v.innerHTML = ok
-      ? `<span class="ok">✓ self-verified.</span> The fetched object declares its own address <code>${esc(declared)}</code>,
+      ? `<span class="ok">✓ self-verified.</span> The fetched ${isObj?'frame':'object'} declares its own address <code>${esc(declared||key)}</code>,
          equal to the key — the bytes cannot lie about where they live. <span class="dim">(hit 🧠 Learn locally to keep it)</span>`
-      : `<span class="bad">✕ rejected as noise.</span> Declares <code>${esc(declared)}</code>, not the requested key — a neighboring frame.`;
+      : `<span class="bad">✕ rejected as noise.</span> The fetched bytes do not address to this key — a neighboring frame.`;
   }catch(e){
     v.innerHTML = `<span class="bad">offline / not published yet.</span> Resolution is still exact (the URL above is the address);
       self-verify lights up once this namespace is served over raw. <span class="dim">(${esc(e.message)})</span>`;
@@ -187,11 +201,14 @@ function forgetLocal(){ localSave({}); const v=document.getElementById("verify")
 /* samples + live manifest refresh */
 document.getElementById("samples").innerHTML =
   NS.objects.map(o=>`<span class="samp" data-k="${esc(o.key)}">${esc(o.slug)}</span>`).join("") +
-  `<span class="samp" data-k="${esc(NS.objects[4].genesis.payload_hash)}">self · payload_hash</span>`;
+  `<span class="samp" data-k="${esc(NS.objects[4].genesis.payload_hash)}">self · payload_hash</span>` +
+  `<span class="samp" data-k="${esc(NS.objects[4].genesis.frame_hash)}">self · frame_hash → object</span>`;
 document.getElementById("samples").addEventListener("click", e=>{
   const k = e.target.getAttribute("data-k"); if(k){ document.getElementById("key").value=k; resolveKey(); }
 });
 fetch("namespace.json",{cache:"no-store"}).then(r=>r.ok?r.json():null).then(j=>{ if(j&&j.objects) NS=j; }).catch(()=>{});
+fetch("objects/index.json",{cache:"no-store"}).then(r=>r.ok?r.json():null).then(j=>{ if(j&&j.objects){ OBJIDX=j.objects; } })
+  .catch(()=>{}); if(!Object.keys(OBJIDX).length){ fetch(BASE+"objects/index.json",{cache:"no-store"}).then(r=>r.ok?r.json():null).then(j=>{ if(j&&j.objects) OBJIDX=j.objects; }).catch(()=>{}); }
 document.getElementById("foot").innerHTML =
   "the GitHub username is the global root · key = address · local match = hidden lookup (no network) · bones travel, soul stays home";
 </script>
