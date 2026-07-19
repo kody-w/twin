@@ -1,0 +1,14 @@
+{
+  "schema": "twin-snapshot/1.0",
+  "rappid": "rappid:@kody-w/twin:5714cdf964b6a6936b44420aa8e8589b2ee9342e10810cdf12fc3c7be7667c30",
+  "title": "Twin — BASE snapshot",
+  "purpose": "A portable, PII-free organism slice that HOT-LOADS to AWAKEN in a local brainstem. Public bones only; fed over globally-public GitHub raw.",
+  "kind": "twin",
+  "channel_sim": "the RAPP brainstem chat channel",
+  "raw_base": "https://raw.githubusercontent.com/kody-w/<repo>/main/snapshots/twin/",
+  "awaken": {
+    "brainstem": "summon public bones from raw + private local, ignite with soul LLM",
+    "dog_god": "public bones travel; private (vault/.brainstem_data) stays on device"
+  },
+  "frames": "frames.jsonl"
+}

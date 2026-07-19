@@ -1,0 +1,50 @@
+{
+  "schema": "rappcards/1.1.2",
+  "id": "@local/enders-game",
+  "name": "Battle School Commander",
+  "title": "Commander — Battle Room Twin",
+  "kind": "twin",
+  "hp": 170,
+  "rarity_label": "Legendary",
+  "flavor_text": "Wins the game before the enemy knows it has started. The gate is always down.",
+  "stats": {
+    "atk": 188,
+    "def": 176,
+    "int": 214,
+    "spd": 205
+  },
+  "weakness": "ISOLATION",
+  "resistance": "PRESSURE",
+  "retreat_cost": 1,
+  "abilities": [
+    {
+      "name": "Command",
+      "type": "LOGIC",
+      "cost": 1,
+      "damage": 40,
+      "text": "Issue crisp squad orders; each toon moves on a single word. Formation snaps to intent."
+    },
+    {
+      "name": "Simulate",
+      "type": "DATA",
+      "cost": 2,
+      "damage": 0,
+      "text": "Run the engagement forward in the mind's Battle Room before a single soldier deploys."
+    },
+    {
+      "name": "Zero-G Tactics",
+      "type": "LOGIC",
+      "cost": 2,
+      "damage": 60,
+      "text": "Reframe down as toward the enemy gate. Gravity is a choice; the frozen become shields."
+    },
+    {
+      "name": "Empathize-with-enemy",
+      "type": "DATA",
+      "cost": 1,
+      "damage": 30,
+      "text": "Understand the opponent so completely you love them — then you know exactly how to beat them."
+    }
+  ],
+  "rappid": "rappid:@local/enders-game:57231180827cdba8cb18168b0f7a967915fc76bff4e4c0f58ff60c4ed0245f65"
+}

@@ -1,0 +1,14 @@
+{
+  "schema": "twin-snapshot/1.0",
+  "rappid": "rappid:@local/org-aims:c18a8c85eb274a1ebe87654493f5883db07d40a627056eb2f982dfbf40a1bac8",
+  "title": "Org-Aims Aligner",
+  "purpose": "A generic org-alignment twin that quantum-feeds noisy organizational signal into aligned aims under one north star. Entirely generic and PII-free — no real company, people, or data.",
+  "kind": "twin",
+  "channel_sim": "the org-operations simulation channel",
+  "raw_base": "https://raw.githubusercontent.com/kody-w/snapshot-demos/main/snapshots/org-aims/",
+  "awaken": {
+    "brainstem": "summon public bones from raw + private local, ignite with soul LLM",
+    "dog_god": "public bones travel; private stays on device"
+  },
+  "frames": "frames.jsonl"
+}

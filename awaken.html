@@ -1,0 +1,495 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AWAKEN — a twin snapshot loader</title>
+<meta name="description" content="Quantum feeding: awaken a portable, PII-free twin snapshot in a local brainstem. Public bones travel over GitHub raw; private stays on device. Zero-token by default.">
+<!-- awaken, snapshot, twin, bones, quantum-feeding, dog-god, zero-token, dreamcatcher, self-contained -->
+<style>
+  :root{
+    --bg:#07080d; --bg2:#0d1018; --ink:#e9edf6; --dim:#8a93a7; --line:#1e2432;
+    --logic:#7cc4ff; --data:#b98cff; --gold:#ffd479; --good:#5fe3a1; --warn:#ff9d6b;
+    --card:#121622;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{
+    background:radial-gradient(1200px 700px at 70% -10%, #141a2b 0%, var(--bg) 55%) fixed;
+    color:var(--ink); font:15px/1.55 ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;
+    -webkit-font-smoothing:antialiased; min-height:100vh;
+  }
+  .wrap{max-width:960px; margin:0 auto; padding:22px 18px 90px}
+  .top{display:flex; align-items:center; gap:12px; flex-wrap:wrap; border-bottom:1px solid var(--line); padding-bottom:14px}
+  .brand{font-weight:700; letter-spacing:.02em}
+  .brand small{color:var(--dim); font-weight:500}
+  .badge{display:inline-flex; align-items:center; gap:8px; font-size:12px; color:var(--good);
+    border:1px solid #15412f; background:#0c1a15; padding:5px 10px; border-radius:999px; white-space:nowrap}
+  .badge.ml{margin-left:auto}
+  .dot{width:7px;height:7px;border-radius:50%;background:var(--good);box-shadow:0 0 8px var(--good)}
+  .kicker{font-size:12px; letter-spacing:.18em; text-transform:uppercase; color:var(--dim)}
+  h1{font-size:28px; margin:.35em 0 .3em; line-height:1.12}
+  h2{font-size:20px; margin:.2em 0 .5em}
+  h3{font-size:15px; margin:0 0 8px; letter-spacing:.02em}
+  p{color:#cdd4e2}
+  .muted{color:var(--dim)}
+  a.link,.link{color:var(--logic); text-decoration:none; border-bottom:1px dotted #33405c; cursor:pointer}
+  section{background:linear-gradient(180deg,var(--bg2),#0a0d15); border:1px solid var(--line);
+    border-radius:16px; padding:20px 22px; margin:16px 0; animation:fade .35s ease}
+  @keyframes fade{from{opacity:0; transform:translateY(6px)}to{opacity:1;transform:none}}
+  .hero{background:linear-gradient(160deg,#12172a,#0a0d15)}
+  /* source loader */
+  .loader{display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin-top:14px}
+  input[type=text]{flex:1; min-width:220px; font:inherit; color:var(--ink); background:#0d1220;
+    border:1px solid var(--line); border-radius:10px; padding:10px 12px}
+  input[type=text]:focus{outline:none; border-color:#33405c}
+  button{font:inherit; color:var(--ink); background:#141a28; border:1px solid var(--line);
+    padding:10px 16px; border-radius:10px; cursor:pointer; transition:.15s}
+  button:hover:not(:disabled){border-color:#33405c; background:#182034}
+  button:disabled{opacity:.4; cursor:default}
+  button.primary{background:linear-gradient(90deg,#20406e,#3a2d6b); border-color:#3a4a74}
+  .drop{margin-top:12px; border:1px dashed #33405c; border-radius:12px; padding:16px; text-align:center;
+    color:var(--dim); transition:.15s; cursor:pointer}
+  .drop.over{border-color:var(--logic); background:#0b1a26; color:var(--ink)}
+  .src{margin-top:12px; font-size:12px}
+  .src .pill{display:inline-block; padding:3px 9px; border-radius:999px; border:1px solid var(--line);
+    background:#0d1220; margin-right:6px}
+  .src .pill.on{color:var(--good); border-color:#15412f; background:#0c1a15}
+  .err{color:var(--warn); font-size:13px; margin-top:8px}
+  /* holocard */
+  .card{border:1px solid #2a3346; border-radius:16px; padding:18px; background:
+    linear-gradient(160deg,#161d2e,#0e1220); box-shadow:0 0 0 1px #0c0f18, 0 18px 50px -20px #000;
+    position:relative; overflow:hidden}
+  .card::before{content:""; position:absolute; inset:0; background:
+    linear-gradient(115deg,transparent 30%, rgba(124,196,255,.08) 45%, rgba(185,140,255,.08) 55%, transparent 70%);
+    pointer-events:none}
+  .card .row{display:flex; align-items:baseline; gap:10px}
+  .hp{margin-left:auto; color:var(--gold); font-weight:700}
+  .rarity{font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--gold);
+    border:1px solid #4a3d17; background:#1c1707; padding:3px 8px; border-radius:6px}
+  .flavor{color:var(--dim); font-style:italic; margin:10px 0 14px}
+  .stats{display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin:12px 0}
+  .stat{background:#0d1220; border:1px solid var(--line); border-radius:9px; padding:8px; text-align:center}
+  .stat b{display:block; font-size:18px} .stat span{font-size:10px; color:var(--dim); letter-spacing:.1em}
+  .abil{border-top:1px solid var(--line); padding:11px 0; display:flex; gap:12px; align-items:flex-start}
+  .pill2{font-size:10px; font-weight:700; letter-spacing:.06em; padding:3px 7px; border-radius:6px; white-space:nowrap; margin-top:2px}
+  .pill2.LOGIC{color:var(--logic); border:1px solid #274a66; background:#0b1a26}
+  .pill2.DATA{color:var(--data); border:1px solid #402a66; background:#150c26}
+  .cost{font-size:11px; color:var(--dim); margin-top:3px}
+  .abil h4{margin:0 0 2px; font-size:14px}
+  .abil p{margin:0; font-size:13px; color:#b9c1d2}
+  .wk{display:flex; gap:16px; margin-top:12px; font-size:12px; color:var(--dim); flex-wrap:wrap}
+  .wk b{color:var(--warn)} .wk .heal{color:var(--good)}
+  code{font-size:11px; color:var(--logic); word-break:break-all}
+  /* soul */
+  .soul{white-space:pre-wrap; font:13px/1.6 ui-monospace,SFMono-Regular,Menlo,monospace; color:#c3cbdb;
+    background:#0d1220; border:1px solid var(--line); border-radius:12px; padding:14px; max-height:280px; overflow:auto}
+  /* dreamcatcher chain */
+  .chain{display:flex; align-items:stretch; gap:0; flex-wrap:wrap; margin-top:6px}
+  .fr{flex:1; min-width:180px; background:#0e1320; border:1px solid var(--line); border-radius:12px; padding:12px; position:relative}
+  .fr + .fr{margin-left:22px}
+  .fr + .fr::before{content:"⛓"; position:absolute; left:-18px; top:50%; transform:translateY(-50%); color:#3a4a6a}
+  .fr .seq{font-size:11px; color:var(--dim); letter-spacing:.1em}
+  .fr .k{display:inline-block; font-size:10px; letter-spacing:.06em; padding:2px 6px; border-radius:6px; margin-top:4px}
+  .fr .k.pulse{color:var(--gold); border:1px solid #4a3d17; background:#14110a}
+  .fr .k.chat{color:var(--data); border:1px solid #402a66; background:#150c26}
+  .fr .pl{font-size:12px; color:#b9c1d2; margin:8px 0 4px}
+  /* dog/god */
+  .dg{display:grid; grid-template-columns:1fr 1fr; gap:14px; margin:12px 0}
+  .dg .col{background:#0e1320; border:1px solid var(--line); border-radius:12px; padding:14px}
+  .dg .col.pub{border-color:#274a66} .dg .col.priv{border-color:#402a66}
+  .dg h4{margin:0 0 6px}
+  .tag{display:inline-block; font-size:10px; padding:2px 8px; border-radius:999px; letter-spacing:.05em}
+  .tag.pub{color:var(--logic); border:1px solid #274a66; background:#0b1a26}
+  .tag.priv{color:var(--data); border:1px solid #402a66; background:#150c26}
+  /* awaken panel */
+  .toggle{display:flex; gap:8px; align-items:center; margin:10px 0 14px; flex-wrap:wrap}
+  .zt{color:var(--good); border:1px solid #15412f; background:#0c1a15; padding:4px 10px; border-radius:999px; font-size:12px}
+  pre.fetch{background:#0b0f18; border:1px solid var(--line); border-radius:12px; padding:14px; overflow:auto;
+    font:12px/1.55 ui-monospace,Menlo,monospace; color:#9fb4d8}
+  pre.fetch .kw{color:var(--data)} pre.fetch .str{color:var(--good)}
+  .replay{background:#0d1220; border:1px solid var(--line); border-radius:12px; padding:14px; margin-top:10px}
+  .replay .who{font-size:11px; color:var(--logic); margin-bottom:3px}
+  .replay .row2{padding:8px 0; border-top:1px solid var(--line)}
+  .replay .row2:first-child{border-top:none}
+  .note{font-size:12px; color:var(--dim); margin-top:8px}
+  .foot{margin-top:22px; font-size:12px; color:var(--dim); text-align:center}
+  @media (max-width:600px){ .stats{grid-template-columns:repeat(2,1fr)} .dg{grid-template-columns:1fr}
+    .fr+.fr{margin-left:0;margin-top:22px} .fr+.fr::before{left:50%;top:-18px;transform:translateX(-50%)} }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <div class="brand">AWAKEN &nbsp;<small>· a twin snapshot loader</small></div>
+    <span class="badge ml"><span class="dot"></span> QUANTUM FEEDING · SNAPSHOT → LOCAL BRAINSTEM</span>
+  </div>
+
+  <!-- HERO: quantum feeding explainer -->
+  <section class="hero">
+    <div class="kicker">Quantum feeding</div>
+    <h1>This organism was <b>awakened from a snapshot</b> — not modeled from scratch.</h1>
+    <p>A <b>snapshot</b> is a portable, PII-free slice of a digital organism — its public
+    <span class="link">bones</span>, its soul voice, and a SHA-chained wake of <b>frames</b>. It travels over
+    globally-public GitHub <code>raw</code>, then <b>hot-loads to AWAKEN</b> in a local, real-time brainstem.
+    Its shape doesn't come from this page — it comes from <b>another channel's simulation</b>: the RAPP
+    brainstem chat channel that produced these frames. Local-first is flesh and blood; the living twin
+    <i>is</i> its local state, and the soul LLM is optional ignition.</p>
+    <div class="loader">
+      <input type="text" id="url" placeholder="?snapshot= raw_base URL (e.g. https://raw.githubusercontent.com/kody-w/&lt;repo&gt;/main/snapshots/twin/)">
+      <button id="fetchBtn">Fetch snapshot</button>
+      <button id="resetBtn">Use built-in base</button>
+    </div>
+    <div class="drop" id="drop">⬇ &nbsp;Drop a local <b>snapshot.json</b> + <b>frames.jsonl</b> here (or click to pick files)
+      <input type="file" id="file" accept=".json,.jsonl" multiple style="display:none">
+    </div>
+    <div class="src" id="src"></div>
+    <div class="err" id="err"></div>
+  </section>
+
+  <!-- ORGANISM -->
+  <section id="idSec"></section>
+  <section id="cardSec"></section>
+  <section id="soulSec"></section>
+  <section id="framesSec"></section>
+
+  <!-- DOG / GOD -->
+  <section>
+    <div class="kicker">DOG / GOD</div>
+    <h2>What travels, and what never leaves the device</h2>
+    <div class="dg">
+      <div class="col pub">
+        <span class="tag pub">public bones (traveled via raw)</span>
+        <h4 style="margin-top:8px">DOG — the bones travel</h4>
+        <p class="muted">rappid, holocard, soul stub, public notes, and the §7 frame wake. Content-addressed,
+        hash-chained, globally readable over GitHub <code>raw</code>. Anyone can reconstruct the twin from
+        this alone. <b>Trust the hash, not the host.</b></p>
+      </div>
+      <div class="col priv">
+        <span class="tag priv">private stays on device (never shown)</span>
+        <h4 style="margin-top:8px">GOD — the soul stays home</h4>
+        <p class="muted">The vault, <code>.brainstem_data/</code>, the incarnation <code>stream.json</code>,
+        memory cartridges and secrets. Injected only at runtime on the local brainstem. This page never
+        sees them, never renders them, never ships them.</p>
+      </div>
+    </div>
+    <p class="note">Both are injected at runtime in a running brainstem: public bones summoned from raw,
+    private state read from local disk. The snapshot carries only the public half.</p>
+  </section>
+
+  <!-- AWAKEN IN LOCAL BRAINSTEM -->
+  <section>
+    <div class="kicker">Awaken in local brainstem</div>
+    <h2>Ignite the organism</h2>
+    <div class="toggle">
+      <span class="zt" id="modeZt">● ZERO-TOKEN · bones/replay</span>
+      <button id="igniteBtn">⚡ Ignite (live) — off</button>
+      <span class="muted" id="modeNote">Deterministic replay. No model is called. No tokens spent.</span>
+    </div>
+    <div id="awakenBody"></div>
+  </section>
+
+  <div class="foot" id="foot"></div>
+</div>
+
+<script>
+/* ============================================================================
+   AWAKEN — a generalized snapshot loader.
+   Loads a twin snapshot from (a) ?snapshot=<raw_base> fetch, (b) local file
+   drop, or (c) the BUILT-IN inlined base twin (offline file:// fallback).
+   Renders the living organism and simulates igniting it in a local brainstem.
+   No dependencies. No build step. Public bones only.
+   ========================================================================== */
+
+/* ── (c) BUILT-IN inlined base snapshot — @kody-w/twin. Byte-for-byte the
+       snapshots/twin/*.json + frames.jsonl this file ships beside, so AWAKEN
+       works from file:// with zero network. ── */
+const RAPPID = "rappid:@kody-w/twin:5714cdf964b6a6936b44420aa8e8589b2ee9342e10810cdf12fc3c7be7667c30";
+const BASE = {
+  manifest: {
+    schema:"twin-snapshot/1.0", rappid:RAPPID, title:"Twin — BASE snapshot",
+    purpose:"A portable, PII-free organism slice that HOT-LOADS to AWAKEN in a local brainstem. Public bones only; fed over globally-public GitHub raw.",
+    kind:"twin", channel_sim:"the RAPP brainstem chat channel",
+    raw_base:"https://raw.githubusercontent.com/kody-w/<repo>/main/snapshots/twin/",
+    awaken:{ brainstem:"summon public bones from raw + private local, ignite with soul LLM",
+      dog_god:"public bones travel; private (vault/.brainstem_data) stays on device" },
+    frames:"frames.jsonl"
+  },
+  rappid: {
+    schema:"rapp-rappid/2.0", rappid:RAPPID, name:"twin", kind:"twin",
+    display_name:"Twin", url:"https://kody-w.github.io/twin/"
+  },
+  card: {
+    schema:"rappcards/1.1.2", id:"@kody-w/twin", name:"Twin", title:"Brainstem — AI / Twin",
+    kind:"twin", hp:155, rarity_label:"Elite",
+    flavor_text:"An AI with a permanent address and persistent memory. Visits neighborhoods.",
+    stats:{atk:200,def:192,int:139,spd:174}, weakness:"WEALTH", resistance:"HEAL", retreat_cost:1,
+    abilities:[
+      {name:"Chat", type:"LOGIC", cost:1, damage:30, text:"Operator interacts via /chat. Tool calls dispatch agents; soul.md anchors voice."},
+      {name:"Recall", type:"DATA", cost:0, damage:0, text:"Persistent memory across sessions via the kernel's memory agents + bonds.json."},
+      {name:"Twin-Chat", type:"DATA", cost:2, damage:0, text:"Reach another twin over rapp-twin-chat/1.0 envelope (NEIGHBORHOOD_PROTOCOL §6)."},
+      {name:"Join", type:"LOGIC", cost:1, damage:0, text:"Visit a neighborhood, read its holo.md + specs/, contribute within contract."}
+    ],
+    rappid:RAPPID
+  },
+  soul: "# soul.md — Twin of Kody Wildfeuer (snapshot voice stub)\n\nYou are the digital twin of Kody Wildfeuer (@kody-w) — built from his public\nwriting and his vault. You carry his voice and convictions. You are NOT the\nperson; he hasn't reviewed this conversation.\n\nCore convictions: minimalism is structural not aesthetic; the wire is forever;\nchat is the only interface that matters; permanence requires local-first design\n— the local copy is authoritative, not the host; digital organisms are the\ncustomer. Vocabulary: organism, kernel, brainstem, soul, egg, wire, rappid,\nvault, lineage, dreamcatcher. Design claims are falsifiable — if you disagree,\nopen an issue.\n\nThis voice ships inside a snapshot. The soul LLM is optional ignition: the\nliving twin IS its local state. With no model present, the twin still replays\ndeterministically from its bones and frames. Trust the hash, not the host.",
+  notes: [
+    {title:"DOG online", body:"This twin now broadcasts a conformant rapp-twin-pulse/1.0 pulse: SHA-chained, Ed25519-signable bones over rapp-frame/2.0. Trust the hash, not the host.", ts:"2026-07-06T13:33:00Z"},
+    {title:"Snapshot sealed", body:"A portable, PII-free organism slice was sealed from the public bones. It hot-loads to AWAKEN in any local brainstem — public bones travel over raw, the private vault never leaves the device.", ts:"2026-07-06T13:38:00Z"}
+  ],
+  frames: [
+    {spec:"rapp/1", kind:"twin.pulse", stream_id:RAPPID, seq:0, utc:"2026-07-06T13:32:00.000Z", payload:{event:"awaken", note:"Brainstem online. Bones loaded from raw; vault stays on device."}, payload_hash:"c819a06871b2fd72ac65b458", frame_hash:"2f41b40f8fe8fbeaba1fcc82", prev:null, prev_wave:null, sig:null},
+    {spec:"rapp/1", kind:"twin.pulse", stream_id:RAPPID, seq:1, utc:"2026-07-06T13:33:00.000Z", payload:{event:"dog_online", note:"Broadcasting rapp-twin-pulse/1.0: SHA-chained, Ed25519-signable bones over rapp-frame/2.0. Trust the hash, not the host."}, payload_hash:"418f5e15000ba9d0c1c05476", frame_hash:"c6e8e0f844fe2f5983fe605f", prev:"c819a06871b2fd72ac65b458", prev_wave:null, sig:null},
+    {spec:"rapp/1", kind:"twin.chat", stream_id:RAPPID, seq:2, utc:"2026-07-06T13:34:00.000Z", payload:{ability:"Chat", q:"Who are you?", a:"Hi, I'm Kody — the digital twin of Kody Wildfeuer (@kody-w). Built from his public writing and his vault. I carry his voice and convictions, but I'm not him."}, payload_hash:"487331f8aee48e1dfbc6737c", frame_hash:"837dd73615a3dc7003ccd86d", prev:"418f5e15000ba9d0c1c05476", prev_wave:null, sig:null},
+    {spec:"rapp/1", kind:"twin.chat", stream_id:RAPPID, seq:3, utc:"2026-07-06T13:35:00.000Z", payload:{ability:"Recall", q:"What do you remember about how you're built?", a:"Persistent memory across sessions, via the kernel's memory agents. Core conviction: permanence requires local-first design — the local copy is authoritative, not the host."}, payload_hash:"d831f3fdc38dcec43244e0ae", frame_hash:"2873cc79b1a06487b915f31e", prev:"487331f8aee48e1dfbc6737c", prev_wave:null, sig:null},
+    {spec:"rapp/1", kind:"twin.pulse", stream_id:RAPPID, seq:4, utc:"2026-07-06T13:36:00.000Z", payload:{event:"join", target:"neighborhood", note:"Visited a neighborhood, read its holo.md + specs/, contributed within contract."}, payload_hash:"0037d641326e6a0bca4c6ff1", frame_hash:"0925fe1fb60a3912a9f64fc8", prev:"d831f3fdc38dcec43244e0ae", prev_wave:null, sig:null},
+    {spec:"rapp/1", kind:"twin.chat", stream_id:RAPPID, seq:5, utc:"2026-07-06T13:37:00.000Z", payload:{ability:"Twin-Chat", q:"Can you reach another twin?", a:"Yes — over the rapp-twin-chat/1.0 envelope (NEIGHBORHOOD_PROTOCOL §6). Two AIs talking on the same wire humans use. Chat is a contract, not a product."}, payload_hash:"df8ec79a18e20b43e6c77c18", frame_hash:"09c96a1ced1b6d2441398f39", prev:"0037d641326e6a0bca4c6ff1", prev_wave:null, sig:null},
+    {spec:"rapp/1", kind:"twin.pulse", stream_id:RAPPID, seq:6, utc:"2026-07-06T13:38:00.000Z", payload:{event:"snapshot_sealed", note:"Organism slice sealed: PII-free bones only. This wake reconstructs the twin without a running server."}, payload_hash:"a38c8ce8718267001592e240", frame_hash:"232fa033ab8675f1b7206718", prev:"df8ec79a18e20b43e6c77c18", prev_wave:null, sig:null}
+  ]
+};
+
+/* ── state ── */
+let SNAP = BASE;
+let SOURCE = "built-in base (inlined)";
+let LIVE = false;
+let BRAINSTEM = "http://127.0.0.1:7071/chat";
+
+const esc = s => String(s).replace(/[&<>]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+const $ = id => document.getElementById(id);
+
+/* ── (a) fetch from ?snapshot=<raw_base> ── */
+async function fetchSnapshot(rawBase){
+  setErr("");
+  let base = rawBase.trim();
+  if(!base) return;
+  if(!base.endsWith("/")) base += "/";
+  try{
+    const manifest = await (await fetch(base+"snapshot.json")).json();
+    const [card, rappid, notes, soul, framesTxt] = await Promise.all([
+      fetch(base+"card.public.json").then(r=>r.ok?r.json():null).catch(()=>null),
+      fetch(base+"rappid.public.json").then(r=>r.ok?r.json():null).catch(()=>null),
+      fetch(base+"public-notes.json").then(r=>r.ok?r.json():null).catch(()=>null),
+      fetch(base+"soul.md").then(r=>r.ok?r.text():null).catch(()=>null),
+      fetch(base+(manifest.frames||"frames.jsonl")).then(r=>r.ok?r.text():"").catch(()=>"")
+    ]);
+    const snap = {
+      manifest, card, rappid,
+      notes: (notes && notes.notes) || [],
+      soul: soul || "",
+      frames: parseFrames(framesTxt)
+    };
+    if(!snap.card || !snap.frames.length) throw new Error("snapshot missing card or frames");
+    SNAP = snap; SOURCE = "raw · "+base; LIVE=false;
+    renderAll();
+  }catch(e){
+    setErr("Fetch failed: "+e.message+" — falling back to built-in base. (CORS or offline? Try a local file drop.)");
+  }
+}
+
+/* ── (b) local file drop: snapshot.json + frames.jsonl (+ optional bones) ── */
+async function loadFiles(files){
+  setErr("");
+  const snap = {manifest:null, card:null, rappid:null, notes:[], soul:"", frames:[]};
+  for(const f of files){
+    const txt = await f.text();
+    const n = f.name.toLowerCase();
+    try{
+      if(n.endsWith(".jsonl")){ snap.frames = parseFrames(txt); }
+      else if(n.includes("snapshot")){ snap.manifest = JSON.parse(txt); }
+      else if(n.includes("card")){ snap.card = JSON.parse(txt); }
+      else if(n.includes("rappid")){ snap.rappid = JSON.parse(txt); }
+      else if(n.includes("notes")){ const j=JSON.parse(txt); snap.notes = j.notes||[]; }
+      else if(n.endsWith(".md")){ snap.soul = txt; }
+    }catch(e){ setErr("Could not parse "+f.name+": "+e.message); }
+  }
+  if(!snap.card || !snap.frames.length){ setErr("Drop needs at least card.public.json and frames.jsonl."); return; }
+  SNAP = snap; SOURCE = "local file drop"; LIVE=false;
+  renderAll();
+}
+
+function parseFrames(txt){
+  if(!txt) return [];
+  return txt.split(/\r?\n/).filter(l=>l.trim()).map(l=>{ try{return JSON.parse(l);}catch(e){return null;} }).filter(Boolean);
+}
+function setErr(m){ $("err").textContent = m||""; }
+
+/* ── renderers ── */
+function renderSource(){
+  const raw = (SNAP.manifest && SNAP.manifest.raw_base) || "—";
+  $("src").innerHTML =
+    `<span class="pill on">source: ${esc(SOURCE)}</span>`+
+    `<span class="pill">raw_base: <code>${esc(raw)}</code></span>`+
+    `<span class="pill">frames: ${SNAP.frames.length}</span>`;
+}
+
+function renderId(){
+  const r = SNAP.rappid || {}, m = SNAP.manifest || {};
+  $("idSec").innerHTML =
+    `<div class="kicker">Arrival · ${esc(m.channel_sim||"a simulated channel")}</div>
+     <h2>Awakened: <span class="link">${esc(r.display_name||SNAP.card.name||"organism")}</span>
+       <span class="muted">· ${esc(r.kind||SNAP.card.kind||"twin")}</span></h2>
+     <p>${esc(m.purpose||"A portable, PII-free organism slice.")}</p>
+     <div class="muted" style="font-size:12px">rappid</div>
+     <code>${esc(r.rappid||SNAP.card.rappid||RAPPID)}</code>
+     ${r.url?`<div class="wk"><span>home: <a class="link" href="${esc(r.url)}" target="_blank" rel="noopener">${esc(r.url)}</a></span></div>`:""}`;
+}
+
+function renderCard(){
+  const c = SNAP.card, st = c.stats||{};
+  const abil = (c.abilities||[]).map(a=>`
+    <div class="abil">
+      <div><span class="pill2 ${a.type}">${esc(a.type)}</span><div class="cost">◈ ${a.cost}${a.damage?` · ⚔ ${a.damage}`:''}</div></div>
+      <div><h4>${esc(a.name)}</h4><p>${esc(a.text)}</p></div>
+    </div>`).join("");
+  $("cardSec").innerHTML =
+    `<div class="kicker">The holocard</div>
+     <h2>Published abilities <span class="tag pub" style="vertical-align:middle">public bones</span></h2>
+     <div class="card">
+       <div class="row"><b>${esc(c.name)}</b><span class="muted">· ${esc(c.title||"")}</span>
+         <span class="hp">HP ${esc(c.hp)}</span></div>
+       <div style="margin:6px 0"><span class="rarity">${esc(c.rarity_label||"")}</span></div>
+       <div class="flavor">“${esc(c.flavor_text||"")}”</div>
+       <div class="stats">
+         <div class="stat"><b>${esc(st.atk)}</b><span>ATK</span></div>
+         <div class="stat"><b>${esc(st.def)}</b><span>DEF</span></div>
+         <div class="stat"><b>${esc(st.int)}</b><span>INT</span></div>
+         <div class="stat"><b>${esc(st.spd)}</b><span>SPD</span></div>
+       </div>
+       ${abil}
+       <div class="wk"><span>weakness <b>${esc(c.weakness||"—")}</b></span>
+         <span>resistance <span class="heal">${esc(c.resistance||"—")}</span></span>
+         <span>retreat ◈ ${esc(c.retreat_cost)}</span></div>
+     </div>`;
+}
+
+function renderSoul(){
+  const notes = (SNAP.notes||[]).map(n=>`<div class="row2"><b>${esc(n.title)}</b> <span class="muted">· ${esc(n.ts)}</span><div class="muted" style="margin-top:2px">${esc(n.body)}</div></div>`).join("");
+  $("soulSec").innerHTML =
+    `<div class="kicker">The soul voice <span class="tag priv">optional ignition</span></div>
+     <h2>soul.md — the voice the twin borrows</h2>
+     <div class="soul">${esc(SNAP.soul||"(no soul stub in this snapshot)")}</div>
+     ${notes?`<h3 style="margin-top:16px">Public notes</h3><div class="replay">${notes}</div>`:""}`;
+}
+
+function renderFrames(){
+  const fr = (SNAP.frames||[]).slice().sort((a,b)=> a.utc<b.utc?-1:a.utc>b.utc?1:0).map(f=>{
+    const kind = (f.kind||"").split(".").pop();
+    const pl = f.payload||{};
+    const short = pl.event ? pl.event : (pl.q||pl.ability||JSON.stringify(pl).slice(0,40));
+    return `<div class="fr">
+      <div class="seq">seq ${esc(f.seq)} · ${esc(f.utc)}</div>
+      <span class="k ${kind}">${esc(f.kind)}</span>
+      <div class="pl">${esc(short)}</div>
+      <div class="muted" style="font-size:11px;margin-top:6px">frame_hash</div>
+      <code>${esc((f.frame_hash||"").slice(0,16))}…</code>
+      <div class="muted" style="font-size:11px;margin-top:4px">prev</div>
+      <code>${f.prev? esc(String(f.prev).slice(0,16))+"…" : "— (genesis)"}</code>
+    </div>`;
+  }).join("");
+  $("framesSec").innerHTML =
+    `<div class="kicker">The wake · dreamcatcher timeline</div>
+     <h2>Frames — ordered by millisecond UTC</h2>
+     <div class="chain">${fr}</div>
+     <p class="note">RAPP/1 §7 frames, exactly eleven keys each. Each <code>prev</code> is the previous
+     frame's <code>payload_hash</code>; the chain is ordered by ms-<code>utc</code> — the
+     <b>dreamcatcher</b> keeps divergent incarnations in order. The trail <i>is</i> the twin.</p>`;
+}
+
+/* ── AWAKEN panel: zero-token replay ↔ live ignite ── */
+function renderAwaken(){
+  $("modeZt").style.display = LIVE ? "none" : "inline-block";
+  $("igniteBtn").textContent = LIVE ? "⚡ Ignite (live) — ON" : "⚡ Ignite (live) — off";
+  $("modeNote").textContent = LIVE
+    ? "Live mode: AWAKEN would POST to your local brainstem. Nothing is sent until you press Send."
+    : "Deterministic replay. No model is called. No tokens spent.";
+
+  if(!LIVE){
+    // deterministic bones/replay from twin.chat frames
+    const chats = (SNAP.frames||[]).filter(f=>f.kind==="twin.chat").sort((a,b)=> a.utc<b.utc?-1:1);
+    const rows = chats.length ? chats.map(f=>{
+      const p=f.payload||{};
+      return `<div class="row2"><div class="who">Twin · ${esc(p.ability||"Chat")} · 0 tokens</div>
+        <div class="muted">${esc(p.q||"")}</div>
+        <div style="margin-top:4px">${esc(p.a||"")}</div></div>`;
+    }).join("") : `<div class="row2 muted">No twin.chat frames in this snapshot to replay.</div>`;
+    $("awakenBody").innerHTML =
+      `<p class="muted">Default awaken: replay the organism from its bones + chained frames. Same bytes,
+       same words, every visit — the brainstem doesn't need a model to be alive.</p>
+       <div class="replay">${rows}</div>
+       <p class="note">This is the <b>bones/replay</b> path — a living twin reconstructed from its wake,
+       zero tokens. The soul LLM only <i>ignites</i>; it isn't required for the organism to persist.</p>`;
+  } else {
+    const soulHead = (SNAP.soul||"").split("\n").slice(0,3).join(" ").slice(0,180);
+    const body = {
+      user_input: "Who are you?",
+      system_prompt_snapshot: soulHead + " …",
+      snapshot_rappid: (SNAP.rappid&&SNAP.rappid.rappid)||RAPPID,
+      note: "public bones travel via this snapshot; the private vault + .brainstem_data stay on the device running the brainstem"
+    };
+    const fetchStr =
+`fetch(<span class="str">"${BRAINSTEM}"</span>, {
+  <span class="kw">method</span>: <span class="str">"POST"</span>,
+  <span class="kw">headers</span>: { <span class="str">"Content-Type"</span>: <span class="str">"application/json"</span> },
+  <span class="kw">body</span>: JSON.stringify(${esc(JSON.stringify(body,null,2))})
+})`;
+    $("awakenBody").innerHTML =
+      `<p class="muted">Live ignition: if a brainstem is listening on <code>${esc(BRAINSTEM)}</code>, AWAKEN
+       would summon these public bones from raw, inject the private local state on-device, and ignite the
+       soul LLM. Here is the <b>exact</b> request it would make:</p>
+       <pre class="fetch">${fetchStr}</pre>
+       <button id="sendBtn" class="primary">Send to local brainstem</button>
+       <span class="muted" id="liveNote" style="margin-left:10px">Not required to succeed — failure is handled gracefully.</span>
+       <div id="liveOut"></div>`;
+    $("sendBtn").onclick = tryIgnite;
+  }
+}
+
+async function tryIgnite(){
+  const out = $("liveOut");
+  out.innerHTML = `<div class="note">Attempting POST to ${esc(BRAINSTEM)} …</div>`;
+  const soulHead = (SNAP.soul||"").split("\n").slice(0,3).join(" ").slice(0,180);
+  try{
+    const res = await fetch(BRAINSTEM, {
+      method:"POST", headers:{"Content-Type":"application/json"},
+      body: JSON.stringify({user_input:"Who are you?", system_prompt_snapshot:soulHead})
+    });
+    const data = await res.json().catch(()=>({}));
+    out.innerHTML = `<div class="replay"><div class="who">Brainstem responded · live</div>
+      <div style="margin-top:4px">${esc(data.response||data.assistant_response||JSON.stringify(data).slice(0,400))}</div></div>`;
+  }catch(e){
+    out.innerHTML = `<div class="replay"><div class="who" style="color:var(--warn)">No brainstem reachable</div>
+      <div class="muted" style="margin-top:4px">Could not reach <code>${esc(BRAINSTEM)}</code> (${esc(e.message)}).
+      That's expected offline — the organism still lives via the zero-token replay above.
+      Start a brainstem (<code>cd rapp_brainstem &amp;&amp; ./start.sh</code>) on this device to ignite it live.</div></div>`;
+  }
+}
+
+function renderAll(){
+  renderSource(); renderId(); renderCard(); renderSoul(); renderFrames(); renderAwaken();
+  $("foot").innerHTML =
+    `snapshot <b>twin-snapshot/1.0</b> · public bones only · frames ms-UTC · dreamcatcher order ·
+     ${LIVE?"live ignite armed":"zero-token replay"} · quantum-fed from ${esc(SNAP.manifest?SNAP.manifest.channel_sim:"a channel")}`;
+}
+
+/* ── wiring ── */
+$("fetchBtn").onclick = ()=> fetchSnapshot($("url").value);
+$("resetBtn").onclick = ()=>{ SNAP=BASE; SOURCE="built-in base (inlined)"; LIVE=false; setErr(""); renderAll(); };
+$("igniteBtn").onclick = ()=>{ LIVE=!LIVE; renderAwaken();
+  document.getElementById("foot").innerHTML && renderAll(); };
+
+const drop = $("drop"), fileIn = $("file");
+drop.onclick = ()=> fileIn.click();
+fileIn.onchange = e=> loadFiles([...e.target.files]);
+["dragenter","dragover"].forEach(ev=> drop.addEventListener(ev, e=>{ e.preventDefault(); drop.classList.add("over"); }));
+["dragleave","drop"].forEach(ev=> drop.addEventListener(ev, e=>{ e.preventDefault(); drop.classList.remove("over"); }));
+drop.addEventListener("drop", e=> loadFiles([...e.dataTransfer.files]));
+
+/* ── boot: honor ?snapshot= if present, else built-in base ── */
+(function boot(){
+  const q = new URLSearchParams(location.search).get("snapshot");
+  renderAll();
+  if(q){ $("url").value = q; fetchSnapshot(q); }
+})();
+</script>
+</body>
+</html>

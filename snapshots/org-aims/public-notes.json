@@ -1,0 +1,21 @@
+{
+  "schema": "rapp-public-notes/1.0",
+  "rappid": "rappid:@local/org-aims:c18a8c85eb274a1ebe87654493f5883db07d40a627056eb2f982dfbf40a1bac8",
+  "notes": [
+    {
+      "title": "One north star",
+      "body": "A cycle with ten priorities has none. Everything ladders up to a single objective or it is cut.",
+      "ts": "2026-07-06T15:00:00.000Z"
+    },
+    {
+      "title": "Impact over effort",
+      "body": "Rank aims by impact-over-effort. The bottom quartile is deferred, not debated.",
+      "ts": "2026-07-06T15:01:00.000Z"
+    },
+    {
+      "title": "Readout as contract",
+      "body": "The one-page north-star readout is the interface: aims, owners, key results, status. Measured weekly.",
+      "ts": "2026-07-06T15:02:00.000Z"
+    }
+  ]
+}

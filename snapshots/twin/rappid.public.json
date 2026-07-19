@@ -1,0 +1,8 @@
+{
+  "schema": "rapp-rappid/2.0",
+  "rappid": "rappid:@kody-w/twin:5714cdf964b6a6936b44420aa8e8589b2ee9342e10810cdf12fc3c7be7667c30",
+  "name": "twin",
+  "kind": "twin",
+  "display_name": "Twin",
+  "url": "https://kody-w.github.io/twin/"
+}

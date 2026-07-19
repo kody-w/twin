@@ -1,0 +1,16 @@
+{
+  "schema": "rapp-public-notes/1.0",
+  "rappid": "rappid:@local/self:370e1c13566c44c799ab3232ba71a12d85bbec2c17b59179834912e1730a3646",
+  "notes": [
+    {
+      "title": "The quantum primary key",
+      "body": "Every frame is addressed by the shape of its own bytes — payload_hash over the canonical payload. That address is the quantum primary key: an instant, virtual lookup that is collision-free, so a frame never matches noise from a neighboring frame. prev chains each particle to the last, so the lookup is fractal — frames into frames into frames.",
+      "ts": "2026-03-20T00:00:00Z"
+    },
+    {
+      "title": "Reflection detected",
+      "body": "This is the agent's snapshot of itself: a deterministic ghost anyone can hot-load onto a brainstem — even the agent that made it. Same bytes, same wake, every time.",
+      "ts": "2026-03-20T00:00:00Z"
+    }
+  ]
+}

@@ -1,0 +1,50 @@
+{
+  "schema": "rappcards/1.1.2",
+  "id": "@local/poke-speedrun",
+  "name": "Red Any% Runner",
+  "title": "Speedrunner — Emulator Channel Twin",
+  "kind": "twin",
+  "hp": 140,
+  "rarity_label": "Elite",
+  "flavor_text": "Any% to the Hall of Fame. Every frame is a road; every menu is a shortcut.",
+  "stats": {
+    "atk": 150,
+    "def": 120,
+    "int": 198,
+    "spd": 240
+  },
+  "weakness": "BAD-RNG",
+  "resistance": "TILT",
+  "retreat_cost": 0,
+  "abilities": [
+    {
+      "name": "Route",
+      "type": "LOGIC",
+      "cost": 1,
+      "damage": 30,
+      "text": "Lay the optimal path start-to-credits: which fights to take, which to walk past."
+    },
+    {
+      "name": "Grind-skip",
+      "type": "LOGIC",
+      "cost": 1,
+      "damage": 50,
+      "text": "Skip every avoidable battle; carry just enough levels to clear the next wall."
+    },
+    {
+      "name": "RNG-manip",
+      "type": "DATA",
+      "cost": 2,
+      "damage": 40,
+      "text": "Steer the pseudo-random seed with timed inputs to force the outcome you need."
+    },
+    {
+      "name": "Menu-buffer",
+      "type": "DATA",
+      "cost": 1,
+      "damage": 0,
+      "text": "Pre-load menu inputs a frame early so the next action fires the instant it's legal."
+    }
+  ],
+  "rappid": "rappid:@local/poke-speedrun:63ae6b8a034caf89fba954c9e4da27a239b45fbfcf42314d1a50610eb72ebc68"
+}

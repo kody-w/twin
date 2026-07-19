@@ -1,0 +1,8 @@
+{
+  "schema": "rapp-rappid/2.0",
+  "rappid": "rappid:@local/org-aims:c18a8c85eb274a1ebe87654493f5883db07d40a627056eb2f982dfbf40a1bac8",
+  "name": "org-aims",
+  "kind": "twin",
+  "display_name": "Org-Aims Aligner",
+  "url": "https://kody-w.github.io/snapshot-demos/snapshots/org-aims/"
+}

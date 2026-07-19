@@ -1,0 +1,8 @@
+{
+  "schema": "rapp-rappid/2.0",
+  "rappid": "rappid:@local/self:370e1c13566c44c799ab3232ba71a12d85bbec2c17b59179834912e1730a3646",
+  "name": "self",
+  "kind": "twin",
+  "display_name": "Coding Agent Twin",
+  "url": "https://raw.githubusercontent.com/kody-w/<repo>/main/snapshots/self/"
+}

@@ -1,0 +1,8 @@
+{
+  "schema": "rapp-rappid/2.0",
+  "rappid": "rappid:@local/enders-game:57231180827cdba8cb18168b0f7a967915fc76bff4e4c0f58ff60c4ed0245f65",
+  "name": "enders-game",
+  "kind": "twin",
+  "display_name": "Battle School Commander",
+  "url": "https://kody-w.github.io/snapshot-demos/snapshots/enders-game/"
+}
