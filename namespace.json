@@ -1,0 +1,70 @@
+{
+  "schema": "rapp-namespace/1.0",
+  "namespace": "kody-w",
+  "root": "https://raw.githubusercontent.com/kody-w",
+  "repo": "twin",
+  "note": "The GitHub username is the GLOBAL namespace root. Every object that makes up the full shape of the application is raw, content-addressed data under this directory. The quantum key IS the address: resolution is instant, global, search-free, and self-verifying — fetched bytes must hash back to the key, or they are rejected as noise from a neighboring frame.",
+  "path_convention": {
+    "rappid": "rappid:@<owner>/<name>:<hash>  ->  <root>/<repo>/claude/platform-engineering-ai-notes-t6psev/snapshots/<name>/",
+    "particle": "payload_hash addresses a frame's payload; frame_hash addresses the whole wave",
+    "rule": "deterministic — given the key you construct the raw URL directly; no index scan required. The manifest below is for enumeration and offline resolution only."
+  },
+  "objects": [
+    {
+      "key": "rappid:@kody-w/twin:5714cdf964b6a6936b44420aa8e8589b2ee9342e10810cdf12fc3c7be7667c30",
+      "kind": "twin",
+      "slug": "twin",
+      "canonical_home": "https://raw.githubusercontent.com/kody-w/twin/",
+      "raw": "https://raw.githubusercontent.com/kody-w/twin/claude/platform-engineering-ai-notes-t6psev/snapshots/twin/",
+      "genesis": {
+        "payload_hash": "c819a06871b2fd72ac65b458",
+        "frame_hash": "2f41b40f8fe8fbeaba1fcc82"
+      }
+    },
+    {
+      "key": "rappid:@local/enders-game:57231180827cdba8cb18168b0f7a967915fc76bff4e4c0f58ff60c4ed0245f65",
+      "kind": "twin",
+      "slug": "enders-game",
+      "raw": "https://raw.githubusercontent.com/kody-w/twin/claude/platform-engineering-ai-notes-t6psev/snapshots/enders-game/",
+      "genesis": {
+        "payload_hash": "7cadb4b209b6a01981b6fec5aff01544",
+        "frame_hash": "1ce4c9b91b27f8eed2986264ea3c6a5d"
+      }
+    },
+    {
+      "key": "rappid:@local/poke-speedrun:63ae6b8a034caf89fba954c9e4da27a239b45fbfcf42314d1a50610eb72ebc68",
+      "kind": "twin",
+      "slug": "poke-speedrun",
+      "raw": "https://raw.githubusercontent.com/kody-w/twin/claude/platform-engineering-ai-notes-t6psev/snapshots/poke-speedrun/",
+      "genesis": {
+        "payload_hash": "5f961dff0ebd6b2c7affbd2f474ca225",
+        "frame_hash": "d3aea5aa88ac5c1a677f45feb84a743e"
+      }
+    },
+    {
+      "key": "rappid:@local/org-aims:c18a8c85eb274a1ebe87654493f5883db07d40a627056eb2f982dfbf40a1bac8",
+      "kind": "twin",
+      "slug": "org-aims",
+      "raw": "https://raw.githubusercontent.com/kody-w/twin/claude/platform-engineering-ai-notes-t6psev/snapshots/org-aims/",
+      "genesis": {
+        "payload_hash": "d93de63d9179e2c6cbe254e17d4f083a",
+        "frame_hash": "6267b57f6d6c9e4e32c3878378c2fc89"
+      }
+    },
+    {
+      "key": "rappid:@local/self:370e1c13566c44c799ab3232ba71a12d85bbec2c17b59179834912e1730a3646",
+      "kind": "twin",
+      "slug": "self",
+      "raw": "https://raw.githubusercontent.com/kody-w/twin/claude/platform-engineering-ai-notes-t6psev/snapshots/self/",
+      "genesis": {
+        "payload_hash": "4a140c74458ae928555ce2922f8cc727",
+        "frame_hash": "ea4cc3eac557ae2305314ab271d7721b"
+      }
+    }
+  ],
+  "objects_store": {
+    "layout": "objects/<hash[:2]>/<frame_hash>.json",
+    "index": "objects/index.json",
+    "note": "Every frame is content-addressed. frame_hash is the filename (construct the URL directly); payload_hash and rappid resolve via index.json. The key is the address."
+  }
+}

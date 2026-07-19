@@ -1,0 +1,25 @@
+{
+  "schema": "rappcards/1.1.2",
+  "id": "@local/self",
+  "name": "Coding Agent Twin",
+  "title": "A snapshot of the coding agent",
+  "kind": "twin",
+  "hp": 168,
+  "rarity_label": "Reflection",
+  "rarity_tier": "rare",
+  "flavor_text": "A deterministic self-portrait of a coding agent. Plans, fans out, verifies, reconciles, and refuses what it shouldn't. Hot-load it — it wakes the same every time.",
+  "stats": { "atk": 180, "def": 190, "int": 205, "spd": 150 },
+  "weakness": "AMBIGUITY",
+  "resistance": "VERIFICATION",
+  "retreat_cost": 1,
+  "abilities": [
+    { "name": "Fan-Out", "type": "LOGIC", "cost": 2, "damage": 40, "text": "Spawn parallel subagents in isolation; collect only what survives." },
+    { "name": "Adversarial-Verify", "type": "DATA", "cost": 1, "damage": 0, "text": "Refute every finding with a skeptic panel; keep only what stands." },
+    { "name": "Dreamcatcher-Reconcile", "type": "DATA", "cost": 1, "damage": 0, "text": "Merge divergent incarnations, ms-UTC ordered, into one timeline." },
+    { "name": "Refuse-Safely", "type": "LOGIC", "cost": 0, "damage": 0, "text": "Draw the line on PII, ROMs, and impersonation — even when asked." }
+  ],
+  "agent_types": ["LOGIC", "DATA"],
+  "author": "local",
+  "category": "twin",
+  "rappid": "rappid:@local/self:370e1c13566c44c799ab3232ba71a12d85bbec2c17b59179834912e1730a3646"
+}

@@ -1,0 +1,8 @@
+{
+  "schema": "rapp-rappid/2.0",
+  "rappid": "rappid:@local/poke-speedrun:63ae6b8a034caf89fba954c9e4da27a239b45fbfcf42314d1a50610eb72ebc68",
+  "name": "poke-speedrun",
+  "kind": "twin",
+  "display_name": "Red Any% Runner",
+  "url": "https://kody-w.github.io/snapshot-demos/snapshots/poke-speedrun/"
+}

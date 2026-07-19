@@ -1,0 +1,14 @@
+{
+  "schema": "twin-snapshot/1.0",
+  "rappid": "rappid:@local/enders-game:57231180827cdba8cb18168b0f7a967915fc76bff4e4c0f58ff60c4ed0245f65",
+  "title": "Battle School Commander",
+  "purpose": "A zero-gravity tactics twin that runs Battle Room engagements: simulate, deploy, flank, and take the gate. FICTION/DEMO — original phrasing, no copyrighted text.",
+  "kind": "twin",
+  "channel_sim": "the Battle Room simulation",
+  "raw_base": "https://raw.githubusercontent.com/kody-w/snapshot-demos/main/snapshots/enders-game/",
+  "awaken": {
+    "brainstem": "summon public bones from raw + private local, ignite with soul LLM",
+    "dog_god": "public bones travel; private stays on device"
+  },
+  "frames": "frames.jsonl"
+}

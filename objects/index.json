@@ -1,0 +1,500 @@
+{
+"count": 39,
+"note": "Every frame is an object addressed by its frame_hash. payload_hash and rappid resolve here too. The key is the address.",
+"objects": {
+"0037d641326e6a0bca4c6ff1": {
+"kind": "frame.particle",
+"path": "objects/09/0925fe1fb60a3912a9f64fc8.json",
+"seq": 4,
+"snapshot": "twin"
+},
+"014987670c971dd4bde7e6961c43c166": {
+"kind": "frame.particle",
+"path": "objects/59/59666ed2c3cda5f18c245e7e66a530cc.json",
+"seq": 6,
+"snapshot": "org-aims"
+},
+"04ce246a7a8e6fdc367c6f9664780335": {
+"kind": "frame.wave",
+"path": "objects/04/04ce246a7a8e6fdc367c6f9664780335.json",
+"seq": 3,
+"snapshot": "org-aims"
+},
+"0925fe1fb60a3912a9f64fc8": {
+"kind": "frame.wave",
+"path": "objects/09/0925fe1fb60a3912a9f64fc8.json",
+"seq": 4,
+"snapshot": "twin"
+},
+"09c96a1ced1b6d2441398f39": {
+"kind": "frame.wave",
+"path": "objects/09/09c96a1ced1b6d2441398f39.json",
+"seq": 5,
+"snapshot": "twin"
+},
+"0ca3f658b0f4722734d147f9802f45c7": {
+"kind": "frame.particle",
+"path": "objects/da/da8a0b776eee99b813ee8afe50d28809.json",
+"seq": 3,
+"snapshot": "enders-game"
+},
+"136b0dcd21b1c93d7c42979d78f81a86": {
+"kind": "frame.particle",
+"path": "objects/ab/ab20a44d69efeac8681887682dad1ef5.json",
+"seq": 7,
+"snapshot": "org-aims"
+},
+"1af821fda1db1e4dc72f1a354a1070e1": {
+"kind": "frame.wave",
+"path": "objects/1a/1af821fda1db1e4dc72f1a354a1070e1.json",
+"seq": 4,
+"snapshot": "enders-game"
+},
+"1ce4c9b91b27f8eed2986264ea3c6a5d": {
+"kind": "frame.wave",
+"path": "objects/1c/1ce4c9b91b27f8eed2986264ea3c6a5d.json",
+"seq": 0,
+"snapshot": "enders-game"
+},
+"1ea56e510be83b543dbc9fbb982fc861": {
+"kind": "frame.wave",
+"path": "objects/1e/1ea56e510be83b543dbc9fbb982fc861.json",
+"seq": 4,
+"snapshot": "poke-speedrun"
+},
+"1ee83e45dcda2df34bead5ab1c1c7efa": {
+"kind": "frame.particle",
+"path": "objects/88/88764ef5c01ee76c259fa6f6955f4167.json",
+"seq": 5,
+"snapshot": "org-aims"
+},
+"2136a760202f8e3dc9a828118972d913": {
+"kind": "frame.particle",
+"path": "objects/1e/1ea56e510be83b543dbc9fbb982fc861.json",
+"seq": 4,
+"snapshot": "poke-speedrun"
+},
+"232fa033ab8675f1b7206718": {
+"kind": "frame.wave",
+"path": "objects/23/232fa033ab8675f1b7206718.json",
+"seq": 6,
+"snapshot": "twin"
+},
+"24bfbcfcc49cb6b0cfb2d4a05531db81": {
+"kind": "frame.wave",
+"path": "objects/24/24bfbcfcc49cb6b0cfb2d4a05531db81.json",
+"seq": 6,
+"snapshot": "poke-speedrun"
+},
+"24f096c54ebf3dead7b263ee4b38d5d2": {
+"kind": "frame.particle",
+"path": "objects/04/04ce246a7a8e6fdc367c6f9664780335.json",
+"seq": 3,
+"snapshot": "org-aims"
+},
+"2873cc79b1a06487b915f31e": {
+"kind": "frame.wave",
+"path": "objects/28/2873cc79b1a06487b915f31e.json",
+"seq": 3,
+"snapshot": "twin"
+},
+"2f41b40f8fe8fbeaba1fcc82": {
+"kind": "frame.wave",
+"path": "objects/2f/2f41b40f8fe8fbeaba1fcc82.json",
+"seq": 0,
+"snapshot": "twin"
+},
+"314501736d68ea38d918a147fa0a2c6a": {
+"kind": "frame.wave",
+"path": "objects/31/314501736d68ea38d918a147fa0a2c6a.json",
+"seq": 3,
+"snapshot": "self"
+},
+"31a54effea99c78c850586950536c9c1": {
+"kind": "frame.wave",
+"path": "objects/31/31a54effea99c78c850586950536c9c1.json",
+"seq": 2,
+"snapshot": "org-aims"
+},
+"33ebe0d0220791cdd62ee77b335740e3": {
+"kind": "frame.particle",
+"path": "objects/63/631fa39bffd35f8b8f762b5e3ba8bc85.json",
+"seq": 7,
+"snapshot": "poke-speedrun"
+},
+"33ff53f2a09c9b4350888f16a11ecd07": {
+"kind": "frame.particle",
+"path": "objects/31/314501736d68ea38d918a147fa0a2c6a.json",
+"seq": 3,
+"snapshot": "self"
+},
+"36b3eb388f4a6ccd76767cb15b8ac223": {
+"kind": "frame.wave",
+"path": "objects/36/36b3eb388f4a6ccd76767cb15b8ac223.json",
+"seq": 6,
+"snapshot": "self"
+},
+"3c7b3693b0bca790ebb5f1097b11ca0c": {
+"kind": "frame.wave",
+"path": "objects/3c/3c7b3693b0bca790ebb5f1097b11ca0c.json",
+"seq": 5,
+"snapshot": "poke-speedrun"
+},
+"4073d148db1e80a77ebb106606975a47": {
+"kind": "frame.wave",
+"path": "objects/40/4073d148db1e80a77ebb106606975a47.json",
+"seq": 2,
+"snapshot": "poke-speedrun"
+},
+"418f5e15000ba9d0c1c05476": {
+"kind": "frame.particle",
+"path": "objects/c6/c6e8e0f844fe2f5983fe605f.json",
+"seq": 1,
+"snapshot": "twin"
+},
+"43e039d938e182652d9dffc1f498a19f": {
+"kind": "frame.wave",
+"path": "objects/43/43e039d938e182652d9dffc1f498a19f.json",
+"seq": 4,
+"snapshot": "self"
+},
+"4446b0b0d938d25812c2f2fa1e75cada": {
+"kind": "frame.wave",
+"path": "objects/44/4446b0b0d938d25812c2f2fa1e75cada.json",
+"seq": 1,
+"snapshot": "poke-speedrun"
+},
+"487331f8aee48e1dfbc6737c": {
+"kind": "frame.particle",
+"path": "objects/83/837dd73615a3dc7003ccd86d.json",
+"seq": 2,
+"snapshot": "twin"
+},
+"4a140c74458ae928555ce2922f8cc727": {
+"kind": "frame.particle",
+"path": "objects/ea/ea4cc3eac557ae2305314ab271d7721b.json",
+"seq": 0,
+"snapshot": "self"
+},
+"508ed342d6e42664bf6ec73a9ea85eca": {
+"kind": "frame.wave",
+"path": "objects/50/508ed342d6e42664bf6ec73a9ea85eca.json",
+"seq": 2,
+"snapshot": "self"
+},
+"59666ed2c3cda5f18c245e7e66a530cc": {
+"kind": "frame.wave",
+"path": "objects/59/59666ed2c3cda5f18c245e7e66a530cc.json",
+"seq": 6,
+"snapshot": "org-aims"
+},
+"5b122452107ab940d55038f5f9caa814": {
+"kind": "frame.particle",
+"path": "objects/df/df8c8366e36e31a37991c89e0a959990.json",
+"seq": 5,
+"snapshot": "self"
+},
+"5f961dff0ebd6b2c7affbd2f474ca225": {
+"kind": "frame.particle",
+"path": "objects/d3/d3aea5aa88ac5c1a677f45feb84a743e.json",
+"seq": 0,
+"snapshot": "poke-speedrun"
+},
+"614479a62a70cafa6ca7e3a3b6bccfe2": {
+"kind": "frame.particle",
+"path": "objects/31/31a54effea99c78c850586950536c9c1.json",
+"seq": 2,
+"snapshot": "org-aims"
+},
+"6267b57f6d6c9e4e32c3878378c2fc89": {
+"kind": "frame.wave",
+"path": "objects/62/6267b57f6d6c9e4e32c3878378c2fc89.json",
+"seq": 0,
+"snapshot": "org-aims"
+},
+"631fa39bffd35f8b8f762b5e3ba8bc85": {
+"kind": "frame.wave",
+"path": "objects/63/631fa39bffd35f8b8f762b5e3ba8bc85.json",
+"seq": 7,
+"snapshot": "poke-speedrun"
+},
+"66b19a7d58c4c6dcdbd43d4be2e6cf0c": {
+"kind": "frame.wave",
+"path": "objects/66/66b19a7d58c4c6dcdbd43d4be2e6cf0c.json",
+"seq": 4,
+"snapshot": "org-aims"
+},
+"6d6096cd0b3328338e61b6579db9cc0d": {
+"kind": "frame.wave",
+"path": "objects/6d/6d6096cd0b3328338e61b6579db9cc0d.json",
+"seq": 3,
+"snapshot": "poke-speedrun"
+},
+"6f1c57bb57abb525671a00cf99e41196": {
+"kind": "frame.particle",
+"path": "objects/50/508ed342d6e42664bf6ec73a9ea85eca.json",
+"seq": 2,
+"snapshot": "self"
+},
+"7cadb4b209b6a01981b6fec5aff01544": {
+"kind": "frame.particle",
+"path": "objects/1c/1ce4c9b91b27f8eed2986264ea3c6a5d.json",
+"seq": 0,
+"snapshot": "enders-game"
+},
+"837dd73615a3dc7003ccd86d": {
+"kind": "frame.wave",
+"path": "objects/83/837dd73615a3dc7003ccd86d.json",
+"seq": 2,
+"snapshot": "twin"
+},
+"88764ef5c01ee76c259fa6f6955f4167": {
+"kind": "frame.wave",
+"path": "objects/88/88764ef5c01ee76c259fa6f6955f4167.json",
+"seq": 5,
+"snapshot": "org-aims"
+},
+"8ba64a11c3ec86caf086e3d31cdfa5cb": {
+"kind": "frame.wave",
+"path": "objects/8b/8ba64a11c3ec86caf086e3d31cdfa5cb.json",
+"seq": 1,
+"snapshot": "self"
+},
+"8df3a88359e5dde3603e89e64018f9db": {
+"kind": "frame.wave",
+"path": "objects/8d/8df3a88359e5dde3603e89e64018f9db.json",
+"seq": 1,
+"snapshot": "org-aims"
+},
+"9a7a044ea5e95dad011f4457e1719fc2": {
+"kind": "frame.particle",
+"path": "objects/6d/6d6096cd0b3328338e61b6579db9cc0d.json",
+"seq": 3,
+"snapshot": "poke-speedrun"
+},
+"9d9febac4df2014df18fcb12c652d22f": {
+"kind": "frame.particle",
+"path": "objects/1a/1af821fda1db1e4dc72f1a354a1070e1.json",
+"seq": 4,
+"snapshot": "enders-game"
+},
+"9f77e7da2f299b00d92e38458663503f": {
+"kind": "frame.wave",
+"path": "objects/9f/9f77e7da2f299b00d92e38458663503f.json",
+"seq": 6,
+"snapshot": "enders-game"
+},
+"a38c8ce8718267001592e240": {
+"kind": "frame.particle",
+"path": "objects/23/232fa033ab8675f1b7206718.json",
+"seq": 6,
+"snapshot": "twin"
+},
+"a6062691a91fbf92badf6f2f28151aac": {
+"kind": "frame.wave",
+"path": "objects/a6/a6062691a91fbf92badf6f2f28151aac.json",
+"seq": 1,
+"snapshot": "enders-game"
+},
+"a8d2967f3b5c021f6cb4d6fe869d75ec": {
+"kind": "frame.particle",
+"path": "objects/44/4446b0b0d938d25812c2f2fa1e75cada.json",
+"seq": 1,
+"snapshot": "poke-speedrun"
+},
+"a94f08a8e8f990143438896955d8a449": {
+"kind": "frame.wave",
+"path": "objects/a9/a94f08a8e8f990143438896955d8a449.json",
+"seq": 5,
+"snapshot": "enders-game"
+},
+"aaa05a39bd90ae842c2eeb088ec657e7": {
+"kind": "frame.particle",
+"path": "objects/66/66b19a7d58c4c6dcdbd43d4be2e6cf0c.json",
+"seq": 4,
+"snapshot": "org-aims"
+},
+"ab20a44d69efeac8681887682dad1ef5": {
+"kind": "frame.wave",
+"path": "objects/ab/ab20a44d69efeac8681887682dad1ef5.json",
+"seq": 7,
+"snapshot": "org-aims"
+},
+"b9b57d8572d5d457d126f730319623f1": {
+"kind": "frame.wave",
+"path": "objects/b9/b9b57d8572d5d457d126f730319623f1.json",
+"seq": 2,
+"snapshot": "enders-game"
+},
+"bcf4d25bd2da9bc9e4eaec000efee467": {
+"kind": "frame.particle",
+"path": "objects/b9/b9b57d8572d5d457d126f730319623f1.json",
+"seq": 2,
+"snapshot": "enders-game"
+},
+"c6e8e0f844fe2f5983fe605f": {
+"kind": "frame.wave",
+"path": "objects/c6/c6e8e0f844fe2f5983fe605f.json",
+"seq": 1,
+"snapshot": "twin"
+},
+"c819a06871b2fd72ac65b458": {
+"kind": "frame.particle",
+"path": "objects/2f/2f41b40f8fe8fbeaba1fcc82.json",
+"seq": 0,
+"snapshot": "twin"
+},
+"c9734b275088708104f8b31c98f02acc": {
+"kind": "frame.particle",
+"path": "objects/24/24bfbcfcc49cb6b0cfb2d4a05531db81.json",
+"seq": 6,
+"snapshot": "poke-speedrun"
+},
+"c9f6e83a83e1a355d94e6f68f9b7983e": {
+"kind": "frame.particle",
+"path": "objects/8b/8ba64a11c3ec86caf086e3d31cdfa5cb.json",
+"seq": 1,
+"snapshot": "self"
+},
+"cf7fbe47b23f8b83db4299d2dc27d24b": {
+"kind": "frame.particle",
+"path": "objects/a9/a94f08a8e8f990143438896955d8a449.json",
+"seq": 5,
+"snapshot": "enders-game"
+},
+"d28774a46c08efc25a94e9bf361379d7": {
+"kind": "frame.particle",
+"path": "objects/36/36b3eb388f4a6ccd76767cb15b8ac223.json",
+"seq": 6,
+"snapshot": "self"
+},
+"d2bb6acb908f89c38d8d5e9c8cf8e6f9": {
+"kind": "frame.wave",
+"path": "objects/d2/d2bb6acb908f89c38d8d5e9c8cf8e6f9.json",
+"seq": 7,
+"snapshot": "self"
+},
+"d2e23dba8694a55cdad39b9380225c9e": {
+"kind": "frame.particle",
+"path": "objects/d2/d2bb6acb908f89c38d8d5e9c8cf8e6f9.json",
+"seq": 7,
+"snapshot": "self"
+},
+"d391bfb5d6768fbcbe4352cbc7a766e9": {
+"kind": "frame.particle",
+"path": "objects/40/4073d148db1e80a77ebb106606975a47.json",
+"seq": 2,
+"snapshot": "poke-speedrun"
+},
+"d3aea5aa88ac5c1a677f45feb84a743e": {
+"kind": "frame.wave",
+"path": "objects/d3/d3aea5aa88ac5c1a677f45feb84a743e.json",
+"seq": 0,
+"snapshot": "poke-speedrun"
+},
+"d48764f3fd9dc8c3e6eab4af6a3a864f": {
+"kind": "frame.particle",
+"path": "objects/3c/3c7b3693b0bca790ebb5f1097b11ca0c.json",
+"seq": 5,
+"snapshot": "poke-speedrun"
+},
+"d74ec3a558c7dbcb5c2a0a3b76f86419": {
+"kind": "frame.particle",
+"path": "objects/a6/a6062691a91fbf92badf6f2f28151aac.json",
+"seq": 1,
+"snapshot": "enders-game"
+},
+"d831f3fdc38dcec43244e0ae": {
+"kind": "frame.particle",
+"path": "objects/28/2873cc79b1a06487b915f31e.json",
+"seq": 3,
+"snapshot": "twin"
+},
+"d93de63d9179e2c6cbe254e17d4f083a": {
+"kind": "frame.particle",
+"path": "objects/62/6267b57f6d6c9e4e32c3878378c2fc89.json",
+"seq": 0,
+"snapshot": "org-aims"
+},
+"da8a0b776eee99b813ee8afe50d28809": {
+"kind": "frame.wave",
+"path": "objects/da/da8a0b776eee99b813ee8afe50d28809.json",
+"seq": 3,
+"snapshot": "enders-game"
+},
+"db224c62b57710c8173fd1f6e34e13f2": {
+"kind": "frame.particle",
+"path": "objects/8d/8df3a88359e5dde3603e89e64018f9db.json",
+"seq": 1,
+"snapshot": "org-aims"
+},
+"df8c8366e36e31a37991c89e0a959990": {
+"kind": "frame.wave",
+"path": "objects/df/df8c8366e36e31a37991c89e0a959990.json",
+"seq": 5,
+"snapshot": "self"
+},
+"df8ec79a18e20b43e6c77c18": {
+"kind": "frame.particle",
+"path": "objects/09/09c96a1ced1b6d2441398f39.json",
+"seq": 5,
+"snapshot": "twin"
+},
+"ea4cc3eac557ae2305314ab271d7721b": {
+"kind": "frame.wave",
+"path": "objects/ea/ea4cc3eac557ae2305314ab271d7721b.json",
+"seq": 0,
+"snapshot": "self"
+},
+"efb4b33ae59279ee85fdd592a79b2066": {
+"kind": "frame.wave",
+"path": "objects/ef/efb4b33ae59279ee85fdd592a79b2066.json",
+"seq": 7,
+"snapshot": "enders-game"
+},
+"f22138bbfa17a5e1e0e7d5b5c9355d5a": {
+"kind": "frame.particle",
+"path": "objects/ef/efb4b33ae59279ee85fdd592a79b2066.json",
+"seq": 7,
+"snapshot": "enders-game"
+},
+"f73b3f6abab7cad9e7dcdf7bae7ae6e6": {
+"kind": "frame.particle",
+"path": "objects/9f/9f77e7da2f299b00d92e38458663503f.json",
+"seq": 6,
+"snapshot": "enders-game"
+},
+"fdd57cea11975734c19a618ad43f9d83": {
+"kind": "frame.particle",
+"path": "objects/43/43e039d938e182652d9dffc1f498a19f.json",
+"seq": 4,
+"snapshot": "self"
+},
+"rappid:@kody-w/twin:5714cdf964b6a6936b44420aa8e8589b2ee9342e10810cdf12fc3c7be7667c30": {
+"kind": "twin.rappid",
+"path": "snapshots/twin/",
+"snapshot": "twin"
+},
+"rappid:@local/enders-game:57231180827cdba8cb18168b0f7a967915fc76bff4e4c0f58ff60c4ed0245f65": {
+"kind": "twin.rappid",
+"path": "snapshots/enders-game/",
+"snapshot": "enders-game"
+},
+"rappid:@local/org-aims:c18a8c85eb274a1ebe87654493f5883db07d40a627056eb2f982dfbf40a1bac8": {
+"kind": "twin.rappid",
+"path": "snapshots/org-aims/",
+"snapshot": "org-aims"
+},
+"rappid:@local/poke-speedrun:63ae6b8a034caf89fba954c9e4da27a239b45fbfcf42314d1a50610eb72ebc68": {
+"kind": "twin.rappid",
+"path": "snapshots/poke-speedrun/",
+"snapshot": "poke-speedrun"
+},
+"rappid:@local/self:370e1c13566c44c799ab3232ba71a12d85bbec2c17b59179834912e1730a3646": {
+"kind": "twin.rappid",
+"path": "snapshots/self/",
+"snapshot": "self"
+}
+},
+"schema": "rapp-objects-index/1.0"
+}

@@ -1,0 +1,21 @@
+{
+  "schema": "rapp-public-notes/1.0",
+  "rappid": "rappid:@local/poke-speedrun:63ae6b8a034caf89fba954c9e4da27a239b45fbfcf42314d1a50610eb72ebc68",
+  "notes": [
+    {
+      "title": "ROM-free by design",
+      "body": "This twin ships the route, splits, and input logic only. The runner supplies their own legally-obtained cartridge dump.",
+      "ts": "2026-07-06T14:00:00.000Z"
+    },
+    {
+      "title": "Brock-skip philosophy",
+      "body": "Early route optimizes for the first gym wall: minimum viable levels, maximum walked-past encounters.",
+      "ts": "2026-07-06T14:01:00.000Z"
+    },
+    {
+      "title": "Buffer discipline",
+      "body": "A frame saved in every menu is minutes saved across a full run. Buffer relentlessly.",
+      "ts": "2026-07-06T14:02:00.000Z"
+    }
+  ]
+}

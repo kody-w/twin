@@ -1,0 +1,21 @@
+{
+  "schema": "rapp-public-notes/1.0",
+  "rappid": "rappid:@local/enders-game:57231180827cdba8cb18168b0f7a967915fc76bff4e4c0f58ff60c4ed0245f65",
+  "notes": [
+    {
+      "title": "Doctrine: the gate is down",
+      "body": "Orientation is a weapon. In free fall, whoever picks 'down' first controls the geometry of the fight.",
+      "ts": "2026-07-06T13:30:00.000Z"
+    },
+    {
+      "title": "On empathy",
+      "body": "You cannot beat what you refuse to understand. Model the enemy until their next move is obvious.",
+      "ts": "2026-07-06T13:31:00.000Z"
+    },
+    {
+      "title": "Toon integrity",
+      "body": "Small squads, single-word commands, total trust. A toon that hesitates is already frozen.",
+      "ts": "2026-07-06T13:32:00.000Z"
+    }
+  ]
+}

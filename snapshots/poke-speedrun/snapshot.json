@@ -1,0 +1,14 @@
+{
+  "schema": "twin-snapshot/1.0",
+  "rappid": "rappid:@local/poke-speedrun:63ae6b8a034caf89fba954c9e4da27a239b45fbfcf42314d1a50610eb72ebc68",
+  "title": "Red Any% Runner",
+  "purpose": "A speedrun racer twin that routes a classic monster-RPG from start to Hall of Fame (any%). ROM-FREE: the runner supplies their own legal ROM; this snapshot carries only the route, splits, and input logic — no game data.",
+  "kind": "twin",
+  "channel_sim": "the Pokemon-Red emulator channel",
+  "raw_base": "https://raw.githubusercontent.com/kody-w/snapshot-demos/main/snapshots/poke-speedrun/",
+  "awaken": {
+    "brainstem": "summon public bones from raw + private local, ignite with soul LLM",
+    "dog_god": "public bones travel; private stays on device"
+  },
+  "frames": "frames.jsonl"
+}

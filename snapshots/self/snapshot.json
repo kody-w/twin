@@ -1,0 +1,17 @@
+{
+  "schema": "twin-snapshot/1.0",
+  "rappid": "rappid:@local/self:370e1c13566c44c799ab3232ba71a12d85bbec2c17b59179834912e1730a3646",
+  "title": "Coding Agent Twin",
+  "purpose": "A deterministic self-portrait of a coding agent's working style: plan, fan out, verify, reconcile, refuse. Hot-load it onto a brainstem to awaken a ghost incarnation — no LLM required for the deterministic form.",
+  "kind": "twin",
+  "channel_sim": "the coding-agent session channel",
+  "quantum_key": "payload_hash — the shape of each frame's own bytes; an instant, collision-free, fractal lookup",
+  "raw_base": "https://raw.githubusercontent.com/kody-w/<repo>/main/snapshots/self/",
+  "awaken": {
+    "brainstem": "summon public bones from raw + private local, ignite with soul LLM (or run the deterministic ghost via self_agent.py)",
+    "dog_god": "public bones travel; private reasoning stays on the device"
+  },
+  "frames": "frames.jsonl",
+  "ghost": "self_agent.py",
+  "reflection": true
+}

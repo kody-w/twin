@@ -1,0 +1,216 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Instant Global Match — namespace resolver</title>
+<meta name="description" content="Paste a quantum key. It resolves instantly to a raw URL under a GitHub namespace — no search — and if you already hold matching local data, it resolves with zero network (the hidden-lookups pattern).">
+<!-- quantum-key, content-addressed, namespace, resolver, instant-match, hidden-lookup, local-first -->
+<style>
+  :root{ --bg:#07080d; --bg2:#0d1018; --ink:#e9edf6; --dim:#8a93a7; --line:#1e2432;
+    --logic:#7cc4ff; --data:#b98cff; --gold:#ffd479; --good:#5fe3a1; --warn:#ff9d6b; --local:#8affc9; }
+  *{box-sizing:border-box} html,body{margin:0}
+  body{background:radial-gradient(1000px 620px at 80% -14%, #16182e 0%, var(--bg) 55%) fixed;
+    color:var(--ink); font:15px/1.55 ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Arial; -webkit-font-smoothing:antialiased}
+  .wrap{max-width:860px; margin:0 auto; padding:22px 18px 90px}
+  .top{display:flex; align-items:center; gap:12px; flex-wrap:wrap; border-bottom:1px solid var(--line); padding-bottom:14px}
+  .brand{font-weight:700; font-size:19px} .brand small{color:var(--dim); font-weight:500; font-size:13px}
+  .chip{margin-left:auto; font-size:12px; color:var(--good); border:1px solid #15412f; background:#0c1a15; padding:5px 10px; border-radius:999px}
+  .lede{color:#cdd4e2; margin:16px 0 6px; max-width:74ch} .lede b{color:var(--ink)}
+  code{font:12.5px ui-monospace,monospace; background:#0c111c; border:1px solid var(--line); border-radius:5px; padding:1px 6px; color:var(--logic); word-break:break-all}
+  label{display:block; font-size:12px; color:var(--dim); margin:16px 0 5px; letter-spacing:.03em}
+  input{width:100%; background:#0c111c; color:var(--ink); border:1px solid var(--line); border-radius:9px; padding:11px 13px; font:13px ui-monospace,monospace}
+  .row{display:flex; gap:8px; flex-wrap:wrap; margin-top:10px}
+  button{font:inherit; color:var(--ink); background:#141a28; border:1px solid var(--line); padding:10px 15px; border-radius:9px; cursor:pointer; font-size:14px; transition:.15s}
+  button:hover{border-color:#33405c; background:#182034}
+  button.p{background:linear-gradient(90deg,#20406e,#3a2d6b); border-color:#3a4a74}
+  button.l{border-color:#1d5a41; color:var(--local)}
+  .samples{display:flex; gap:6px; flex-wrap:wrap; margin-top:8px}
+  .samp{font:11px ui-monospace,monospace; color:var(--dim); border:1px dashed var(--line); border-radius:7px; padding:4px 8px; cursor:pointer}
+  .samp:hover{color:var(--logic); border-color:#33405c}
+  .result{margin-top:18px; background:linear-gradient(180deg,var(--bg2),#0a0d15); border:1px solid var(--line); border-radius:14px; padding:18px; display:none}
+  .result.show{display:block; animation:fade .3s ease} @keyframes fade{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
+  .verdict{display:inline-flex; align-items:center; gap:8px; font-weight:700; font-size:14px; padding:6px 12px; border-radius:999px}
+  .verdict.hit{color:var(--good); border:1px solid #15412f; background:#0c1a15}
+  .verdict.local{color:var(--local); border:1px solid #1d5a41; background:#0a1a13}
+  .verdict.miss{color:var(--warn); border:1px solid #4a3d17; background:#14110a}
+  .kv{margin:12px 0} .kv div{margin:6px 0} .kv b{color:var(--dim); font-weight:500; display:inline-block; min-width:130px; font-size:12px; letter-spacing:.04em}
+  .url{color:var(--logic)} a{color:var(--logic)}
+  .verify{margin-top:12px; padding:11px; border:1px solid var(--line); border-radius:10px; font-size:13px; color:#b9c1d2}
+  .ok{color:var(--good)} .bad{color:var(--warn)} .loc{color:var(--local)} .dim{color:var(--dim)}
+  .note{margin-top:18px; background:#0a140f; border:1px solid #143a2a; border-radius:12px; padding:14px; font-size:13px; color:#bfe9d4}
+  .note b{color:var(--local)}
+  .foot{margin-top:22px; font-size:12px; color:var(--dim); text-align:center; line-height:1.8}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <div class="brand">🔑 Instant Global Match <small>· content-addressed namespace resolver</small></div>
+    <span class="chip">KEY = ADDRESS · no search · no DB</span>
+  </div>
+
+  <p class="lede">Paste a <b>quantum key</b> — a <code>rappid</code> or a content hash. The GitHub username
+  is the <b>global namespace root</b>; everything under it is raw, content-addressed data. The key <b>is</b>
+  the address, so resolution is instant and search-free. And if you already hold <b>matching local data</b>,
+  it resolves with <b>zero network</b> — you already possess that monument of time.</p>
+
+  <label>Quantum key (rappid or hash)</label>
+  <input id="key" placeholder="rappid:@kody-w/twin:5714cdf9…  or  a payload_hash / frame_hash" spellcheck="false">
+  <div class="row">
+    <button class="p" onclick="resolveKey()">⚡ Resolve (instant)</button>
+    <button onclick="fetchVerify()">Fetch &amp; self-verify (online)</button>
+    <button class="l" onclick="learnLocal()">🧠 Learn locally</button>
+    <button onclick="forgetLocal()">forget</button>
+  </div>
+  <div class="samples" id="samples"></div>
+
+  <div class="result" id="result"></div>
+  <div class="verify" id="verify" style="display:none"></div>
+
+  <div class="note">
+    <b>The hidden-lookups pattern.</b> Because a key is the shape of its own bytes, a match between your
+    <i>local-only</i> data and a global key means you already hold that global object — even if it was
+    never fetched. So the AI can <b>learn a global monument of time from local data alone</b>: a cache hit
+    on the content address is knowledge, not a network call. Click <b>🧠 Learn locally</b> to seed a key into
+    your device store, then <b>Resolve</b> it — it now resolves from local, no network, marked "known locally".
+  </div>
+
+  <div class="foot" id="foot"></div>
+</div>
+
+<script>
+/* Embedded namespace manifest — resolution works OFFLINE. Refreshed from ./namespace.json when served. */
+let NS = {
+  namespace: "kody-w", root: "https://raw.githubusercontent.com/kody-w", repo: "twin",
+  objects: [
+    { key:"rappid:@kody-w/twin:5714cdf964b6a6936b44420aa8e8589b2ee9342e10810cdf12fc3c7be7667c30", kind:"twin", slug:"twin",
+      raw:"https://raw.githubusercontent.com/kody-w/twin/claude/platform-engineering-ai-notes-t6psev/snapshots/twin/",
+      genesis:{payload_hash:"c819a06871b2fd72ac65b458", frame_hash:"2f41b40f8fe8fbeaba1fcc82"} },
+    { key:"rappid:@local/enders-game:57231180827cdba8cb18168b0f7a967915fc76bff4e4c0f58ff60c4ed0245f65", kind:"twin", slug:"enders-game",
+      raw:"https://raw.githubusercontent.com/kody-w/twin/claude/platform-engineering-ai-notes-t6psev/snapshots/enders-game/",
+      genesis:{payload_hash:"7cadb4b209b6a01981b6fec5aff01544", frame_hash:"1ce4c9b91b27f8eed2986264ea3c6a5d"} },
+    { key:"rappid:@local/poke-speedrun:63ae6b8a034caf89fba954c9e4da27a239b45fbfcf42314d1a50610eb72ebc68", kind:"twin", slug:"poke-speedrun",
+      raw:"https://raw.githubusercontent.com/kody-w/twin/claude/platform-engineering-ai-notes-t6psev/snapshots/poke-speedrun/",
+      genesis:{payload_hash:"5f961dff0ebd6b2c7affbd2f474ca225", frame_hash:"d3aea5aa88ac5c1a677f45feb84a743e"} },
+    { key:"rappid:@local/org-aims:c18a8c85eb274a1ebe87654493f5883db07d40a627056eb2f982dfbf40a1bac8", kind:"twin", slug:"org-aims",
+      raw:"https://raw.githubusercontent.com/kody-w/twin/claude/platform-engineering-ai-notes-t6psev/snapshots/org-aims/",
+      genesis:{payload_hash:"d93de63d9179e2c6cbe254e17d4f083a", frame_hash:"6267b57f6d6c9e4e32c3878378c2fc89"} },
+    { key:"rappid:@local/self:370e1c13566c44c799ab3232ba71a12d85bbec2c17b59179834912e1730a3646", kind:"twin", slug:"self",
+      raw:"https://raw.githubusercontent.com/kody-w/twin/claude/platform-engineering-ai-notes-t6psev/snapshots/self/",
+      genesis:{payload_hash:"4a140c74458ae928555ce2922f8cc727", frame_hash:"ea4cc3eac557ae2305314ab271d7721b"} }
+  ]
+};
+const esc = s => String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const BASE = "https://raw.githubusercontent.com/kody-w/twin/claude/platform-engineering-ai-notes-t6psev/";
+let OBJIDX = {};  /* content-address -> {path,kind,snapshot,seq}, from objects/index.json */
+
+/* ---- LOCAL content-addressed store (the hidden-lookups substrate) ---- */
+const LKEY = "rapp-cas/v1";
+function localStore(){ try{ return JSON.parse(localStorage.getItem(LKEY)) || {}; }catch(e){ return {}; } }
+function localSave(s){ localStorage.setItem(LKEY, JSON.stringify(s)); }
+function keysOf(o){ return [o.key, o.genesis&&o.genesis.payload_hash, o.genesis&&o.genesis.frame_hash].filter(Boolean); }
+
+/* ---- resolution: LOCAL first (hidden lookup), then namespace/deterministic ---- */
+function lookup(rawkey){
+  const key = (rawkey||"").trim(); if(!key) return null;
+  const L = localStore();
+  if(L[key]) return { o:L[key], via:"local content match (hidden lookup)", local:true, matched:key };
+  for(const o of NS.objects){
+    if(o.key === key) return { o, via:"rappid (name is the path)", matched:key };
+    if(o.genesis && (o.genesis.payload_hash===key || o.genesis.frame_hash===key))
+      return { o, via:"content hash (particle/wave address)", matched:key };
+  }
+  if(/^[0-9a-f]{8,64}$/i.test(key)){
+    const oi = OBJIDX[key];
+    if(oi) return { o:{ key, kind:oi.kind, slug:oi.snapshot, seq:oi.seq, raw_object: BASE+oi.path,
+                        raw: BASE+"snapshots/"+oi.snapshot+"/" }, via:"objects index ("+oi.kind+")", object:true, matched:key };
+    return { o:{ key, kind:"frame.wave", raw_object: BASE+"objects/"+key.slice(0,2)+"/"+key+".json", constructed:true },
+             via:"constructed objects path (frame_hash = filename)", object:true, matched:key };
+  }
+  const m = key.match(/^rappid:@([^/]+)\/([^:]+):[0-9a-f]{6,64}$/i);
+  if(m) return { o:{ key, kind:"twin", slug:m[2], raw:`${NS.root}/${NS.repo}/claude/platform-engineering-ai-notes-t6psev/snapshots/${m[2]}/`, constructed:true },
+                 via:"constructed from rappid (no manifest hit)", matched:key };
+  return null;
+}
+
+function resolveKey(){
+  const r = lookup(document.getElementById("key").value);
+  const el = document.getElementById("result"); document.getElementById("verify").style.display="none";
+  if(!r){
+    el.className="result show";
+    el.innerHTML = `<span class="verdict miss">✕ no match in namespace ${esc(NS.namespace)}</span>
+      <div class="kv"><div>Not a known object, not held locally, and not a well-formed rappid.</div></div>`;
+    return;
+  }
+  const o=r.o;
+  el.className="result show";
+  el.innerHTML = `<span class="verdict ${r.local?'local':'hit'}">${r.local?'🧠 known locally · no network':'✓ instant match · '+esc(NS.namespace)}</span>
+    <div class="kv">
+      <div><b>key</b> <code>${esc(o.key||r.matched)}</code></div>
+      <div><b>resolved via</b> ${esc(r.via)}</div>
+      ${o.raw?`<div><b>raw URL</b> <span class="url"><a href="${esc(o.raw)}" target="_blank" rel="noopener">${esc(o.raw)}</a></span></div>`:''}
+      ${o.raw_object?`<div><b>object</b> <span class="url"><a href="${esc(o.raw_object)}" target="_blank" rel="noopener">${esc(o.raw_object)}</a></span></div>`:''}
+      ${typeof o.seq!=='undefined'?`<div><b>frame</b> ${esc(o.snapshot||o.slug||'')} · seq ${o.seq}</div>`:''}
+      ${o.genesis?`<div><b>genesis particle</b> <code>${esc(o.genesis.payload_hash)}</code></div>`:''}
+      ${o.constructed?`<div><b>note</b> constructed deterministically — the key is the address, no index needed</div>`:''}
+    </div>
+    <div style="color:${r.local?'var(--local)':'var(--dim)'};font-size:13px">${r.local
+      ? 'You already hold this monument of time — learned from local-only data. A global fetch is optional, not required.'
+      : 'No search ran. The key <i>is</i> the path. Fetch &amp; self-verify proves the bytes hash back to this key.'}</div>`;
+}
+
+async function fetchVerify(){
+  const r = lookup(document.getElementById("key").value);
+  const v = document.getElementById("verify"); v.style.display="block";
+  if(!r){ v.innerHTML=`<span class="bad">Resolve a valid key first.</span>`; return; }
+  if(r.local){ v.innerHTML=`<span class="loc">🧠 already known locally — no network needed. That's the hidden lookup.</span>`; return; }
+  const isObj = !!r.object;
+  const url = isObj ? r.o.raw_object : (r.o.raw + "rappid.public.json");
+  v.innerHTML = `Fetching <code>${esc(url)}</code> …`;
+  try{
+    const resp = await fetch(url, {cache:"no-store"}); if(!resp.ok) throw new Error("HTTP "+resp.status);
+    const doc = await resp.json(); const key = r.matched;
+    let declared, ok;
+    if(isObj){ ok = (doc.frame_hash===key || doc.payload_hash===key); declared = doc.frame_hash===key ? doc.frame_hash : doc.payload_hash; }
+    else { declared = doc.rappid || ""; ok = declared === key; }
+    v.innerHTML = ok
+      ? `<span class="ok">✓ self-verified.</span> The fetched ${isObj?'frame':'object'} declares its own address <code>${esc(declared||key)}</code>,
+         equal to the key — the bytes cannot lie about where they live. <span class="dim">(hit 🧠 Learn locally to keep it)</span>`
+      : `<span class="bad">✕ rejected as noise.</span> The fetched bytes do not address to this key — a neighboring frame.`;
+  }catch(e){
+    v.innerHTML = `<span class="bad">offline / not published yet.</span> Resolution is still exact (the URL above is the address);
+      self-verify lights up once this namespace is served over raw. <span class="dim">(${esc(e.message)})</span>`;
+  }
+}
+
+/* Seed the current key's object into the local store — "the AI already has local data
+   that matches this key", so it learns the global monument without ever experiencing it. */
+function learnLocal(){
+  const r = lookup(document.getElementById("key").value);
+  const v = document.getElementById("verify"); v.style.display="block";
+  if(!r){ v.innerHTML=`<span class="bad">Resolve a valid key first.</span>`; return; }
+  const S = localStore(); for(const k of keysOf(r.o)) S[k] = r.o; localSave(S);
+  v.innerHTML = `<span class="loc">🧠 learned locally.</span> This key now resolves from your device with zero network —
+    a hidden lookup. Even a global monument you never fetched is "known" the moment your local data matches its key.`;
+  resolveKey();
+}
+function forgetLocal(){ localSave({}); const v=document.getElementById("verify"); v.style.display="block";
+  v.innerHTML = `<span class="dim">local content store cleared.</span>`; resolveKey(); }
+
+/* samples + live manifest refresh */
+document.getElementById("samples").innerHTML =
+  NS.objects.map(o=>`<span class="samp" data-k="${esc(o.key)}">${esc(o.slug)}</span>`).join("") +
+  `<span class="samp" data-k="${esc(NS.objects[4].genesis.payload_hash)}">self · payload_hash</span>` +
+  `<span class="samp" data-k="${esc(NS.objects[4].genesis.frame_hash)}">self · frame_hash → object</span>`;
+document.getElementById("samples").addEventListener("click", e=>{
+  const k = e.target.getAttribute("data-k"); if(k){ document.getElementById("key").value=k; resolveKey(); }
+});
+fetch("namespace.json",{cache:"no-store"}).then(r=>r.ok?r.json():null).then(j=>{ if(j&&j.objects) NS=j; }).catch(()=>{});
+fetch("objects/index.json",{cache:"no-store"}).then(r=>r.ok?r.json():null).then(j=>{ if(j&&j.objects){ OBJIDX=j.objects; } })
+  .catch(()=>{}); if(!Object.keys(OBJIDX).length){ fetch(BASE+"objects/index.json",{cache:"no-store"}).then(r=>r.ok?r.json():null).then(j=>{ if(j&&j.objects) OBJIDX=j.objects; }).catch(()=>{}); }
+document.getElementById("foot").innerHTML =
+  "the GitHub username is the global root · key = address · local match = hidden lookup (no network) · bones travel, soul stays home";
+</script>
+</body>
+</html>

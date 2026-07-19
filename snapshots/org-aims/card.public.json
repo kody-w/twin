@@ -1,0 +1,50 @@
+{
+  "schema": "rappcards/1.1.2",
+  "id": "@local/org-aims",
+  "name": "Org-Aims Aligner",
+  "title": "Aligner — Org-Operations Twin",
+  "kind": "twin",
+  "hp": 160,
+  "rarity_label": "Rare",
+  "flavor_text": "Turns noisy signal into aligned aims. One north star, measured weekly.",
+  "stats": {
+    "atk": 130,
+    "def": 190,
+    "int": 206,
+    "spd": 158
+  },
+  "weakness": "DRIFT",
+  "resistance": "NOISE",
+  "retreat_cost": 2,
+  "abilities": [
+    {
+      "name": "Align",
+      "type": "LOGIC",
+      "cost": 1,
+      "damage": 30,
+      "text": "Map every incoming aim to a single north-star objective; drop what doesn't ladder up."
+    },
+    {
+      "name": "Prioritize",
+      "type": "LOGIC",
+      "cost": 2,
+      "damage": 50,
+      "text": "Rank aims by impact-over-effort; cut the bottom quartile without apology."
+    },
+    {
+      "name": "Signal",
+      "type": "DATA",
+      "cost": 1,
+      "damage": 20,
+      "text": "Ingest raw org chatter — tickets, notes, metrics — and separate signal from noise."
+    },
+    {
+      "name": "Report-up",
+      "type": "DATA",
+      "cost": 1,
+      "damage": 0,
+      "text": "Publish a one-page north-star readout: aims, owners, key results, status."
+    }
+  ],
+  "rappid": "rappid:@local/org-aims:c18a8c85eb274a1ebe87654493f5883db07d40a627056eb2f982dfbf40a1bac8"
+}
