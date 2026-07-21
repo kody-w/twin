@@ -3188,7 +3188,11 @@
       const COPILOT_CLIENT_ID  = "Iv1.b507a08c87ecfe98";
       const COPILOT_DEFAULT_API= "https://api.individual.githubcopilot.com";
       const STORAGE_KEY        = "rapp_settings";
-      const DEFAULT_MODEL      = "claude-sonnet-4";
+      const DEFAULT_MODEL      = "auto";
+      const FALLBACK_MODEL     = "gpt-4o";
+      const MODEL_CACHE_TTL    = 5 * 60 * 1000;
+      const BAD_POLICY_STATES  = new Set(["unconfigured", "not_configured", "disabled", "blocked", "denied"]);
+      let modelCatalogCache    = null;
 
       function loadSettings() {
         try { const r = localStorage.getItem(STORAGE_KEY); return r ? JSON.parse(r) : {}; }
@@ -3201,7 +3205,12 @@
       }
       function getToken() { return loadSettings().ghuToken || null; }
       function clearAuthState() {
+        modelCatalogCache = null;
         saveSettings({ ghuToken:"", copilotToken:"", copilotEndpoint:"", copilotExpiresAt:0, ghUser:null });
+      }
+      function clearCopilotSession() {
+        modelCatalogCache = null;
+        saveSettings({ copilotToken:"", copilotEndpoint:"", copilotExpiresAt:0 });
       }
 
       // ── Device-code flow (mirror of installer/plant.sh) ────────────
@@ -3250,6 +3259,7 @@
           copilotEndpoint: (d.endpoints && d.endpoints.api) || COPILOT_DEFAULT_API,
           copilotExpiresAt: (d.expires_at || (Date.now()/1000 + 600)) * 1000,
         });
+        modelCatalogCache = null;
         return d.token;
       }
       async function ensureCopilotToken() {
@@ -3262,6 +3272,120 @@
         const s = loadSettings();
         return AUTH_WORKER_URL + "/api/copilot/chat?endpoint=" +
                encodeURIComponent(s.copilotEndpoint || COPILOT_DEFAULT_API);
+      }
+      function activeModelsUrl() {
+        const s = loadSettings();
+        return AUTH_WORKER_URL + "/api/copilot/models?endpoint=" +
+               encodeURIComponent(s.copilotEndpoint || COPILOT_DEFAULT_API);
+      }
+
+      function modelIsAvailable(model) {
+        if (!model || typeof model !== "object") return false;
+        const policyState = model.policy && typeof model.policy.state === "string"
+          ? model.policy.state.toLowerCase()
+          : "";
+        if (BAD_POLICY_STATES.has(policyState) || model.model_picker_enabled === false) return false;
+
+        const caps = model.capabilities && typeof model.capabilities === "object"
+          ? model.capabilities
+          : {};
+        if (typeof caps.type === "string" && caps.type && caps.type.toLowerCase() !== "chat") return false;
+        if (caps.supports && caps.supports.tool_calls === false) return false;
+
+        const endpoints = model.supported_endpoints;
+        if (Array.isArray(endpoints) && !endpoints.includes("/chat/completions")) return false;
+        return true;
+      }
+
+      function normalizeModels(payload) {
+        const raw = Array.isArray(payload)
+          ? payload
+          : Array.isArray(payload && payload.data)
+            ? payload.data
+            : Array.isArray(payload && payload.models)
+              ? payload.models
+              : [];
+        return raw
+          .map(model => ({
+            id: String(model.id || model.model || "").trim(),
+            name: String(model.name || model.id || model.model || "").trim(),
+            available: modelIsAvailable(model),
+          }))
+          .filter(model => model.id && model.id.toLowerCase() !== "trajectory-compaction");
+      }
+
+      function claudeRank(model, family) {
+        const id = String(model.id || "").toLowerCase();
+        const name = id.includes("claude") ? String(model.name || "").toLowerCase() : "";
+        for (let value of [id, name]) {
+          if (!value.includes("claude") || !new RegExp(`\\b${family}\\b`).test(value)) continue;
+          value = value
+            .replace(/-(thought|thinking|reasoning)\b/g, "")
+            .replace(/[-_.]?\d{4,}$/, "");
+          let match = value.match(new RegExp(`claude[-_ ]+v?(\\d+(?:[.\\-_]\\d+)?)[-_ ]+${family}`));
+          if (!match) match = value.match(new RegExp(`${family}[-_ ]+v?(\\d+(?:[.\\-_]\\d+)?)`));
+          if (!match) continue;
+          const parts = match[1].replaceAll("_", "-").split(/[.-]/).map(Number);
+          if (Number.isFinite(parts[0])) return [parts[0], Number.isFinite(parts[1]) ? parts[1] : 0];
+        }
+        return null;
+      }
+
+      function chooseModel(models, requested, excluded = new Set()) {
+        const available = models.filter(model => model.available && !excluded.has(model.id));
+        const requestedId = requested && requested !== "auto" ? requested : null;
+        if (requestedId) {
+          const exact = available.find(model => model.id === requestedId);
+          if (exact) return exact.id;
+        }
+
+        for (const family of ["haiku", "sonnet"]) {
+          let best = null;
+          for (const model of available) {
+            const rank = claudeRank(model, family);
+            if (!rank) continue;
+            const isBase = !/(thought|thinking|reasoning)/i.test(model.id);
+            const key = [rank[0], rank[1], isBase ? 1 : 0];
+            if (!best || key[0] > best.key[0] ||
+                (key[0] === best.key[0] && key[1] > best.key[1]) ||
+                (key[0] === best.key[0] && key[1] === best.key[1] && key[2] > best.key[2])) {
+              best = { key, id: model.id };
+            }
+          }
+          if (best) return best.id;
+        }
+
+        for (const id of ["gpt-4o", "gpt-4.1"]) {
+          if (available.some(model => model.id === id)) return id;
+        }
+        return available[0] ? available[0].id : null;
+      }
+
+      async function fetchModelCatalog(token, force = false) {
+        if (!force && modelCatalogCache && Date.now() < modelCatalogCache.expiresAt) {
+          return modelCatalogCache.models;
+        }
+        const response = await fetch(activeModelsUrl(), {
+          headers: { "Authorization": "Bearer " + token },
+        });
+        if (!response.ok) throw new Error(`model catalog ${response.status}`);
+        const models = normalizeModels(await response.json());
+        if (!models.length) throw new Error("model catalog is empty");
+        modelCatalogCache = { models, expiresAt: Date.now() + MODEL_CACHE_TTL };
+        return models;
+      }
+
+      async function resolveModel(token, requested, { force = false, exclude = [] } = {}) {
+        const excluded = new Set(exclude);
+        try {
+          const models = await fetchModelCatalog(token, force);
+          const selected = chooseModel(models, requested, excluded);
+          if (selected) return selected;
+        } catch (error) {
+          console.warn("[doorman] model discovery:", error.message || error);
+        }
+        if (requested && requested !== "auto" && !excluded.has(requested)) return requested;
+        return excluded.has(FALLBACK_MODEL) ? "gpt-4.1" : FALLBACK_MODEL;
       }
 
       // ── Identity loader — fetches the planted seed's public state, plus
@@ -3647,6 +3771,58 @@ _r if isinstance(_r, str) else json.dumps(_r)
         }
       }
 
+      async function responseErrorDetail(response) {
+        const text = await response.text();
+        try {
+          const data = JSON.parse(text);
+          if (typeof data.error === "string") return data.error;
+          return data.error?.message || data.message || data.detail || text.slice(0, 240);
+        } catch {
+          return text.slice(0, 240);
+        }
+      }
+
+      function mergeChoiceMessages(data) {
+        const choices = Array.isArray(data && data.choices) ? data.choices : [];
+        const content = [];
+        const toolCalls = [];
+        for (const choice of choices) {
+          const message = choice && choice.message;
+          if (!message) continue;
+          if (typeof message.content === "string" && message.content.trim()) {
+            content.push(message.content.trim());
+          }
+          if (Array.isArray(message.tool_calls)) {
+            toolCalls.push(...message.tool_calls);
+          }
+        }
+        if (!content.length && !toolCalls.length) return null;
+        return {
+          content: content.join("\n\n"),
+          tool_calls: toolCalls,
+        };
+      }
+
+      async function postCopilotChat(token, body) {
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 60000);
+        try {
+          return await fetch(activeChatUrl(), {
+            method: "POST",
+            headers: { "Content-Type": "application/json", "Authorization": "Bearer " + token },
+            body: JSON.stringify(body),
+            signal: controller.signal,
+          });
+        } catch (error) {
+          if (error && error.name === "AbortError") {
+            throw new Error("Chat service timed out. Please try again.");
+          }
+          throw new Error("Chat service could not be reached. Check your connection and try again.");
+        } finally {
+          clearTimeout(timeout);
+        }
+      }
+
       // ── Chat dispatch — full tool-call loop, identical pattern to the
       //    canonical doorman in installer/plant.sh and utils/web/index.html.
       //    LLM emits tool_calls → we run the matching agent in Pyodide →
@@ -3656,7 +3832,9 @@ _r if isinstance(_r, str) else json.dumps(_r)
         // Kick Pyodide load in the background; tools become available
         // once it finishes. First chat call may go without tools — fine.
         initPyodide({ ascended: false }).catch(() => {});
-        const tok = await ensureCopilotToken();
+        let tok = await ensureCopilotToken();
+        const requestedModel = model || loadSettings().model || DEFAULT_MODEL;
+        let selectedModel = await resolveModel(tok, requestedModel);
         const messages = [
           { role: "system", content: system },
           ...(history || []),
@@ -3665,21 +3843,66 @@ _r if isinstance(_r, str) else json.dumps(_r)
         let rounds = 0;
         while (rounds++ < 4) {
           const tools = pyAgentsToolDefs();
-          const body = {
-            model: model || loadSettings().model || DEFAULT_MODEL,
-            messages,
-            max_tokens: 800,
-            ...(tools.length ? { tools, tool_choice: "auto" } : {}),
-          };
-          const r = await fetch(activeChatUrl(), {
-            method: "POST",
-            headers: { "Content-Type": "application/json", "Authorization": "Bearer " + tok },
-            body: JSON.stringify(body),
-          });
-          if (r.status === 401) { clearAuthState(); throw new Error("Sign-in expired — sign in again."); }
-          if (!r.ok) throw new Error(`HTTP ${r.status}: ${(await r.text()).slice(0,200)}`);
+          let authRetried = false;
+          let modelRetried = false;
+          let omitToolChoice = /(^|[-_.])o1($|[-_.])/i.test(selectedModel);
+          let r;
+
+          while (true) {
+            const body = {
+              model: selectedModel,
+              messages,
+              max_tokens: 800,
+              ...(tools.length ? {
+                tools,
+                ...(!omitToolChoice ? { tool_choice: "auto" } : {}),
+              } : {}),
+            };
+            r = await postCopilotChat(tok, body);
+
+            if (r.status === 401 && !authRetried) {
+              authRetried = true;
+              clearCopilotSession();
+              tok = await copilotExchange();
+              selectedModel = await resolveModel(tok, requestedModel, { force: true });
+              omitToolChoice = /(^|[-_.])o1($|[-_.])/i.test(selectedModel);
+              continue;
+            }
+
+            if (r.ok) break;
+            const detail = await responseErrorDetail(r);
+
+            if (r.status === 400 && !omitToolChoice &&
+                /tool[_ -]?choice|unsupported[_ -]?parameter/i.test(detail)) {
+              omitToolChoice = true;
+              continue;
+            }
+
+            if ([400, 404, 422].includes(r.status) && !modelRetried) {
+              modelRetried = true;
+              const fallback = await resolveModel(tok, "auto", {
+                force: true,
+                exclude: [selectedModel],
+              });
+              if (fallback && fallback !== selectedModel) {
+                console.info(`[doorman] model ${selectedModel} rejected; retrying with ${fallback}`);
+                selectedModel = fallback;
+                omitToolChoice = /(^|[-_.])o1($|[-_.])/i.test(selectedModel);
+                continue;
+              }
+            }
+
+            if (r.status === 401) {
+              clearAuthState();
+              throw new Error("Sign-in expired — sign in again.");
+            }
+            const error = new Error(`Chat request failed (${r.status}): ${detail || "upstream error"}`);
+            error.status = r.status;
+            throw error;
+          }
+
           const d = await r.json();
-          const msg = d.choices && d.choices[0] && d.choices[0].message;
+          const msg = mergeChoiceMessages(d);
           if (!msg) break;
           if (msg.tool_calls && msg.tool_calls.length) {
             messages.push({ role: "assistant", content: msg.content || null, tool_calls: msg.tool_calls });
@@ -4050,12 +4273,16 @@ _r if isinstance(_r, str) else json.dumps(_r)
                 this.updateInterval = 50; // ms
                 this.lastUpdate = 0;
                 this.viewerNames = new Map(); // Store viewer names
+                this.pendingStartHosting = false;
 
-                this.initializePeer();
                 this.setupEventListeners();
+                if (new URLSearchParams(window.location.search).get('show')) {
+                    this.initializePeer();
+                }
             }
 
             initializePeer() {
+                if (this.peer) return;
                 const urlParams = new URLSearchParams(window.location.search);
                 const hostId = urlParams.get('show');
 
@@ -4086,6 +4313,10 @@ _r if isinstance(_r, str) else json.dumps(_r)
                         
                         this.peer.on('open', (id) => {
                             console.log('Peer ID:', id);
+                            if (this.pendingStartHosting) {
+                                this.pendingStartHosting = false;
+                                this.startHosting();
+                            }
                         });
                     }
 
@@ -4165,8 +4396,11 @@ _r if isinstance(_r, str) else json.dumps(_r)
                 document.getElementById('show-mode-button').addEventListener('click', () => {
                     if (this.isHost) {
                         this.stopHosting();
-                    } else {
+                    } else if (this.peer && this.peer.open) {
                         this.startHosting();
+                    } else {
+                        this.pendingStartHosting = true;
+                        this.initializePeer();
                     }
                 });
 
@@ -7109,7 +7343,7 @@ _r if isinstance(_r, str) else json.dumps(_r)
                 }
             }
 
-            async sendToAPI(message) {
+            async sendToAPI(message, history) {
                 // Lazy-load identity if user just signed in mid-session.
                 if (!this.systemPrompt) await this.ensureSeedLoaded();
                 // RAPP.Doorman.chat runs the full tool-call loop (Pyodide
@@ -7118,7 +7352,7 @@ _r if isinstance(_r, str) else json.dumps(_r)
                 // sphere's reply rendering needs no changes.
                 return window.RAPP.Doorman.chat({
                     message,
-                    history: this.conversationHistory,
+                    history,
                     system: this.systemPrompt,
                     onAgentLog: (log) => {
                         // Surface tool-call activity as a quiet system note —
@@ -7151,13 +7385,14 @@ _r if isinstance(_r, str) else json.dumps(_r)
 
                 this.showTypingIndicator();
 
+                const historyBeforeMessage = this.conversationHistory.slice();
                 this.conversationHistory.push({
                     role: 'user',
                     content: message
                 });
 
                 try {
-                    const response = await this.sendToAPI(message);
+                    const response = await this.sendToAPI(message, historyBeforeMessage);
 
                     this.hideTypingIndicator();
 
@@ -7190,7 +7425,17 @@ _r if isinstance(_r, str) else json.dumps(_r)
                 } catch (error) {
                     console.error('Failed to send message:', error);
                     this.hideTypingIndicator();
-                    this.addMessage('Sorry, I encountered an error. Please try again.', 'ai');
+                    const detail = String(error && error.message ? error.message : error || '').trim();
+                    const userMessage = /^(Chat request failed|Chat service|Sign-in expired|GitHub Copilot)/.test(detail)
+                        ? detail
+                        : 'The twin could not complete that response. Please try again.';
+                    this.addMessage(userMessage, 'ai');
+                    this.showNotification(userMessage);
+                    if (detail.startsWith('Sign-in expired')) {
+                        this.isActive = false;
+                        this.companionButton.classList.remove('active');
+                        this.setCompanionActive(false);
+                    }
                 }
             }
 
