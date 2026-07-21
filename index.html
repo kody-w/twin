@@ -2,16 +2,80 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>AI Companion Hub - Interactive Assistant</title>
+    <link rel="icon" type="image/svg+xml" href="app/icon-192.svg">
+
+    <script>
+      (() => {
+        const param = new URLSearchParams(window.location.search).get("scoutTheme");
+        const theme =
+          param || (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+        document.documentElement.setAttribute("data-theme", theme);
+      })();
+    </script>
 
     <!-- Preload critical resources -->
     <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js" as="script">
     <link rel="preload" href="https://threejs.org/examples/fonts/helvetiker_regular.typeface.json" as="fetch" crossorigin>
 
     <style>
+        :root {
+          color-scheme: light;
+          --cp-bg: #f7f4ef;
+          --cp-bg-elevated: #fcfbf8;
+          --cp-surface: #ffffff;
+          --cp-surface-soft: #f5f5f5;
+          --cp-border: #dedede;
+          --cp-border-strong: #919191;
+          --cp-text: #242424;
+          --cp-text-muted: #5c5c5c;
+          --cp-text-soft: #6f6f6f;
+          --cp-accent: #b11f4b;
+          --cp-accent-hover: #9a1a41;
+          --cp-accent-soft: rgba(177, 31, 75, 0.08);
+          --cp-accent-fg: #ffffff;
+          --cp-success: #16a34a;
+          --cp-danger: #dc2626;
+          --cp-warning: #f59e0b;
+          --cp-link: #0078d4;
+          --cp-shadow: 0 18px 48px rgba(0, 0, 0, 0.12);
+          --cp-overlay: rgba(255, 255, 255, 0.8);
+          --cp-panel: rgba(255, 255, 255, 0.86);
+          --cp-panel-strong: rgba(255, 255, 255, 0.96);
+          --cp-sheen: rgba(255, 255, 255, 0.55);
+          --cp-highlight: rgba(177, 31, 75, 0.12);
+        }
+        html[data-theme="dark"] {
+          color-scheme: dark;
+          --cp-bg: #3d3b3a;
+          --cp-bg-elevated: #343231;
+          --cp-surface: #292929;
+          --cp-surface-soft: #2e2e2e;
+          --cp-border: #474747;
+          --cp-border-strong: #5f5f5f;
+          --cp-text: #dedede;
+          --cp-text-muted: #919191;
+          --cp-text-soft: #b0b0b0;
+          --cp-accent: #fd8ea1;
+          --cp-accent-hover: #fb7b91;
+          --cp-accent-soft: rgba(253, 142, 161, 0.14);
+          --cp-accent-fg: #1a1a1a;
+          --cp-success: #4ade80;
+          --cp-danger: #f87171;
+          --cp-warning: #fbbf24;
+          --cp-link: #4da6ff;
+          --cp-shadow: 0 18px 48px rgba(0, 0, 0, 0.32);
+          --cp-overlay: rgba(41, 41, 41, 0.88);
+          --cp-panel: rgba(41, 41, 41, 0.72);
+          --cp-panel-strong: rgba(41, 41, 41, 0.96);
+          --cp-sheen: rgba(255, 255, 255, 0.04);
+          --cp-highlight: rgba(253, 142, 161, 0.12);
+        }
+
         * {
             margin: 0;
             padding: 0;
@@ -1572,15 +1636,1070 @@
             }
         }
     </style>
+
+    <style id="twin-refinement">
+        :root {
+            --cp-card-shadow:
+                0 0 2px color-mix(in srgb, var(--cp-text) 12%, transparent),
+                0 1px 2px color-mix(in srgb, var(--cp-text) 14%, transparent);
+            --cp-focus-ring: 0 0 0 3px var(--cp-accent-soft);
+        }
+
+        html,
+        body {
+            background: var(--cp-bg);
+            color: var(--cp-text);
+        }
+
+        body,
+        button,
+        input,
+        select {
+            font-family: "Segoe UI", Aptos, Calibri, -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        button,
+        input,
+        select {
+            font: inherit;
+        }
+
+        button {
+            color: inherit;
+        }
+
+        input,
+        select,
+        .ai-message,
+        .qr-url,
+        .json-preview,
+        #rapp-signin-code {
+            -webkit-user-select: text;
+            user-select: text;
+        }
+
+        a {
+            color: var(--cp-link);
+        }
+
+        :where(button, a, input, select):focus-visible {
+            outline: 2px solid var(--cp-accent);
+            outline-offset: 3px;
+            box-shadow: var(--cp-focus-ring);
+        }
+
+        .loading {
+            z-index: 11000;
+            background: var(--cp-bg);
+            color: var(--cp-text);
+        }
+
+        .loading-content {
+            width: min(320px, calc(100vw - 48px));
+            padding: 32px;
+            border: 1px solid var(--cp-border);
+            border-radius: 16px;
+            background: var(--cp-surface);
+            box-shadow: var(--cp-card-shadow);
+        }
+
+        .loading-logo {
+            width: 64px;
+            height: 64px;
+            margin: 0 auto 24px;
+        }
+
+        .loading-orb {
+            width: 64px;
+            height: 64px;
+            background: var(--cp-accent);
+            box-shadow: 0 0 0 10px var(--cp-accent-soft);
+        }
+
+        .loading-text {
+            margin-bottom: 20px;
+            color: var(--cp-text);
+            font-size: 1rem;
+            font-weight: 600;
+            letter-spacing: 0.04em;
+        }
+
+        .loading-progress {
+            width: 100%;
+            height: 4px;
+            background: var(--cp-surface-soft);
+            border: 1px solid var(--cp-border);
+        }
+
+        .loading-progress-bar {
+            background: var(--cp-accent);
+        }
+
+        .loading-status {
+            color: var(--cp-text-muted);
+        }
+
+        #three-container {
+            background: var(--cp-bg);
+        }
+
+        .world-ui {
+            top: max(20px, env(safe-area-inset-top));
+            left: max(20px, env(safe-area-inset-left));
+            width: min(430px, calc(100vw - 200px));
+            padding: 20px 22px;
+            border: 1px solid var(--cp-border);
+            border-radius: 16px;
+            background: var(--cp-panel-strong);
+            box-shadow: var(--cp-card-shadow);
+        }
+
+        .world-title {
+            margin: 0;
+            background: none;
+            color: var(--cp-accent);
+            font-size: clamp(1.75rem, 4vw, 2.75rem);
+            font-weight: 600;
+            letter-spacing: 0.12em;
+            line-height: 1;
+            -webkit-text-fill-color: currentColor;
+            animation: none;
+        }
+
+        .world-description {
+            max-width: 38ch;
+            margin-top: 12px;
+            color: var(--cp-text-muted);
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+
+        .front-gate-link {
+            position: fixed;
+            top: max(16px, env(safe-area-inset-top));
+            right: max(16px, env(safe-area-inset-right));
+            z-index: 1500;
+            display: inline-flex;
+            min-height: 40px;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 14px;
+            border: 1px solid var(--cp-border);
+            border-radius: 0.625rem;
+            background: var(--cp-panel-strong);
+            box-shadow: var(--cp-card-shadow);
+            color: var(--cp-link);
+            font-size: 0.78rem;
+            font-weight: 600;
+            text-decoration: none;
+            transition: border-color 160ms ease, transform 160ms ease;
+        }
+
+        .front-gate-link:hover {
+            border-color: var(--cp-accent);
+            transform: translateY(-1px);
+        }
+
+        .voice-pause-button,
+        .settings-button,
+        .show-mode-button,
+        .tasks-button,
+        .ai-companion-button {
+            appearance: none;
+            border: 1px solid var(--cp-border);
+            background: var(--cp-panel-strong);
+            color: var(--cp-text);
+            box-shadow: var(--cp-card-shadow);
+        }
+
+        .voice-pause-button {
+            top: calc(max(16px, env(safe-area-inset-top)) + 52px);
+            right: max(16px, env(safe-area-inset-right));
+            width: auto;
+            min-width: 132px;
+            height: 44px;
+            padding: 0 16px;
+            border-radius: 0.625rem;
+            font-size: 0.82rem;
+            font-weight: 600;
+            box-shadow: var(--cp-card-shadow);
+        }
+
+        .voice-pause-button:hover,
+        .settings-button:hover,
+        .show-mode-button:hover,
+        .tasks-button:hover,
+        .ai-companion-button:hover {
+            border-color: var(--cp-accent);
+            background: var(--cp-surface);
+            box-shadow: var(--cp-card-shadow);
+            transform: translateY(-1px);
+        }
+
+        .voice-pause-button.paused {
+            border-color: var(--cp-warning);
+            background: var(--cp-surface);
+            color: var(--cp-warning);
+            box-shadow: var(--cp-card-shadow);
+        }
+
+        .voice-pause-button.paused:hover {
+            background: var(--cp-surface-soft);
+            box-shadow: var(--cp-card-shadow);
+        }
+
+        .voice-pause-button svg,
+        .settings-button svg,
+        .show-mode-button svg,
+        .tasks-button svg,
+        .ai-companion-button svg {
+            color: currentColor;
+        }
+
+        .settings-button {
+            right: max(16px, env(safe-area-inset-right));
+            width: 52px;
+            height: 52px;
+            border-radius: 0.625rem;
+        }
+
+        #settings-button {
+            bottom: max(16px, env(safe-area-inset-bottom));
+        }
+
+        #details-button {
+            bottom: calc(max(16px, env(safe-area-inset-bottom)) + 64px);
+        }
+
+        .settings-button::after {
+            position: absolute;
+            right: calc(100% + 10px);
+            padding: 6px 10px;
+            border: 1px solid var(--cp-border);
+            border-radius: 0.625rem;
+            background: var(--cp-panel-strong);
+            color: var(--cp-text);
+            box-shadow: var(--cp-card-shadow);
+            content: attr(data-label);
+            font-size: 0.75rem;
+            font-weight: 600;
+            opacity: 0;
+            pointer-events: none;
+            transform: translateX(4px);
+            transition: opacity 140ms ease, transform 140ms ease;
+            white-space: nowrap;
+        }
+
+        .settings-button:hover::after,
+        .settings-button:focus-visible::after {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .companion-tooltip {
+            border: 1px solid var(--cp-border);
+            border-radius: 0.625rem;
+            background: var(--cp-panel-strong);
+            color: var(--cp-text);
+            box-shadow: var(--cp-card-shadow);
+        }
+
+        .settings-panel,
+        .show-mode-modal-content,
+        .ai-chat-interface,
+        .task-panel,
+        .signin-card {
+            border: 1px solid var(--cp-border);
+            border-radius: 16px;
+            background: var(--cp-surface);
+            color: var(--cp-text);
+            box-shadow: var(--cp-card-shadow);
+            backdrop-filter: none;
+        }
+
+        .settings-panel {
+            width: min(680px, calc(100vw - 32px));
+            max-height: min(820px, calc(100dvh - 32px));
+            padding: 28px;
+        }
+
+        .settings-panel h2,
+        .show-mode-modal h3,
+        .task-panel h3 {
+            background: none;
+            color: var(--cp-text);
+            -webkit-text-fill-color: currentColor;
+        }
+
+        .settings-tabs {
+            gap: 8px;
+            overflow-x: auto;
+            padding: 0 0 12px;
+            border-color: var(--cp-border);
+            scrollbar-width: thin;
+        }
+
+        .settings-tab {
+            flex: 0 0 auto;
+            border: 1px solid var(--cp-border);
+            border-radius: 0.625rem;
+            background: var(--cp-surface-soft);
+            color: var(--cp-text-muted);
+            font-weight: 600;
+        }
+
+        .settings-tab:hover {
+            border-color: var(--cp-border-strong);
+            background: var(--cp-surface);
+            color: var(--cp-text);
+        }
+
+        .settings-tab.active {
+            border-color: var(--cp-accent);
+            background: var(--cp-accent);
+            color: var(--cp-accent-fg);
+        }
+
+        .settings-group,
+        .import-export-section {
+            border: 1px solid var(--cp-border);
+            border-radius: 16px;
+            background: var(--cp-bg-elevated);
+        }
+
+        .settings-group h3,
+        .import-export-section h4,
+        .range-value,
+        .ai-chat-title,
+        .ai-message.ai :is(h1, h2, h3, h4, h5, h6) {
+            color: var(--cp-accent);
+        }
+
+        .setting-item label,
+        .dialog-copy,
+        .section-copy,
+        .setting-hint {
+            color: var(--cp-text-muted);
+        }
+
+        .dialog-copy,
+        .section-copy,
+        .signin-copy {
+            margin-bottom: 16px;
+        }
+
+        #perspective-settings .settings-group h4 {
+            margin: 20px 0 10px;
+            color: var(--cp-text);
+        }
+
+        .setting-hint {
+            font-size: 0.72rem;
+            font-weight: 400;
+        }
+
+        .setting-item input[type="text"],
+        .setting-item input[type="password"],
+        .setting-item input[type="number"],
+        .setting-item select,
+        .ai-chat-input {
+            border: 1px solid var(--cp-border);
+            border-radius: 0.625rem;
+            background: var(--cp-surface);
+            color: var(--cp-text);
+        }
+
+        .setting-item input:focus,
+        .setting-item select:focus,
+        .ai-chat-input:focus {
+            border-color: var(--cp-accent);
+            outline: none;
+            box-shadow: var(--cp-focus-ring);
+        }
+
+        .setting-item select option {
+            background: var(--cp-surface);
+            color: var(--cp-text);
+        }
+
+        .setting-item input[type="range"] {
+            background: var(--cp-border);
+        }
+
+        .setting-item input[type="range"]::-webkit-slider-thumb {
+            background: var(--cp-accent);
+        }
+
+        .setting-item input[type="range"]::-webkit-slider-thumb:hover {
+            background: var(--cp-accent-hover);
+        }
+
+        .toggle-switch {
+            appearance: none;
+            border: 1px solid var(--cp-border-strong);
+            background: var(--cp-surface-soft);
+        }
+
+        .toggle-switch.active {
+            border-color: var(--cp-accent);
+            background: var(--cp-accent);
+        }
+
+        .toggle-switch::after {
+            background: var(--cp-surface);
+            box-shadow: var(--cp-card-shadow);
+        }
+
+        .settings-actions {
+            border-color: var(--cp-border);
+        }
+
+        .settings-btn,
+        .copy-url-btn,
+        .ai-chat-send,
+        .upload-conversation-btn,
+        .signin-primary,
+        .signin-link {
+            border: 1px solid var(--cp-accent);
+            border-radius: 0.625rem;
+            background: var(--cp-accent);
+            color: var(--cp-accent-fg);
+            box-shadow: none;
+            font-weight: 600;
+            text-decoration: none;
+        }
+
+        .settings-btn:hover,
+        .copy-url-btn:hover,
+        .ai-chat-send:hover,
+        .upload-conversation-btn:hover,
+        .signin-primary:hover,
+        .signin-link:hover {
+            border-color: var(--cp-accent-hover);
+            background: var(--cp-accent-hover);
+            box-shadow: none;
+            transform: translateY(-1px);
+        }
+
+        .settings-btn.secondary,
+        .signin-secondary,
+        .file-input-label,
+        .preset-btn {
+            border: 1px solid var(--cp-border);
+            background: var(--cp-surface);
+            color: var(--cp-text);
+        }
+
+        .settings-btn.secondary:hover,
+        .signin-secondary:hover,
+        .file-input-label:hover,
+        .preset-btn:hover {
+            border-color: var(--cp-accent);
+            background: var(--cp-accent-soft);
+        }
+
+        .settings-btn.danger {
+            border-color: var(--cp-danger);
+            background: var(--cp-danger);
+            color: var(--cp-accent-fg);
+        }
+
+        .close-settings,
+        .modal-close,
+        .overlay-close,
+        .signin-close {
+            display: inline-grid;
+            width: 40px;
+            height: 40px;
+            place-items: center;
+            padding: 0;
+            border: 1px solid transparent;
+            border-radius: 0.625rem;
+            background: transparent;
+            color: var(--cp-text-muted);
+            font-size: 1.5rem;
+            line-height: 1;
+        }
+
+        .close-settings:hover,
+        .modal-close:hover,
+        .overlay-close:hover,
+        .signin-close:hover {
+            border-color: var(--cp-border);
+            background: var(--cp-surface-soft);
+            color: var(--cp-text);
+            transform: none;
+        }
+
+        .json-preview,
+        .qr-url,
+        .signin-code-box {
+            border: 1px solid var(--cp-border);
+            background: var(--cp-bg-elevated);
+            color: var(--cp-text);
+            font-family: Consolas, "Courier New", Courier, monospace;
+        }
+
+        .file-input-label {
+            border-style: dashed;
+        }
+
+        .danger-copy {
+            color: var(--cp-warning);
+        }
+
+        .spaced-section {
+            margin-top: 30px;
+        }
+
+        .show-mode-modal,
+        .rapp-overlay,
+        .signin-modal {
+            background: var(--cp-overlay);
+            backdrop-filter: blur(6px);
+        }
+
+        .show-mode-modal-content {
+            width: min(420px, calc(100vw - 32px));
+            padding: 28px;
+        }
+
+        .show-mode-info,
+        .viewer-chat-label {
+            border: 1px solid var(--cp-accent);
+            background: var(--cp-accent-soft);
+            color: var(--cp-accent);
+        }
+
+        .viewer-chat-label {
+            display: none;
+        }
+
+        .ai-chat-interface.viewer-mode .viewer-chat-label {
+            display: inline-flex;
+        }
+
+        #qr-code-container {
+            background: var(--cp-surface);
+        }
+
+        .show-mode-status,
+        .viewer-mode-indicator,
+        .following-indicator,
+        .voice-paused-indicator,
+        .voice-indicator,
+        .listening-indicator,
+        .notification,
+        .show-mode-notification {
+            border: 1px solid var(--cp-border);
+            border-radius: 0.625rem;
+            background: var(--cp-panel-strong);
+            color: var(--cp-text);
+            box-shadow: var(--cp-card-shadow);
+            backdrop-filter: none;
+        }
+
+        .status-indicator {
+            background: var(--cp-text-muted);
+        }
+
+        .status-indicator.connected,
+        .status-indicator.hosting {
+            background: var(--cp-success);
+            box-shadow: 0 0 0 4px color-mix(in srgb, var(--cp-success) 18%, transparent);
+        }
+
+        .status-text {
+            color: var(--cp-text-muted);
+        }
+
+        .viewer-count {
+            color: var(--cp-accent);
+        }
+
+        .voice-paused-indicator {
+            color: var(--cp-warning);
+        }
+
+        .voice-indicator {
+            color: var(--cp-accent);
+        }
+
+        .listening-indicator {
+            color: var(--cp-danger);
+        }
+
+        .notification,
+        .show-mode-notification {
+            top: max(116px, calc(env(safe-area-inset-top) + 116px));
+            right: max(16px, env(safe-area-inset-right));
+            max-width: min(360px, calc(100vw - 32px));
+            border-left: 4px solid var(--cp-accent);
+        }
+
+        .ai-chat-interface {
+            right: max(84px, calc(env(safe-area-inset-right) + 84px));
+            bottom: max(16px, env(safe-area-inset-bottom));
+            width: min(440px, calc(100vw - 116px));
+            height: min(580px, calc(100dvh - 32px));
+            overflow: hidden;
+        }
+
+        .ai-chat-interface.viewer-mode {
+            border-color: var(--cp-accent);
+            box-shadow: var(--cp-card-shadow);
+        }
+
+        .ai-chat-header,
+        .ai-chat-input-container {
+            border-color: var(--cp-border);
+            background: var(--cp-bg-elevated);
+        }
+
+        .ai-chat-header {
+            min-height: 64px;
+        }
+
+        .ai-chat-messages {
+            padding: 18px;
+            scrollbar-color: var(--cp-border-strong) transparent;
+        }
+
+        .ai-message,
+        .ai-typing {
+            border: 1px solid var(--cp-border);
+            border-radius: 16px;
+            box-shadow: none;
+        }
+
+        .ai-message.user {
+            border-color: var(--cp-accent);
+            background: var(--cp-accent);
+            color: var(--cp-accent-fg);
+        }
+
+        .ai-message.ai,
+        .ai-typing {
+            background: var(--cp-surface-soft);
+            color: var(--cp-text);
+        }
+
+        .ai-message.system {
+            max-width: 100%;
+            border-style: dashed;
+            background: var(--cp-bg-elevated);
+            color: var(--cp-text-muted);
+            font-size: 0.82rem;
+        }
+
+        .ai-message.presenter-message::before {
+            color: var(--cp-link);
+        }
+
+        .ai-message.viewer-message::before {
+            color: var(--cp-warning);
+        }
+
+        .ai-message.ai a {
+            color: var(--cp-link);
+        }
+
+        .ai-message.ai a:hover {
+            color: var(--cp-accent);
+        }
+
+        .ai-message.ai strong,
+        .ai-message.ai pre code {
+            color: var(--cp-text);
+        }
+
+        .ai-message.ai em,
+        .ai-message.ai blockquote {
+            color: var(--cp-text-muted);
+        }
+
+        .ai-message.ai code,
+        .ai-message.ai pre {
+            background: var(--cp-bg-elevated);
+            color: var(--cp-accent);
+        }
+
+        .ai-message.ai blockquote {
+            border-color: var(--cp-accent);
+        }
+
+        .ai-message.ai :is(hr, th, td) {
+            border-color: var(--cp-border);
+        }
+
+        .ai-message.ai th {
+            background: var(--cp-accent-soft);
+        }
+
+        .ai-message.task-replay {
+            border-color: var(--cp-warning);
+        }
+
+        .typing-dot {
+            background: var(--cp-accent);
+        }
+
+        .ai-chat-input {
+            min-width: 0;
+            min-height: 42px;
+            padding: 10px 12px;
+        }
+
+        .ai-chat-send {
+            min-height: 42px;
+            padding: 10px 16px;
+        }
+
+        .voice-input-btn {
+            flex: 0 0 42px;
+            width: 42px;
+            height: 42px;
+            border: 1px solid var(--cp-border);
+            background: var(--cp-surface);
+            color: var(--cp-text);
+        }
+
+        .voice-input-btn:hover {
+            border-color: var(--cp-accent);
+            background: var(--cp-accent-soft);
+            color: var(--cp-accent);
+        }
+
+        .voice-input-btn.recording {
+            border-color: var(--cp-danger);
+            background: var(--cp-danger);
+            color: var(--cp-accent-fg);
+        }
+
+        .voice-input-btn.disabled {
+            border-color: var(--cp-border);
+            background: var(--cp-surface-soft);
+            color: var(--cp-text-muted);
+        }
+
+        .task-panel {
+            left: max(16px, env(safe-area-inset-left));
+            bottom: max(16px, env(safe-area-inset-bottom));
+            width: min(360px, calc(100vw - 32px));
+        }
+
+        .task-item {
+            border: 1px solid var(--cp-border);
+            background: var(--cp-bg-elevated);
+        }
+
+        .task-item:hover {
+            border-color: var(--cp-accent);
+            background: var(--cp-accent-soft);
+        }
+
+        .task-item strong {
+            color: var(--cp-accent);
+        }
+
+        .task-item small,
+        .task-meta,
+        .empty-state {
+            color: var(--cp-text-muted);
+        }
+
+        .task-meta {
+            margin-top: 8px;
+            font-size: 0.85em;
+        }
+
+        .empty-state {
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .rapp-overlay,
+        .signin-modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .rapp-overlay {
+            z-index: 9998;
+        }
+
+        .signin-modal {
+            z-index: 9999;
+        }
+
+        .overlay-close {
+            position: absolute;
+            top: max(16px, env(safe-area-inset-top));
+            right: max(16px, env(safe-area-inset-right));
+            z-index: 2;
+            border-color: var(--cp-border);
+            background: var(--cp-panel-strong);
+        }
+
+        .rapp-overlay iframe {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            border: 0;
+            background: var(--cp-bg);
+        }
+
+        .signin-card {
+            width: min(440px, calc(100vw - 32px));
+            overflow: hidden;
+        }
+
+        .signin-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            min-height: 64px;
+            padding: 12px 18px;
+            border-bottom: 1px solid var(--cp-border);
+            background: var(--cp-bg-elevated);
+        }
+
+        .signin-title {
+            font-size: 0.95rem;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+        }
+
+        .signin-body {
+            padding: 24px;
+        }
+
+        .signin-error {
+            margin-bottom: 14px;
+            padding: 10px 12px;
+            border: 1px solid var(--cp-danger);
+            border-radius: 0.625rem;
+            background: color-mix(in srgb, var(--cp-danger) 8%, var(--cp-surface));
+            color: var(--cp-danger);
+            font-size: 0.82rem;
+        }
+
+        .signin-copy,
+        .signin-wait,
+        .signin-success-note {
+            color: var(--cp-text-muted);
+            font-size: 0.82rem;
+            line-height: 1.55;
+        }
+
+        .signin-primary,
+        .signin-secondary,
+        .signin-link {
+            display: block;
+            width: 100%;
+            padding: 12px 14px;
+            text-align: center;
+            cursor: pointer;
+        }
+
+        .signin-code-box {
+            margin-bottom: 10px;
+            padding: 18px 14px;
+            border-color: var(--cp-accent);
+            border-radius: 0.625rem;
+            text-align: center;
+            cursor: pointer;
+        }
+
+        #rapp-signin-code {
+            color: var(--cp-accent);
+            font-family: Consolas, "Courier New", Courier, monospace;
+            font-size: clamp(1.5rem, 8vw, 2rem);
+            font-weight: 700;
+            letter-spacing: 0.18em;
+        }
+
+        .signin-secondary,
+        .signin-link {
+            margin-bottom: 12px;
+        }
+
+        .signin-secondary.is-success {
+            border-color: var(--cp-success);
+            background: var(--cp-success);
+            color: var(--cp-accent-fg);
+        }
+
+        .signin-secondary.is-error {
+            border-color: var(--cp-danger);
+            background: var(--cp-danger);
+            color: var(--cp-accent-fg);
+        }
+
+        .signin-wait {
+            text-align: center;
+        }
+
+        .signin-success {
+            padding: 20px 0;
+            text-align: center;
+        }
+
+        .signin-success-icon {
+            margin-bottom: 10px;
+            font-size: 3rem;
+        }
+
+        .signin-success-title {
+            color: var(--cp-success);
+            font-weight: 700;
+        }
+
+        #rapp-signin-status {
+            color: var(--cp-text-muted);
+            font-size: 0.82rem;
+            line-height: 1.55;
+        }
+
+        #rapp-signin-status.is-authenticated {
+            color: var(--cp-success);
+        }
+
+        #rapp-signout-btn {
+            display: none;
+            margin-top: 10px;
+        }
+
+        @media (max-width: 768px) {
+            .world-ui {
+                top: max(12px, env(safe-area-inset-top));
+                left: max(12px, env(safe-area-inset-left));
+                width: calc(100vw - 172px);
+                min-width: 0;
+                padding: 14px 16px;
+            }
+
+            .world-title {
+                font-size: clamp(1.3rem, 7vw, 1.8rem);
+                letter-spacing: 0.1em;
+            }
+
+            .world-description {
+                margin-top: 8px;
+                font-size: 0.82rem;
+                line-height: 1.4;
+            }
+
+            .front-gate-link {
+                top: max(12px, env(safe-area-inset-top));
+                right: max(12px, env(safe-area-inset-right));
+                min-height: 38px;
+                padding: 7px 10px;
+            }
+
+            .voice-pause-button {
+                top: calc(max(12px, env(safe-area-inset-top)) + 48px);
+                right: max(12px, env(safe-area-inset-right));
+                min-width: 128px;
+                height: 42px;
+                padding: 0 12px;
+            }
+
+            .settings-button {
+                right: max(12px, env(safe-area-inset-right));
+                width: 48px;
+                height: 48px;
+            }
+
+            #settings-button {
+                bottom: max(12px, env(safe-area-inset-bottom));
+            }
+
+            #details-button {
+                bottom: calc(max(12px, env(safe-area-inset-bottom)) + 60px);
+            }
+
+            .settings-button::after {
+                display: none;
+            }
+
+            .ai-chat-interface {
+                right: max(8px, env(safe-area-inset-right));
+                bottom: max(8px, env(safe-area-inset-bottom));
+                left: max(8px, env(safe-area-inset-left));
+                width: auto;
+                height: min(72dvh, 620px);
+                border-radius: 16px;
+            }
+
+            .ai-chat-input-container {
+                gap: 8px;
+                padding: 12px;
+            }
+
+            .ai-chat-send {
+                padding-inline: 13px;
+            }
+
+            .settings-panel {
+                width: calc(100vw - 16px);
+                max-height: calc(100dvh - 16px);
+                padding: 22px 16px 18px;
+            }
+
+            .settings-tabs {
+                flex-wrap: nowrap;
+            }
+
+            .perspective-preset {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+
+            .notification,
+            .show-mode-notification {
+                right: max(12px, env(safe-area-inset-right));
+                left: max(12px, env(safe-area-inset-left));
+                max-width: none;
+            }
+        }
+
+        @media (max-width: 430px) {
+            .world-ui {
+                width: calc(100vw - 172px);
+            }
+
+            .world-description {
+                display: -webkit-box;
+                overflow: hidden;
+                -webkit-box-orient: vertical;
+                -webkit-line-clamp: 3;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *,
+            *::before,
+            *::after {
+                scroll-behavior: auto !important;
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+    </style>
 </head>
 <body>
     <!-- ╭─── Front-gate trio link (Article LI conformance for /twin) ───╮
          The canonical front-gate-QR + holocard + 7-word incantation
-         lives at /twin/front.html — this in-page banner is the minimum-
-         viable visible-on-first-paint surface that points there, so the
-         existing AI-Companion-Hub UI underneath stays untouched. -->
+         lives at /twin/front.html; this visible-on-first-paint link keeps
+         the summon identity one tap away from the interactive 3D shell. -->
     <a href="front.html"
-       style="position:fixed;top:8px;right:8px;z-index:9999;background:rgba(13,17,23,0.85);color:#58a6ff;border:1px solid #30363d;border-radius:999px;padding:5px 12px;font-family:-apple-system,system-ui,sans-serif;font-size:0.7rem;text-decoration:none;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)"
+       id="front-gate-link"
+       class="front-gate-link"
        title="Front gate — QR + holocard + 7-word incantation for dialing this twin from any RAPP tether">
       📞 front gate
     </a>
@@ -1606,7 +2725,7 @@
     <div class="companion-tooltip" id="companion-tooltip">Click to chat</div>
 
     <!-- Viewer Mode Indicator -->
-    <div class="viewer-mode-indicator" id="viewer-mode-indicator">
+    <div class="viewer-mode-indicator" id="viewer-mode-indicator" role="status" aria-live="polite">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
             <circle cx="12" cy="12" r="3"></circle>
@@ -1615,7 +2734,7 @@
     </div>
 
     <!-- Following Indicator -->
-    <div class="following-indicator" id="following-indicator">
+    <div class="following-indicator" id="following-indicator" role="status" aria-live="polite">
         <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
             <circle cx="12" cy="12" r="10"/>
             <polygon points="10 8 16 12 10 16 10 8"/>
@@ -1624,7 +2743,7 @@
     </div>
 
     <!-- Show Mode Status -->
-    <div class="show-mode-status" id="show-mode-status">
+    <div class="show-mode-status" id="show-mode-status" role="status" aria-live="polite">
         <div class="status-indicator" id="status-indicator"></div>
         <span class="status-text" id="status-text">Connecting...</span>
         <div class="viewer-count">
@@ -1633,15 +2752,16 @@
     </div>
 
     <!-- Voice Pause Button -->
-    <div class="voice-pause-button" id="voice-pause-button">
+    <button type="button" class="voice-pause-button" id="voice-pause-button"
+            aria-label="Pause voice activity" aria-pressed="false">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
         </svg>
         <span id="voice-pause-text">Pause Voice</span>
-    </div>
+    </button>
 
     <!-- Voice Paused Indicator -->
-    <div class="voice-paused-indicator" id="voice-paused-indicator">
+    <div class="voice-paused-indicator" id="voice-paused-indicator" role="status" aria-live="polite">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M10 9v6m4-6v6"></path>
         </svg>
@@ -1649,19 +2769,21 @@
     </div>
 
     <!-- Show Mode Button -->
-    <div class="show-mode-button" id="show-mode-button">
+    <button type="button" class="show-mode-button" id="show-mode-button"
+            aria-label="Start show mode" aria-pressed="false">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
             <circle cx="12" cy="12" r="3"></circle>
         </svg>
-    </div>
+    </button>
 
     <!-- Show Mode Modal -->
-    <div class="show-mode-modal" id="show-mode-modal">
+    <div class="show-mode-modal" id="show-mode-modal" role="dialog" aria-modal="true"
+         aria-labelledby="show-mode-title" aria-hidden="true">
         <div class="show-mode-modal-content">
-            <button class="modal-close" id="show-mode-close">&times;</button>
-            <h3>Show Mode</h3>
-            <p style="color: rgba(255, 255, 255, 0.7); margin-bottom: 20px;">
+            <button type="button" class="modal-close" id="show-mode-close" aria-label="Close show mode">&times;</button>
+            <h3 id="show-mode-title">Show Mode</h3>
+            <p class="dialog-copy">
                 Share your perspective in real-time. Others can scan the QR code to follow your view.
             </p>
             <div class="show-mode-info" id="show-mode-info">
@@ -1674,19 +2796,20 @@
     </div>
 
     <!-- Settings Panel -->
-    <div class="settings-panel" id="settings-panel">
-        <button class="close-settings" id="close-settings">&times;</button>
-        <h2>AI Companion Settings</h2>
+    <div class="settings-panel" id="settings-panel" role="dialog" aria-modal="true"
+         aria-labelledby="settings-title" aria-hidden="true">
+        <button type="button" class="close-settings" id="close-settings" aria-label="Close settings">&times;</button>
+        <h2 id="settings-title">AI Companion Settings</h2>
         
-        <div class="settings-tabs">
-            <button class="settings-tab active" data-tab="general">General</button>
-            <button class="settings-tab" data-tab="voice">Voice</button>
-            <button class="settings-tab" data-tab="perspective">3D View</button>
-            <button class="settings-tab" data-tab="import-export">Import/Export</button>
+        <div class="settings-tabs" role="tablist" aria-label="Settings sections">
+            <button type="button" class="settings-tab active" data-tab="general" role="tab" aria-selected="true">General</button>
+            <button type="button" class="settings-tab" data-tab="voice" role="tab" aria-selected="false">Voice</button>
+            <button type="button" class="settings-tab" data-tab="perspective" role="tab" aria-selected="false">3D View</button>
+            <button type="button" class="settings-tab" data-tab="import-export" role="tab" aria-selected="false">Import/Export</button>
         </div>
 
         <!-- General Settings -->
-        <div class="settings-section active" id="general-settings">
+        <div class="settings-section active" id="general-settings" role="tabpanel">
             <!-- The legacy "API Configuration" panel is replaced by the
                  implicit-summon flow. The doorman is powered by the
                  GitHub Copilot CLI via the same auth worker the
@@ -1697,10 +2820,10 @@
                  with the underlying settings serializer. -->
             <div class="settings-group">
                 <h3>Doorman</h3>
-                <div class="setting-item" id="rapp-signin-status" style="font-size:13px;color:#9aa6b3;line-height:1.55;">
+                <div class="setting-item" id="rapp-signin-status">
                     Tap the sphere to summon the doorman. One-time GitHub Copilot device-code sign-in. No API key paste.
                 </div>
-                <button id="rapp-signout-btn" style="display:none;margin-top:10px;background:#21262d;border:1px solid #30363d;color:#c9d1d9;border-radius:8px;padding:8px 14px;font-size:13px;cursor:pointer;">Sign out</button>
+                <button type="button" id="rapp-signout-btn" class="settings-btn secondary">Sign out</button>
                 <input type="password" id="settings-api-key" style="display:none;">
                 <input type="text" id="settings-endpoint" style="display:none;">
             </div>
@@ -1719,27 +2842,29 @@
         </div>
 
         <!-- Voice Settings -->
-        <div class="settings-section" id="voice-settings">
+        <div class="settings-section" id="voice-settings" role="tabpanel">
             <div class="settings-group">
                 <h3>Voice Output</h3>
                 <div class="toggle-setting">
                     <label>Enable Voice Response</label>
-                    <div class="toggle-switch" id="settings-voice-enabled"></div>
+                    <button type="button" class="toggle-switch" id="settings-voice-enabled"
+                            role="switch" aria-checked="false" aria-label="Enable voice response"></button>
                 </div>
                 <div class="toggle-setting">
                     <label>Auto-speak Responses</label>
-                    <div class="toggle-switch" id="settings-auto-speak"></div>
+                    <button type="button" class="toggle-switch" id="settings-auto-speak"
+                            role="switch" aria-checked="false" aria-label="Auto-speak responses"></button>
                 </div>
                 <div class="setting-item">
-                    <label for="settings-elevenlabs-key">ElevenLabs API Key <span style="font-size:11px;color:#6e7681;font-weight:normal;">(premium voice — overrides Azure when set)</span></label>
+                    <label for="settings-elevenlabs-key">ElevenLabs API Key <span class="setting-hint">(premium voice — overrides Azure when set)</span></label>
                     <input type="password" id="settings-elevenlabs-key" placeholder="sk_…   paste your ElevenLabs key for cinematic voice">
                 </div>
                 <div class="setting-item">
-                    <label for="settings-elevenlabs-voice-id">ElevenLabs Voice ID <span style="font-size:11px;color:#6e7681;font-weight:normal;">(optional — leave blank for warm default)</span></label>
+                    <label for="settings-elevenlabs-voice-id">ElevenLabs Voice ID <span class="setting-hint">(optional — leave blank for warm default)</span></label>
                     <input type="text" id="settings-elevenlabs-voice-id" placeholder="e.g. EXAVITQu4vr4xnSDxMaL (Sarah)">
                 </div>
                 <div class="setting-item">
-                    <label for="settings-azure-tts-key">Azure TTS API Key <span style="font-size:11px;color:#6e7681;font-weight:normal;">(alternative premium provider)</span></label>
+                    <label for="settings-azure-tts-key">Azure TTS API Key <span class="setting-hint">(alternative premium provider)</span></label>
                     <input type="password" id="settings-azure-tts-key" placeholder="Enter Azure TTS key for premium voices">
                 </div>
                 <div class="setting-item">
@@ -1761,11 +2886,13 @@
                 <h3>Voice Input</h3>
                 <div class="toggle-setting">
                     <label>Enable Voice Input</label>
-                    <div class="toggle-switch active" id="settings-voice-input-enabled"></div>
+                    <button type="button" class="toggle-switch active" id="settings-voice-input-enabled"
+                            role="switch" aria-checked="true" aria-label="Enable voice input"></button>
                 </div>
                 <div class="toggle-setting">
                     <label>Continuous Conversation Mode</label>
-                    <div class="toggle-switch" id="settings-continuous-conversation"></div>
+                    <button type="button" class="toggle-switch" id="settings-continuous-conversation"
+                            role="switch" aria-checked="false" aria-label="Continuous conversation mode"></button>
                 </div>
                 <div class="setting-item">
                     <label for="settings-push-to-talk">Push-to-Talk Key</label>
@@ -1781,7 +2908,7 @@
         </div>
 
         <!-- Perspective Settings -->
-        <div class="settings-section" id="perspective-settings">
+        <div class="settings-section" id="perspective-settings" role="tabpanel">
             <div class="settings-group">
                 <h3>Camera Controls</h3>
                 <div class="perspective-controls">
@@ -1810,7 +2937,7 @@
                     </div>
                 </div>
                 
-                <h4 style="margin-top: 20px; margin-bottom: 10px; color: #8a2be2;">Presets</h4>
+                <h4>Presets</h4>
                 <div class="perspective-preset">
                     <button class="preset-btn" onclick="window.worldNavigator.perspectiveManager.applyPreset('default')">Default</button>
                     <button class="preset-btn" onclick="window.worldNavigator.perspectiveManager.applyPreset('overhead')">Overhead</button>
@@ -1835,10 +2962,10 @@
         </div>
 
         <!-- Import/Export Settings -->
-        <div class="settings-section" id="import-export-settings">
+        <div class="settings-section" id="import-export-settings" role="tabpanel">
             <div class="import-export-section">
                 <h4>Export Settings</h4>
-                <p style="color: rgba(255, 255, 255, 0.6); margin-bottom: 15px; font-size: 14px;">
+                <p class="section-copy">
                     Export all your settings including API keys, voice configuration, and 3D perspective as a JSON file.
                 </p>
                 <div class="json-preview" id="json-preview"></div>
@@ -1847,9 +2974,9 @@
                 </button>
             </div>
 
-            <div class="import-export-section" style="margin-top: 30px;">
+            <div class="import-export-section spaced-section">
                 <h4>Import Settings</h4>
-                <p style="color: rgba(255, 255, 255, 0.6); margin-bottom: 15px; font-size: 14px;">
+                <p class="section-copy">
                     Import a previously exported settings file to restore your configuration.
                 </p>
                 <div class="file-input-wrapper">
@@ -1860,9 +2987,9 @@
                 </div>
             </div>
 
-            <div class="import-export-section" style="margin-top: 30px;">
+            <div class="import-export-section spaced-section">
                 <h4>Danger Zone</h4>
-                <p style="color: rgba(255, 165, 0, 0.8); margin-bottom: 15px; font-size: 14px;">
+                <p class="section-copy danger-copy">
                     ⚠️ This action will reset all settings to their default values. This cannot be undone.
                 </p>
                 <button class="settings-btn danger" onclick="window.worldNavigator.settingsManager.resetSettings()">
@@ -1872,19 +2999,19 @@
         </div>
 
         <div class="settings-actions">
-            <button class="settings-btn" onclick="window.worldNavigator.settingsManager.saveSettings()">Save Changes</button>
-            <button class="settings-btn secondary" onclick="document.getElementById('settings-panel').classList.remove('active')">Cancel</button>
+            <button type="button" class="settings-btn" onclick="window.worldNavigator.settingsManager.saveSettings()">Save Changes</button>
+            <button type="button" class="settings-btn secondary" onclick="window.worldNavigator.settingsManager.closeSettings()">Cancel</button>
         </div>
     </div>
 
     <!-- Voice Indicator -->
-    <div class="voice-indicator" id="voice-indicator">
+    <div class="voice-indicator" id="voice-indicator" role="status" aria-live="polite">
         <i class="fas fa-volume-up"></i>
         <span>Speaking...</span>
     </div>
 
     <!-- Listening Indicator -->
-    <div class="listening-indicator" id="listening-indicator">
+    <div class="listening-indicator" id="listening-indicator" role="status" aria-live="polite">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
             <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
@@ -1895,18 +3022,19 @@
     </div>
 
     <!-- AI Chat Interface -->
-    <div class="ai-chat-interface" id="ai-chat-interface">
+    <div class="ai-chat-interface" id="ai-chat-interface" role="dialog" aria-labelledby="chat-title" aria-hidden="true">
         <div class="ai-chat-header">
-            <div class="ai-chat-title">
+            <div class="ai-chat-title" id="chat-title">
                 AI Companion Chat
-                <span class="viewer-chat-label" id="viewer-chat-label" style="display: none;">Viewer Mode</span>
+                <span class="viewer-chat-label" id="viewer-chat-label">Viewer Mode</span>
             </div>
-            <button class="modal-close" onclick="document.getElementById('ai-chat-interface').classList.remove('active')">&times;</button>
+            <button type="button" class="modal-close" id="chat-close" aria-label="Close chat">&times;</button>
         </div>
         <div class="ai-chat-messages" id="ai-chat-messages"></div>
         <div class="ai-chat-input-container">
-            <input type="text" class="ai-chat-input" id="ai-chat-input" placeholder="Type a message..." onkeypress="if(event.key==='Enter') window.worldNavigator.aiManager.sendMessage()">
-            <button class="voice-input-btn" id="voice-input-btn" title="Hold to speak">
+            <input type="text" class="ai-chat-input" id="ai-chat-input" placeholder="Type a message..."
+                   aria-label="Message the twin">
+            <button type="button" class="voice-input-btn" id="voice-input-btn" title="Hold to speak" aria-label="Hold to speak">
                 <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
                     <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
@@ -1914,14 +3042,14 @@
                     <line x1="8" y1="23" x2="16" y2="23"></line>
                 </svg>
             </button>
-            <button class="ai-chat-send" onclick="window.worldNavigator.aiManager.sendMessage()">Send</button>
+            <button type="button" class="ai-chat-send">Send</button>
         </div>
     </div>
 
     <!-- Task Panel -->
     <div class="task-panel" id="task-panel">
         <h3>📚 Saved Conversations</h3>
-        <button class="upload-conversation-btn" onclick="document.getElementById('conversation-upload-input').click()">
+        <button type="button" class="upload-conversation-btn" onclick="document.getElementById('conversation-upload-input').click()">
             <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"></path>
                 <polyline points="17 8 12 3 7 8"></polyline>
@@ -1941,41 +3069,42 @@
     </div>
 
     <!-- AI Companion Button -->
-    <div class="ai-companion-button" id="ai-companion-button">
+    <button type="button" class="ai-companion-button" id="ai-companion-button" aria-label="Open AI companion">
         <svg class="view-toggle-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path>
         </svg>
-    </div>
+    </button>
 
     <!-- Tasks Button -->
-    <div class="tasks-button" id="tasks-button">
+    <button type="button" class="tasks-button" id="tasks-button" aria-label="Open saved conversations">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M9 11l3 3L22 4"></path>
             <path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"></path>
         </svg>
-    </div>
+    </button>
 
     <!-- Settings Button -->
-    <div class="settings-button" id="settings-button">
+    <button type="button" class="settings-button" id="settings-button"
+            aria-label="Open settings" data-label="Settings">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <circle cx="12" cy="12" r="3"></circle>
             <path d="M12 1v6m0 6v6m4.22-10.22l1.42-1.42m-1.42 8.49l1.42 1.42M20 12h-6m-6 0H1m4.22 4.22l-1.42 1.42m1.42-8.49L3.8 7.73"></path>
         </svg>
-    </div>
+    </button>
 
     <!-- Identity / details button — voice-first mode keeps the sphere
-         clean; tap this to overlay the classic front door (trade card,
-         neighborhood pane, install, plant) on top of the sphere via
-         iframe. Tap × to dismiss; sphere chat state is preserved.
+         clean; tap this to overlay the QR, holocard, and incantation
+         front gate via iframe. Tap × to dismiss; sphere chat state is preserved.
          Positioned above the settings button (where show-mode used to
          live; show-mode itself is hidden — see CSS overrides below). -->
-    <div class="settings-button" id="details-button" style="bottom: calc(env(safe-area-inset-bottom, 30px) + 240px);" title="Identity, neighborhood, share card">
+    <button type="button" class="settings-button" id="details-button"
+            title="Identity, neighborhood, share card" aria-label="Open twin identity" data-label="Twin identity">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <circle cx="12" cy="12" r="10"></circle>
             <line x1="12" y1="16" x2="12" y2="12"></line>
             <line x1="12" y1="8" x2="12.01" y2="8"></line>
         </svg>
-    </div>
+    </button>
 
     <!-- Doorman experience — declutter the legacy AI Companion Hub
          button stack. Hide buttons that don't fit a doorman:
@@ -1990,46 +3119,48 @@
       .ai-companion-button { display: none !important; }
     </style>
 
-    <!-- Classic-front-door iframe overlay. Loads ./classic.html (the
-         flat front door with trade card, 🏘 Neighborhood, install widget,
-         plant section). Slides over the sphere; sphere keeps running
+    <!-- Front-gate iframe overlay. Loads ./front.html (the QR, holocard,
+         and incantation identity surface). Slides over the sphere; sphere keeps running
          underneath so dismissing returns the visitor to chat without
          losing context. Per the user's "iframe in to jump back to the
          sphere without losing context" pattern. -->
-    <div id="rapp-classic-overlay" style="display:none;position:fixed;inset:0;z-index:9998;background:rgba(0,0,0,0.85);backdrop-filter:blur(8px);">
-      <button id="rapp-classic-close" style="position:absolute;top:16px;right:16px;z-index:2;background:rgba(0,0,0,0.7);border:1px solid #2c3440;color:#fff;font-size:24px;line-height:1;width:44px;height:44px;border-radius:22px;cursor:pointer;">×</button>
-      <iframe id="rapp-classic-frame" style="position:absolute;inset:0;width:100%;height:100%;border:none;background:#0d1117;" loading="lazy" title="Classic front door"></iframe>
+    <div id="rapp-classic-overlay" class="rapp-overlay" role="dialog" aria-modal="true"
+         aria-label="Twin identity" aria-hidden="true">
+      <button type="button" id="rapp-classic-close" class="overlay-close" aria-label="Close twin identity">×</button>
+      <iframe id="rapp-classic-frame" loading="lazy" title="Twin identity and summon card"></iframe>
     </div>
 
     <!-- Implicit-summon sign-in modal. Opens automatically when the
          sphere is tapped while inactive. Same device-code flow as the
          canonical doorman; once authorized the sphere goes active and
          chat opens immediately. No API key paste — Article XLI. -->
-    <div id="rapp-signin-modal" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.7);backdrop-filter:blur(8px);align-items:center;justify-content:center;">
-      <div style="max-width:440px;width:calc(100% - 32px);background:#0a0e17;border:1px solid #2c3440;border-radius:16px;overflow:hidden;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#fff;">
-        <header style="padding:16px 20px;border-bottom:1px solid #21262d;display:flex;align-items:center;justify-content:space-between;">
-          <span style="font-size:14px;font-weight:600;letter-spacing:.3px;">🔮 Summoning the doorman</span>
-          <button id="rapp-signin-close" style="background:transparent;border:none;color:#8b949e;font-size:24px;line-height:1;cursor:pointer;padding:0 4px;">×</button>
+    <div id="rapp-signin-modal" class="signin-modal" role="dialog" aria-modal="true"
+         aria-labelledby="signin-title" aria-hidden="true">
+      <div class="signin-card">
+        <header class="signin-header">
+          <span class="signin-title" id="signin-title">🔮 Summoning the doorman</span>
+          <button type="button" id="rapp-signin-close" class="signin-close" aria-label="Close sign in">×</button>
         </header>
-        <div style="padding:22px;">
-          <div id="rapp-signin-error" style="display:none;background:rgba(248,81,73,0.1);border:1px solid rgba(248,81,73,0.3);color:#f85149;padding:10px 12px;border-radius:8px;margin-bottom:14px;font-size:13px;"></div>
+        <div class="signin-body">
+          <div id="rapp-signin-error" class="signin-error" style="display:none;" role="alert"></div>
           <div id="rapp-signin-step1">
-            <p style="font-size:13px;color:#9aa6b3;margin-bottom:16px;line-height:1.55;">The doorman is powered by the GitHub Copilot CLI — no API keys to paste, no setup. One-time device-code sign in, takes about 30 seconds.</p>
-            <button id="rapp-signin-go" style="background:#06ffa5;border:none;color:#000;border-radius:10px;padding:14px;width:100%;font-size:14px;font-weight:700;cursor:pointer;letter-spacing:.3px;">Sign in with GitHub →</button>
+            <p class="signin-copy">The doorman is powered by the GitHub Copilot CLI — no API keys to paste, no setup. One-time device-code sign in, takes about 30 seconds.</p>
+            <button type="button" id="rapp-signin-go" class="signin-primary">Sign in with GitHub →</button>
           </div>
           <div id="rapp-signin-step2" style="display:none;">
-            <p style="font-size:13px;color:#9aa6b3;margin-bottom:12px;">Open GitHub on any device and enter this code:</p>
-            <div id="rapp-signin-code-box" title="Tap to copy" style="background:#000;border:1.5px solid #06ffa5;border-radius:10px;padding:18px 14px;text-align:center;margin-bottom:10px;cursor:pointer;user-select:all;-webkit-user-select:all;">
-              <div id="rapp-signin-code" style="font-family:'SF Mono',Menlo,monospace;font-size:32px;letter-spacing:6px;color:#06ffa5;font-weight:700;">XXXX-XXXX</div>
+            <p class="signin-copy">Open GitHub on any device and enter this code:</p>
+            <div id="rapp-signin-code-box" class="signin-code-box" title="Tap to copy"
+                 role="button" tabindex="0" aria-label="Copy GitHub device code">
+              <div id="rapp-signin-code">XXXX-XXXX</div>
             </div>
-            <button id="rapp-signin-copy" type="button" style="display:block;width:100%;background:#21262d;border:1px solid #30363d;color:#c9d1d9;border-radius:10px;padding:10px;font-size:13px;font-weight:600;cursor:pointer;margin-bottom:14px;">📋 Copy code</button>
-            <a href="#" id="rapp-signin-link" target="_blank" rel="noopener" style="display:block;text-align:center;background:#06ffa5;color:#000;border-radius:10px;padding:12px;text-decoration:none;font-size:14px;font-weight:700;margin-bottom:14px;">Open github.com/login/device →</a>
-            <p style="font-size:12px;color:#6e7681;text-align:center;">⏳ waiting for you to authorize…</p>
+            <button id="rapp-signin-copy" type="button" class="signin-secondary">📋 Copy code</button>
+            <a href="#" id="rapp-signin-link" target="_blank" rel="noopener" class="signin-link">Open github.com/login/device →</a>
+            <p class="signin-wait">⏳ waiting for you to authorize…</p>
           </div>
-          <div id="rapp-signin-step3" style="display:none;text-align:center;padding:20px 0;">
-            <div style="font-size:48px;margin-bottom:10px;">✨</div>
-            <div style="font-size:16px;color:#06ffa5;font-weight:700;">Doorman summoned</div>
-            <div style="font-size:12px;color:#6e7681;margin-top:6px;">Activating sphere…</div>
+          <div id="rapp-signin-step3" class="signin-success" style="display:none;">
+            <div class="signin-success-icon">✨</div>
+            <div class="signin-success-title">Doorman summoned</div>
+            <div class="signin-success-note">Activating sphere…</div>
           </div>
         </div>
       </div>
@@ -2648,14 +3779,47 @@ _r if isinstance(_r, str) else json.dumps(_r)
                 });
         });
 
+        const themeColor = (name) =>
+            getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+
+        const THEME_COLORS = Object.freeze({
+            background: themeColor('--cp-bg'),
+            elevated: themeColor('--cp-bg-elevated'),
+            surface: themeColor('--cp-surface'),
+            surfaceSoft: themeColor('--cp-surface-soft'),
+            border: themeColor('--cp-border'),
+            borderStrong: themeColor('--cp-border-strong'),
+            text: themeColor('--cp-text'),
+            textMuted: themeColor('--cp-text-muted'),
+            textSoft: themeColor('--cp-text-soft'),
+            accent: themeColor('--cp-accent'),
+            accentFg: themeColor('--cp-accent-fg'),
+            success: themeColor('--cp-success'),
+            warning: themeColor('--cp-warning')
+        });
+
+        const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+        function threeColor(value) {
+            return new THREE.Color(value).convertSRGBToLinear();
+        }
+
+        function writeParticleColor(buffer, offset) {
+            const color = threeColor(THEME_COLORS.accent);
+            color.lerp(threeColor(THEME_COLORS.textSoft), Math.random() * 0.65);
+            buffer[offset] = color.r;
+            buffer[offset + 1] = color.g;
+            buffer[offset + 2] = color.b;
+        }
+
         // Configuration
         const WORLD_ATTRIBUTES = {
             name: "AI Companion Hub",
             description: "Your intelligent assistant awaits. Click on the AI companion to start chatting!",
-            ambientColor: 0x1a1a2e,
-            fogColor: 0x0a0a0f,
-            groundColor: 0x16213e,
-            skyColor: 0x0f3460,
+            ambientColor: threeColor(THEME_COLORS.textMuted),
+            fogColor: threeColor(THEME_COLORS.background),
+            groundColor: threeColor(THEME_COLORS.borderStrong),
+            skyColor: threeColor(THEME_COLORS.background),
             particleCount: 300,
             fogNear: 5,
             fogFar: 50,
@@ -2678,14 +3842,25 @@ _r if isinstance(_r, str) else json.dumps(_r)
             const peerJsScript = document.createElement('script');
             peerJsScript.src = 'https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js';
             peerJsScript.async = true;
-            peerJsScript.onload = () => {
+            let peerSettled = false;
+            let resolvePeer;
+            const peerReady = new Promise((resolve) => {
+                resolvePeer = resolve;
+            });
+            const settlePeer = (available) => {
+                if (peerSettled) return;
+                peerSettled = true;
                 window.AICompanion.modules.core = true;
                 updateLoadingProgress();
+                resolvePeer(available);
             };
+            peerJsScript.onload = () => settlePeer(true);
+            peerJsScript.onerror = () => settlePeer(false);
             document.head.appendChild(peerJsScript);
+            setTimeout(() => settlePeer(typeof window.Peer !== 'undefined'), 3500);
 
-            // Wait for font to load
-            await fontLoader;
+            // Wait for the visual font and collaboration runtime to settle.
+            await Promise.all([fontLoader, peerReady]);
 
             // Load main application code
             document.getElementById('loading-status').textContent = 'Initializing world...';
@@ -2997,7 +4172,9 @@ _r if isinstance(_r, str) else json.dumps(_r)
 
                 // Modal close
                 document.getElementById('show-mode-close').addEventListener('click', () => {
-                    document.getElementById('show-mode-modal').classList.remove('show');
+                    const modal = document.getElementById('show-mode-modal');
+                    modal.classList.remove('show');
+                    modal.setAttribute('aria-hidden', 'true');
                 });
 
                 // Copy URL button
@@ -3021,7 +4198,8 @@ _r if isinstance(_r, str) else json.dumps(_r)
                 // Close modal on outside click
                 document.getElementById('show-mode-modal').addEventListener('click', (e) => {
                     if (e.target.id === 'show-mode-modal') {
-                        document.getElementById('show-mode-modal').classList.remove('show');
+                        e.currentTarget.classList.remove('show');
+                        e.currentTarget.setAttribute('aria-hidden', 'true');
                     }
                 });
             }
@@ -3030,8 +4208,13 @@ _r if isinstance(_r, str) else json.dumps(_r)
                 this.isHost = true;
                 this.roomId = this.peer.id;
                 
-                document.getElementById('show-mode-button').classList.add('active');
-                document.getElementById('show-mode-modal').classList.add('show');
+                const showModeButton = document.getElementById('show-mode-button');
+                const showModeModal = document.getElementById('show-mode-modal');
+                showModeButton.classList.add('active');
+                showModeButton.setAttribute('aria-pressed', 'true');
+                showModeButton.setAttribute('aria-label', 'Stop show mode');
+                showModeModal.classList.add('show');
+                showModeModal.setAttribute('aria-hidden', 'false');
                 document.getElementById('show-mode-status').classList.add('visible');
                 
                 this.updateStatus('Hosting Show', true);
@@ -3050,8 +4233,13 @@ _r if isinstance(_r, str) else json.dumps(_r)
                 this.connections.clear();
                 this.viewerNames.clear();
                 
-                document.getElementById('show-mode-button').classList.remove('active');
-                document.getElementById('show-mode-modal').classList.remove('show');
+                const showModeButton = document.getElementById('show-mode-button');
+                const showModeModal = document.getElementById('show-mode-modal');
+                showModeButton.classList.remove('active');
+                showModeButton.setAttribute('aria-pressed', 'false');
+                showModeButton.setAttribute('aria-label', 'Start show mode');
+                showModeModal.classList.remove('show');
+                showModeModal.setAttribute('aria-hidden', 'true');
                 document.getElementById('show-mode-status').classList.remove('visible');
                 
                 this.showNotification('Show Mode deactivated');
@@ -3314,7 +4502,7 @@ _r if isinstance(_r, str) else json.dumps(_r)
                 
                 // Show chat if AI is active
                 if (state.aiActive) {
-                    document.getElementById('ai-chat-interface').classList.add('active');
+                    this.world.aiManager.setChatOpen(true);
                 }
             }
 
@@ -3362,7 +4550,7 @@ _r if isinstance(_r, str) else json.dumps(_r)
                 
                 // Ensure chat is visible
                 if (!document.getElementById('ai-chat-interface').classList.contains('active')) {
-                    document.getElementById('ai-chat-interface').classList.add('active');
+                    this.world.aiManager.setChatOpen(true);
                 }
                 
                 // Animate companion if AI message
@@ -3577,13 +4765,14 @@ _r if isinstance(_r, str) else json.dumps(_r)
                 loadQRious().then(() => {
                     const canvas = document.createElement('canvas');
                     container.appendChild(canvas);
+                    const dark = document.documentElement.getAttribute('data-theme') === 'dark';
 
                     new window.QRious({
                         element: canvas,
                         value: url,
                         size: 250,
-                        background: 'white',
-                        foreground: 'black',
+                        background: dark ? THEME_COLORS.text : THEME_COLORS.accentFg,
+                        foreground: dark ? THEME_COLORS.accentFg : THEME_COLORS.text,
                         level: 'H'
                     });
                 }).catch(() => {
@@ -3721,10 +4910,14 @@ _r if isinstance(_r, str) else json.dumps(_r)
                 // Tab switching
                 document.querySelectorAll('.settings-tab').forEach(tab => {
                     tab.addEventListener('click', (e) => {
-                        document.querySelectorAll('.settings-tab').forEach(t => t.classList.remove('active'));
+                        document.querySelectorAll('.settings-tab').forEach(t => {
+                            t.classList.remove('active');
+                            t.setAttribute('aria-selected', 'false');
+                        });
                         document.querySelectorAll('.settings-section').forEach(s => s.classList.remove('active'));
                         
                         e.target.classList.add('active');
+                        e.target.setAttribute('aria-selected', 'true');
                         const tabName = e.target.dataset.tab;
                         document.getElementById(`${tabName}-settings`).classList.add('active');
                     });
@@ -3732,7 +4925,7 @@ _r if isinstance(_r, str) else json.dumps(_r)
 
                 // Close button
                 document.getElementById('close-settings').addEventListener('click', () => {
-                    document.getElementById('settings-panel').classList.remove('active');
+                    this.closeSettings();
                 });
 
                 // Settings button
@@ -3751,11 +4944,11 @@ _r if isinstance(_r, str) else json.dumps(_r)
                   if (ghu) {
                     const u = window.RAPP.Doorman.loadSettings().ghUser;
                     statusEl.textContent = (u && u.login) ? `Signed in as @${u.login}` : 'Signed in to GitHub Copilot';
-                    statusEl.style.color = '#3fb950';
+                    statusEl.classList.add('is-authenticated');
                     if (signoutBtn) signoutBtn.style.display = 'inline-block';
                   } else {
                     statusEl.textContent = 'Tap the sphere to summon the doorman. One-time GitHub Copilot device-code sign-in. No API key paste.';
-                    statusEl.style.color = '#9aa6b3';
+                    statusEl.classList.remove('is-authenticated');
                     if (signoutBtn) signoutBtn.style.display = 'none';
                   }
                 };
@@ -3770,9 +4963,8 @@ _r if isinstance(_r, str) else json.dumps(_r)
                   });
                 }
 
-                // Details (ⓘ) — overlays the classic front door (trade
-                // card, neighborhood pane, install) in an iframe on top
-                // of the sphere. Sphere keeps running underneath; close
+                // Details (ⓘ) — overlays the twin's existing front gate
+                // in an iframe. Sphere keeps running underneath; close
                 // returns to chat without losing context.
                 {
                   const detailsBtn = document.getElementById('details-button');
@@ -3780,19 +4972,31 @@ _r if isinstance(_r, str) else json.dumps(_r)
                   const closeBtn   = document.getElementById('rapp-classic-close');
                   const frame      = document.getElementById('rapp-classic-frame');
                   if (detailsBtn && overlay) {
+                    const closeOverlay = () => {
+                      overlay.style.display = 'none';
+                      overlay.setAttribute('aria-hidden', 'true');
+                      detailsBtn.focus();
+                    };
                     detailsBtn.addEventListener('click', () => {
                       // Lazy-load the iframe src on first open. ?seed=
                       // override propagates so the right seed renders.
-                      if (!frame.src) {
+                      if (!frame.getAttribute('src')) {
                         const params = new URLSearchParams(location.search);
                         const seed = params.get('seed');
-                        frame.src = seed
-                          ? `https://${seed.split('/')[0]}.github.io/${seed.split('/')[1]}/classic.html`
-                          : './classic.html';
+                        frame.src = seed && /^[^/]+\/[^/]+$/.test(seed)
+                          ? `https://${seed.split('/')[0]}.github.io/${seed.split('/')[1]}/front.html`
+                          : './front.html';
                       }
                       overlay.style.display = 'block';
+                      overlay.setAttribute('aria-hidden', 'false');
                     });
-                    closeBtn.addEventListener('click', () => { overlay.style.display = 'none'; });
+                    closeBtn.addEventListener('click', closeOverlay);
+                    window.addEventListener('message', (event) => {
+                      if (event.source !== frame.contentWindow || event.data?.type !== 'rapp-front-close') return;
+                      const expectedOrigin = new URL(frame.src, location.href).origin;
+                      if (event.origin !== expectedOrigin) return;
+                      closeOverlay();
+                    });
                   }
                 }
 
@@ -3825,9 +5029,11 @@ _r if isinstance(_r, str) else json.dumps(_r)
 
                 const value = this.getNestedValue(this.settings, settingPath);
                 element.classList.toggle('active', value);
+                element.setAttribute('aria-checked', String(Boolean(value)));
 
                 element.addEventListener('click', () => {
                     const isActive = element.classList.toggle('active');
+                    element.setAttribute('aria-checked', String(isActive));
                     this.setNestedValue(this.settings, settingPath, isActive);
                     this.updatePreview();
                 });
@@ -3875,8 +5081,18 @@ _r if isinstance(_r, str) else json.dumps(_r)
 
             openSettings() {
                 this.loadSettingsToUI();
-                document.getElementById('settings-panel').classList.add('active');
+                const panel = document.getElementById('settings-panel');
+                panel.classList.add('active');
+                panel.setAttribute('aria-hidden', 'false');
                 this.updatePreview();
+                document.getElementById('close-settings').focus();
+            }
+
+            closeSettings() {
+                const panel = document.getElementById('settings-panel');
+                panel.classList.remove('active');
+                panel.setAttribute('aria-hidden', 'true');
+                document.getElementById('settings-button').focus();
             }
 
             loadSettingsToUI() {
@@ -3903,6 +5119,7 @@ _r if isinstance(_r, str) else json.dumps(_r)
                 if (!element) return;
                 const value = this.getNestedValue(this.settings, settingPath);
                 element.classList.toggle('active', value);
+                element.setAttribute('aria-checked', String(Boolean(value)));
             }
 
             loadInputField(elementId, settingPath) {
@@ -3961,7 +5178,7 @@ _r if isinstance(_r, str) else json.dumps(_r)
                 document.getElementById('world-description').textContent = this.settings.world.description;
 
                 this.world.showNotification('Settings saved successfully!');
-                document.getElementById('settings-panel').classList.remove('active');
+                this.closeSettings();
             }
 
             exportSettings() {
@@ -4175,8 +5392,7 @@ _r if isinstance(_r, str) else json.dumps(_r)
             }
 
             updateParticleCount(count) {
-                // Find and update particle system
-                const particles = this.world.scene.getObjectByProperty('type', 'Points');
+                const particles = this.world.environmentParticles;
                 if (particles) {
                     const positions = new Float32Array(count * 3);
                     const colors = new Float32Array(count * 3);
@@ -4186,13 +5402,12 @@ _r if isinstance(_r, str) else json.dumps(_r)
                         positions[i + 1] = Math.random() * 30 + 5;
                         positions[i + 2] = (Math.random() - 0.5) * 80;
 
-                        colors[i] = Math.random() * 0.5 + 0.5;
-                        colors[i + 1] = Math.random() * 0.5;
-                        colors[i + 2] = Math.random() * 0.5 + 0.5;
+                        writeParticleColor(colors, i);
                     }
 
                     particles.geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
                     particles.geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+                    particles.geometry.computeBoundingSphere();
                 }
             }
         }
@@ -5129,7 +6344,7 @@ _r if isinstance(_r, str) else json.dumps(_r)
                 taskList.innerHTML = '';
 
                 if (this.conversations.size === 0) {
-                    taskList.innerHTML = '<p style="color: rgba(255, 255, 255, 0.5); text-align: center; margin-top: 20px;">No conversations loaded yet. Upload a Teacher-Learner conversation JSON to replay it in 3D space!</p>';
+                    taskList.innerHTML = '<p class="empty-state">No conversations loaded yet. Upload a Teacher-Learner conversation JSON to replay it in 3D space!</p>';
                     return;
                 }
 
@@ -5143,7 +6358,7 @@ _r if isinstance(_r, str) else json.dumps(_r)
                     
                     taskEl.innerHTML = `<strong>${appName}</strong>
                         <small>Saved: ${timestamp}</small>
-                        <div style="font-size: 0.85em; color: rgba(255, 255, 255, 0.7); margin-top: 8px;">
+                        <div class="task-meta">
                             ${messageCount} messages
                         </div>
                     `;
@@ -5185,7 +6400,7 @@ _r if isinstance(_r, str) else json.dumps(_r)
 
                 this.world.showNotification(`Starting conversation replay...`);
 
-                document.getElementById('ai-chat-interface').classList.add('active');
+                this.world.aiManager.setChatOpen(true);
 
                 const chatMessages = document.getElementById('ai-chat-messages');
                 chatMessages.innerHTML = '';
@@ -5384,6 +6599,8 @@ _r if isinstance(_r, str) else json.dumps(_r)
                         this.voiceInputManager.setPaused(true);
                         
                         pauseButton.classList.add('paused');
+                        pauseButton.setAttribute('aria-pressed', 'true');
+                        pauseButton.setAttribute('aria-label', 'Resume voice activity');
                         pauseIndicator.classList.add('active');
                         pauseText.textContent = 'Resume Voice';
                         
@@ -5393,6 +6610,8 @@ _r if isinstance(_r, str) else json.dumps(_r)
                         this.voiceInputManager.setPaused(false);
                         
                         pauseButton.classList.remove('paused');
+                        pauseButton.setAttribute('aria-pressed', 'false');
+                        pauseButton.setAttribute('aria-label', 'Pause voice activity');
                         pauseIndicator.classList.remove('active');
                         pauseText.textContent = 'Pause Voice';
                         
@@ -5516,8 +6735,13 @@ _r if isinstance(_r, str) else json.dumps(_r)
                 };
                 reset();
                 modal.style.display = 'flex';
+                modal.setAttribute('aria-hidden', 'false');
+                closeBtn.focus();
 
-                closeBtn.onclick = () => { modal.style.display = 'none'; };
+                closeBtn.onclick = () => {
+                    modal.style.display = 'none';
+                    modal.setAttribute('aria-hidden', 'true');
+                };
 
                 // Copy-to-clipboard with mobile-safe fallbacks. Clipboard
                 // API works on iOS Safari ONLY in secure contexts inside a
@@ -5551,16 +6775,21 @@ _r if isinstance(_r, str) else json.dumps(_r)
                     if (copyBtn) {
                         const original = copyBtn.innerHTML;
                         copyBtn.innerHTML = ok ? '✓ Copied' : '⚠ Copy failed — long-press the code instead';
-                        copyBtn.style.background = ok ? '#06ffa5' : '#f85149';
-                        copyBtn.style.color = ok ? '#000' : '#fff';
+                        copyBtn.classList.toggle('is-success', ok);
+                        copyBtn.classList.toggle('is-error', !ok);
                         setTimeout(() => {
                             copyBtn.innerHTML = original;
-                            copyBtn.style.background = '#21262d';
-                            copyBtn.style.color = '#c9d1d9';
+                            copyBtn.classList.remove('is-success', 'is-error');
                         }, 1800);
                     }
                 };
                 codeBox.onclick = copyCode;
+                codeBox.onkeydown = (event) => {
+                    if (event.key === 'Enter' || event.key === ' ') {
+                        event.preventDefault();
+                        copyCode();
+                    }
+                };
                 const copyBtnEl = document.getElementById('rapp-signin-copy');
                 if (copyBtnEl) copyBtnEl.onclick = copyCode;
 
@@ -5593,11 +6822,12 @@ _r if isinstance(_r, str) else json.dumps(_r)
                                     await this.ensureSeedLoaded();
                                     setTimeout(() => {
                                         modal.style.display = 'none';
+                                        modal.setAttribute('aria-hidden', 'true');
                                         this.isActive = true;
                                         this.companionButton.classList.add('active');
-                                        this.createAICompanion(true);
+                                        this.setCompanionActive(true);
                                         this.applySettingsFromManager();
-                                        this.chatInterface.classList.add('active');
+                                        this.setChatOpen(true);
                                         if (this.showNotification) this.showNotification('Doorman summoned ✨');
                                     }, 700);
                                     return;
@@ -5621,7 +6851,7 @@ _r if isinstance(_r, str) else json.dumps(_r)
             setupEventListeners() {
                 this.companionButton.addEventListener('click', () => {
                     if (this.isActive) {
-                        this.chatInterface.classList.toggle('active');
+                        this.setChatOpen(!this.chatInterface.classList.contains('active'));
                         if (this.world.showModeManager && this.world.showModeManager.isHost) {
                             this.world.showModeManager.broadcastAIInteraction('chat_opened');
                         }
@@ -5637,8 +6867,9 @@ _r if isinstance(_r, str) else json.dumps(_r)
                 });
 
                 // Update the chat input event listener for viewers
-                this.chatInput.addEventListener('keypress', (event) => {
+                this.chatInput.addEventListener('keydown', (event) => {
                     if (event.key === 'Enter') {
+                        event.preventDefault();
                         // Check if we're a viewer
                         if (this.world.showModeManager && this.world.showModeManager.isFollowing) {
                             this.sendViewerMessage();
@@ -5657,6 +6888,18 @@ _r if isinstance(_r, str) else json.dumps(_r)
                         this.sendMessage();
                     }
                 };
+
+                document.getElementById('chat-close').addEventListener('click', () => {
+                    this.setChatOpen(false);
+                });
+            }
+
+            setChatOpen(open) {
+                this.chatInterface.classList.toggle('active', open);
+                this.chatInterface.setAttribute('aria-hidden', String(!open));
+                if (open) {
+                    requestAnimationFrame(() => this.chatInput.focus());
+                }
             }
 
             // New method for viewers to send messages
@@ -5674,19 +6917,47 @@ _r if isinstance(_r, str) else json.dumps(_r)
                 }
             }
 
+            setCompanionActive(isActive) {
+                if (!this.companion) {
+                    this.createAICompanion(isActive);
+                    return;
+                }
+
+                const coreColor = threeColor(isActive ? THEME_COLORS.accent : THEME_COLORS.borderStrong);
+                const particleColor = threeColor(isActive ? THEME_COLORS.accent : THEME_COLORS.textMuted);
+                this.companion.orb.material.color.set(coreColor);
+                this.companion.orb.material.emissive.set(coreColor);
+                this.companion.particles.material.color.set(particleColor);
+                this.companion.light.color.set(coreColor);
+
+                if (isActive && this.inactiveText) {
+                    this.companion.object.remove(this.inactiveText);
+                    this.inactiveText.geometry.dispose();
+                    this.inactiveText.material.dispose();
+                    this.inactiveText = null;
+                }
+            }
+
             createAICompanion(isActive = false) {
+                if (this.companion) {
+                    this.setCompanionActive(isActive);
+                    return;
+                }
+
                 const companionGroup = new THREE.Group();
 
                 // Glowing orb - using simpler materials for better performance
-                const geometry = new THREE.SphereGeometry(1.5, 16, 16); // Reduced segments
+                const sphereSegments = this.world.isMobile ? 12 : 16;
+                const geometry = new THREE.SphereGeometry(1.5, sphereSegments, sphereSegments);
+                const coreColor = threeColor(isActive ? THEME_COLORS.accent : THEME_COLORS.borderStrong);
                 const material = new THREE.MeshStandardMaterial({
-                    color: isActive ? 0x06ffa5 : 0x666666,
-                    emissive: isActive ? 0x06ffa5 : 0x666666,
-                    emissiveIntensity: 0.5,
-                    metalness: 0.8,
-                    roughness: 0.2,
+                    color: coreColor,
+                    emissive: coreColor,
+                    emissiveIntensity: 0.3,
+                    metalness: 0.35,
+                    roughness: 0.45,
                     transparent: true,
-                    opacity: 0.8
+                    opacity: 0.92
                 });
 
                 const orb = new THREE.Mesh(geometry, material);
@@ -5698,7 +6969,7 @@ _r if isinstance(_r, str) else json.dumps(_r)
                 orb.userData.isCompanion = true;
 
                 // Glow effect
-                const glowLight = new THREE.PointLight(isActive ? 0x06ffa5 : 0x666666, 2, 10);
+                const glowLight = new THREE.PointLight(coreColor, 1.6, 9, 2);
                 glowLight.position.y = 4;
                 companionGroup.add(glowLight);
 
@@ -5718,12 +6989,13 @@ _r if isinstance(_r, str) else json.dumps(_r)
                 }
 
                 particleGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+                particleGeometry.attributes.position.setUsage(THREE.StaticDrawUsage);
 
                 const particleMaterial = new THREE.PointsMaterial({
-                    color: isActive ? 0x8338ec : 0x444444,
+                    color: threeColor(isActive ? THEME_COLORS.accent : THEME_COLORS.textMuted),
                     size: 0.1,
                     transparent: true,
-                    opacity: 0.6
+                    opacity: 0.55
                 });
 
                 const particles = new THREE.Points(particleGeometry, particleMaterial);
@@ -5773,29 +7045,24 @@ _r if isinstance(_r, str) else json.dumps(_r)
 
                 // Load font for 3D text
                 this.loadFont();
-
-                // Animate companion
-                this.animateCompanion();
             }
 
             createInactiveText(font, companionGroup) {
                 const textGeometry = new THREE.TextGeometry('Tap to summon', {
                     font: font,
                     size: 0.5,
-                    height: 0.1,
-                    curveSegments: 8, // Reduced for performance
-                    bevelEnabled: true,
-                    bevelThickness: 0.02,
-                    bevelSize: 0.02,
-                    bevelSegments: 4 // Reduced for performance
+                    height: 0.05,
+                    curveSegments: 4,
+                    bevelEnabled: false
                 });
 
                 textGeometry.center();
 
                 const textMaterial = new THREE.MeshStandardMaterial({
-                    color: 0xff6a00,
-                    emissive: 0xff6a00,
-                    emissiveIntensity: 0.3
+                    color: threeColor(THEME_COLORS.accent),
+                    emissive: threeColor(THEME_COLORS.accent),
+                    emissiveIntensity: 0.2,
+                    roughness: 0.55
                 });
 
                 this.inactiveText = new THREE.Mesh(textGeometry, textMaterial);
@@ -5816,49 +7083,30 @@ _r if isinstance(_r, str) else json.dumps(_r)
                 }
             }
 
-            animateCompanion() {
-                const animate = () => {
-                    if (!this.companion) return;
+            updateCompanion(time) {
+                if (!this.companion) return;
 
-                    const time = Date.now() * 0.001;
+                const motion = reducedMotion ? 0 : 1;
+                this.companion.orb.position.y = 4 + Math.sin(time * 2) * 0.3 * motion;
+                this.companion.particles.rotation.y = time * 0.5 * motion;
+                this.companion.light.intensity = 1.6 + Math.sin(time * 3) * 0.35 * motion;
 
-                    // Float animation
-                    this.companion.orb.position.y = 4 + Math.sin(time * 2) * 0.3;
+                if (this.textContainer) {
+                    this.textContainer.lookAt(this.world.camera.position);
+                }
 
-                    // Rotate particles
-                    this.companion.particles.rotation.y = time * 0.5;
+                if (this.persistentTextGroup) {
+                    this.persistentTextGroup.lookAt(this.world.camera.position);
+                }
 
-                    // Pulse glow
-                    this.companion.light.intensity = 2 + Math.sin(time * 3) * 0.5;
+                if (this.inactiveText) {
+                    this.inactiveText.rotation.y = Math.sin(time) * 0.08 * motion;
+                    this.inactiveText.position.y = 6 + Math.sin(time * 3) * 0.08 * motion;
+                }
 
-                    // Make text containers face camera
-                    if (this.textContainer) {
-                        this.textContainer.lookAt(this.world.camera.position);
-                    }
-                    
-                    if (this.persistentTextGroup) {
-                        this.persistentTextGroup.lookAt(this.world.camera.position);
-                    }
-
-                    // Rotate inactive text if present
-                    if (this.inactiveText) {
-                        this.inactiveText.rotation.y = Math.sin(time) * 0.1;
-                        this.inactiveText.position.y = 6 + Math.sin(time * 3) * 0.1;
-                    }
-
-                    // Update companion to active state when activated
-                    if (this.isActive && this.companion && this.inactiveText) {
-                        this.companion.orb.material.color.setHex(0x06ffa5);
-                        this.companion.orb.material.emissive.setHex(0x06ffa5);
-                        this.companion.light.color.setHex(0x06ffa5);
-                        this.companion.object.remove(this.inactiveText);
-                        this.inactiveText = null;
-                    }
-
-                    requestAnimationFrame(animate);
-                };
-
-                animate();
+                if (this.isActive && this.inactiveText) {
+                    this.setCompanionActive(true);
+                }
             }
 
             async sendToAPI(message) {
@@ -5982,11 +7230,11 @@ _r if isinstance(_r, str) else json.dumps(_r)
 
                 const lineHeight = 0.8;
                 const textMaterial = new THREE.MeshStandardMaterial({
-                    color: 0xffffff,
-                    emissive: 0x06ffa5,
-                    emissiveIntensity: 0.5,
-                    metalness: 0.5,
-                    roughness: 0.3,
+                    color: threeColor(THEME_COLORS.text),
+                    emissive: threeColor(THEME_COLORS.accent),
+                    emissiveIntensity: 0.25,
+                    metalness: 0.15,
+                    roughness: 0.6,
                     transparent: true,
                     opacity: 1
                 });
@@ -5995,12 +7243,9 @@ _r if isinstance(_r, str) else json.dumps(_r)
                     const textGeometry = new THREE.TextGeometry(line, {
                         font: this.font,
                         size: 0.4,
-                        height: 0.05,
-                        curveSegments: 8, // Reduced for performance
-                        bevelEnabled: true,
-                        bevelThickness: 0.01,
-                        bevelSize: 0.01,
-                        bevelSegments: 4 // Reduced for performance
+                        height: 0.035,
+                        curveSegments: 4,
+                        bevelEnabled: false
                     });
 
                     textGeometry.center();
@@ -6095,11 +7340,11 @@ _r if isinstance(_r, str) else json.dumps(_r)
 
                 const lineHeight = 0.6;
                 const persistentMaterial = new THREE.MeshStandardMaterial({
-                    color: 0xffffff,
-                    emissive: 0x06ffa5,
-                    emissiveIntensity: 0.2,
-                    metalness: 0.3,
-                    roughness: 0.5,
+                    color: threeColor(THEME_COLORS.text),
+                    emissive: threeColor(THEME_COLORS.accent),
+                    emissiveIntensity: 0.12,
+                    metalness: 0.1,
+                    roughness: 0.7,
                     transparent: true,
                     opacity: 0.8
                 });
@@ -6108,12 +7353,9 @@ _r if isinstance(_r, str) else json.dumps(_r)
                     const textGeometry = new THREE.TextGeometry(line, {
                         font: this.font,
                         size: 0.3,
-                        height: 0.03,
-                        curveSegments: 6, // Reduced for performance
-                        bevelEnabled: true,
-                        bevelThickness: 0.01,
-                        bevelSize: 0.01,
-                        bevelSegments: 3 // Reduced for performance
+                        height: 0.025,
+                        curveSegments: 3,
+                        bevelEnabled: false
                     });
 
                     textGeometry.center();
@@ -6156,19 +7398,27 @@ _r if isinstance(_r, str) else json.dumps(_r)
             }
 
             animateCompanionSpeaking() {
-                if (!this.companion) return;
+                if (!this.companion || reducedMotion) return;
 
                 const originalScale = this.companion.orb.scale.x;
+                const originalLightIntensity = this.companion.light.intensity;
+                const originalEmissiveIntensity = this.companion.orb.material.emissiveIntensity;
                 let progress = 0;
                 const animate = () => {
                     progress += 0.1;
-                    if (progress > 1) return;
+                    if (progress > 1) {
+                        this.companion.orb.scale.setScalar(originalScale);
+                        this.companion.light.intensity = originalLightIntensity;
+                        this.companion.orb.material.emissiveIntensity = originalEmissiveIntensity;
+                        return;
+                    }
 
                     const scale = originalScale + Math.sin(progress * Math.PI) * 0.3;
                     this.companion.orb.scale.setScalar(scale);
 
-                    this.companion.light.intensity = 3 + Math.sin(progress * Math.PI * 2) * 1;
-                    this.companion.orb.material.emissiveIntensity = 0.5 + Math.sin(progress * Math.PI) * 0.3;
+                    this.companion.light.intensity = originalLightIntensity + Math.sin(progress * Math.PI * 2);
+                    this.companion.orb.material.emissiveIntensity =
+                        originalEmissiveIntensity + Math.sin(progress * Math.PI) * 0.25;
 
                     requestAnimationFrame(animate);
                 };
@@ -6408,6 +7658,10 @@ _r if isinstance(_r, str) else json.dumps(_r)
                 this.raycaster = new THREE.Raycaster();
                 this.mouse = new THREE.Vector2();
                 this.clock = new THREE.Clock();
+                this.environmentParticles = null;
+                this.pointerDirty = false;
+                this.companionWorldPosition = new THREE.Vector3();
+                this.resizeFrame = null;
 
                 this.isMobile = isMobile;
                 this.isIOS = isIOS;
@@ -6463,21 +7717,26 @@ _r if isinstance(_r, str) else json.dumps(_r)
 
             setupScene() {
                 this.scene = new THREE.Scene();
+                this.scene.background = WORLD_ATTRIBUTES.skyColor.clone();
                 this.scene.fog = new THREE.Fog(WORLD_ATTRIBUTES.fogColor, WORLD_ATTRIBUTES.fogNear, WORLD_ATTRIBUTES.fogFar);
 
-                this.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+                this.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 250);
                 this.camera.position.set(0, WORLD_ATTRIBUTES.cameraPositionY, WORLD_ATTRIBUTES.cameraPositionZ);
                 this.camera.lookAt(0, 3, 0);
 
                 this.renderer = new THREE.WebGLRenderer({ 
-                    antialias: true, 
-                    alpha: true,
+                    antialias: !this.isMobile,
+                    alpha: false,
+                    stencil: false,
                     powerPreference: "high-performance"
                 });
                 this.renderer.setSize(window.innerWidth, window.innerHeight);
-                this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-                this.renderer.shadowMap.enabled = true;
-                this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+                this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, this.isMobile ? 1.25 : 1.75));
+                this.renderer.outputEncoding = THREE.sRGBEncoding;
+                this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
+                this.renderer.toneMappingExposure = 1;
+                this.renderer.shadowMap.enabled = false;
+                this.renderer.domElement.setAttribute('aria-label', 'Interactive 3D twin');
                 document.getElementById('three-container').appendChild(this.renderer.domElement);
             }
 
@@ -6485,13 +7744,12 @@ _r if isinstance(_r, str) else json.dumps(_r)
                 const ambientLight = new THREE.AmbientLight(WORLD_ATTRIBUTES.ambientColor, 0.6);
                 this.scene.add(ambientLight);
 
-                const dirLight = new THREE.DirectionalLight(0x8338ec, 0.8);
+                const dirLight = new THREE.DirectionalLight(threeColor(THEME_COLORS.accent), 0.55);
                 dirLight.position.set(10, 20, 10);
-                dirLight.castShadow = true;
                 this.scene.add(dirLight);
 
                 // Add spotlight focused on where companion will be
-                const spotLight = new THREE.SpotLight(0x06ffa5, 1, 30, Math.PI / 6, 0.5, 2);
+                const spotLight = new THREE.SpotLight(threeColor(THEME_COLORS.accent), 0.8, 30, Math.PI / 6, 0.5, 2);
                 spotLight.position.set(0, 10, -5);
                 spotLight.target.position.set(0, 0, -WORLD_ATTRIBUTES.companionDistance);
                 this.scene.add(spotLight);
@@ -6499,43 +7757,29 @@ _r if isinstance(_r, str) else json.dumps(_r)
             }
 
             createEnvironment() {
-                // Ground with grid pattern - optimized geometry
-                const groundGeometry = new THREE.PlaneGeometry(100, 100, 25, 25); // Reduced segments
-                const groundMaterial = new THREE.MeshStandardMaterial({
-                    color: WORLD_ATTRIBUTES.groundColor,
-                    roughness: 0.8,
-                    metalness: 0.2,
-                    wireframe: true,
-                    transparent: true,
-                    opacity: 0.3
-                });
-
-                const ground = new THREE.Mesh(groundGeometry, groundMaterial);
-                ground.rotation.x = -Math.PI / 2;
-                ground.receiveShadow = true;
-                this.scene.add(ground);
+                const grid = new THREE.GridHelper(
+                    100,
+                    this.isMobile ? 18 : 24,
+                    threeColor(THEME_COLORS.accent),
+                    WORLD_ATTRIBUTES.groundColor
+                );
+                grid.material.transparent = true;
+                grid.material.opacity = 0.4;
+                grid.material.depthWrite = false;
+                grid.material.toneMapped = false;
+                this.scene.add(grid);
 
                 // Solid ground beneath
                 const solidGroundGeometry = new THREE.PlaneGeometry(100, 100);
-                const solidGroundMaterial = new THREE.MeshStandardMaterial({
-                    color: 0x0a0a0f,
-                    roughness: 1,
-                    metalness: 0
+                const solidGroundMaterial = new THREE.MeshBasicMaterial({
+                    color: threeColor(THEME_COLORS.elevated)
                 });
+                solidGroundMaterial.toneMapped = false;
 
                 const solidGround = new THREE.Mesh(solidGroundGeometry, solidGroundMaterial);
                 solidGround.rotation.x = -Math.PI / 2;
                 solidGround.position.y = -0.1;
                 this.scene.add(solidGround);
-
-                // Sky sphere - optimized geometry
-                const skyGeometry = new THREE.SphereGeometry(200, 16, 16); // Reduced segments
-                const skyMaterial = new THREE.MeshBasicMaterial({
-                    color: WORLD_ATTRIBUTES.skyColor,
-                    side: THREE.BackSide
-                });
-                const sky = new THREE.Mesh(skyGeometry, skyMaterial);
-                this.scene.add(sky);
 
                 // Floating particles
                 const particleGeometry = new THREE.BufferGeometry();
@@ -6548,60 +7792,60 @@ _r if isinstance(_r, str) else json.dumps(_r)
                     positions[i + 1] = Math.random() * 30 + 5;
                     positions[i + 2] = (Math.random() - 0.5) * 80;
 
-                    // Random colors in purple/cyan range
-                    colors[i] = Math.random() * 0.5 + 0.5;
-                    colors[i + 1] = Math.random() * 0.5;
-                    colors[i + 2] = Math.random() * 0.5 + 0.5;
+                    writeParticleColor(colors, i);
                 }
 
                 particleGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
                 particleGeometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+                particleGeometry.attributes.position.setUsage(THREE.StaticDrawUsage);
+                particleGeometry.attributes.color.setUsage(THREE.StaticDrawUsage);
 
                 const particleMaterial = new THREE.PointsMaterial({
-                    size: 0.2,
+                    size: this.isMobile ? 0.16 : 0.2,
                     transparent: true,
-                    opacity: 0.8,
+                    opacity: 0.7,
                     vertexColors: true,
                     blending: THREE.AdditiveBlending
                 });
 
                 const particles = new THREE.Points(particleGeometry, particleMaterial);
                 this.scene.add(particles);
+                this.environmentParticles = particles;
             }
 
             setupEventListeners() {
                 window.addEventListener('resize', () => {
-                    this.camera.aspect = window.innerWidth / window.innerHeight;
-                    this.camera.updateProjectionMatrix();
-                    this.renderer.setSize(window.innerWidth, window.innerHeight);
+                    if (this.resizeFrame) return;
+                    this.resizeFrame = requestAnimationFrame(() => {
+                        this.resizeFrame = null;
+                        this.camera.aspect = window.innerWidth / window.innerHeight;
+                        this.camera.updateProjectionMatrix();
+                        this.renderer.setSize(window.innerWidth, window.innerHeight);
+                        this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, this.isMobile ? 1.25 : 1.75));
+                    });
                 });
 
-                // Mouse move for hover detection
-                window.addEventListener('mousemove', (event) => {
-                    this.mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-                    this.mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
-                    
-                    this.checkHover();
-                });
+                this.renderer.domElement.addEventListener('pointermove', (event) => {
+                    this.updatePointer(event.clientX, event.clientY);
+                    this.pointerDirty = true;
+                }, { passive: true });
 
-                // Click event
-                this.renderer.domElement.addEventListener('click', (event) => {
-                    this.mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-                    this.mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
-                    
+                this.renderer.domElement.addEventListener('pointerup', (event) => {
+                    this.updatePointer(event.clientX, event.clientY);
                     this.checkClick();
                 });
+            }
 
-                // Touch events for mobile
-                if (this.isMobile) {
-                    this.renderer.domElement.addEventListener('touchstart', (event) => {
-                        const touch = event.touches[0];
-                        this.mouse.x = (touch.clientX / window.innerWidth) * 2 - 1;
-                        this.mouse.y = -(touch.clientY / window.innerHeight) * 2 + 1;
-                        
-                        this.checkClick();
-                    });
-                }
+            updatePointer(clientX, clientY) {
+                this.mouse.x = (clientX / window.innerWidth) * 2 - 1;
+                this.mouse.y = -(clientY / window.innerHeight) * 2 + 1;
+            }
+
+            companionIntersections() {
+                const orb = this.aiManager && this.aiManager.companion && this.aiManager.companion.orb;
+                if (!orb) return [];
+                this.raycaster.setFromCamera(this.mouse, this.camera);
+                return this.raycaster.intersectObject(orb, false);
             }
 
             checkHover() {
@@ -6610,36 +7854,22 @@ _r if isinstance(_r, str) else json.dumps(_r)
                     return;
                 }
                 
-                this.raycaster.setFromCamera(this.mouse, this.camera);
-                const intersects = this.raycaster.intersectObjects(this.scene.children, true);
-
-                let foundCompanion = false;
-
-                for (const intersect of intersects) {
-                    if (intersect.object.userData.isCompanion) {
-                        foundCompanion = true;
-                        this.renderer.domElement.style.cursor = 'pointer';
-                        
-                        // Show tooltip
-                        const vector = new THREE.Vector3();
-                        intersect.object.getWorldPosition(vector);
-                        vector.project(this.camera);
-                        
-                        const x = (vector.x * 0.5 + 0.5) * window.innerWidth;
-                        const y = (-(vector.y * 0.5) + 0.5) * window.innerHeight;
-                        
-                        this.tooltip.style.left = x + 'px';
-                        this.tooltip.style.top = (y - 40) + 'px';
-                        this.tooltip.classList.add('visible');
-                        
-                        break;
-                    }
-                }
-
-                if (!foundCompanion) {
+                const intersections = this.companionIntersections();
+                if (intersections.length === 0) {
                     this.renderer.domElement.style.cursor = 'default';
                     this.tooltip.classList.remove('visible');
+                    return;
                 }
+
+                this.renderer.domElement.style.cursor = 'pointer';
+                intersections[0].object.getWorldPosition(this.companionWorldPosition);
+                this.companionWorldPosition.project(this.camera);
+
+                const x = (this.companionWorldPosition.x * 0.5 + 0.5) * window.innerWidth;
+                const y = (-(this.companionWorldPosition.y * 0.5) + 0.5) * window.innerHeight;
+                this.tooltip.style.left = x + 'px';
+                this.tooltip.style.top = (y - 44) + 'px';
+                this.tooltip.classList.add('visible');
             }
 
             checkClick() {
@@ -6648,26 +7878,19 @@ _r if isinstance(_r, str) else json.dumps(_r)
                     return;
                 }
                 
-                this.raycaster.setFromCamera(this.mouse, this.camera);
-                const intersects = this.raycaster.intersectObjects(this.scene.children, true);
+                if (this.companionIntersections().length === 0) return;
 
-                for (const intersect of intersects) {
-                    if (intersect.object.userData.isCompanion) {
-                        if (this.aiManager.isActive) {
-                            // Open chat interface
-                            document.getElementById('ai-chat-interface').classList.add('active');
-                            if (this.showModeManager && this.showModeManager.isHost) {
-                                this.showModeManager.broadcastAIInteraction('chat_opened');
-                            }
-                        } else {
-                            // Implicit summon — same handler the floating
-                            // companion-button uses. Tap the orb in 3D
-                            // space → device-code sign-in modal opens.
-                            // No API-key panel.
-                            this.aiManager.summonDoorman();
-                        }
-                        break;
+                if (this.aiManager.isActive) {
+                    this.aiManager.setChatOpen(true);
+                    if (this.showModeManager && this.showModeManager.isHost) {
+                        this.showModeManager.broadcastAIInteraction('chat_opened');
                     }
+                } else {
+                    // Implicit summon — same handler the floating
+                    // companion-button uses. Tap the orb in 3D
+                    // space → device-code sign-in modal opens.
+                    // No API-key panel.
+                    this.aiManager.summonDoorman();
                 }
             }
 
@@ -6689,11 +7912,18 @@ _r if isinstance(_r, str) else json.dumps(_r)
 
                 const time = this.clock.getElapsedTime();
 
-                // Animate particles
-                const particles = this.scene.getObjectByProperty('type', 'Points');
-                if (particles) {
-                    particles.rotation.y = time * 0.05;
-                    particles.position.y = Math.sin(time * 0.2) * 2;
+                if (this.pointerDirty && !this.isMobile) {
+                    this.pointerDirty = false;
+                    this.checkHover();
+                }
+
+                if (this.environmentParticles && !reducedMotion) {
+                    this.environmentParticles.rotation.y = time * 0.05;
+                    this.environmentParticles.position.y = Math.sin(time * 0.2) * 2;
+                }
+
+                if (this.aiManager) {
+                    this.aiManager.updateCompanion(time);
                 }
 
                 // Update show mode

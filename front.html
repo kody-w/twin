@@ -2,50 +2,206 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>@kody-w's twin — front gate</title>
 <meta name="description" content="Front-gate trio for @kody-w's digital twin: tether QR + holocard + 7-word incantation. All three resolve to the same rappid.">
 <link rel="canonical" href="https://kody-w.github.io/twin/front.html">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ctext y='26' font-size='28'%3E🧬%3C/text%3E%3C/svg%3E">
+<script>
+  (() => {
+    const param = new URLSearchParams(window.location.search).get("scoutTheme");
+    const theme =
+      param || (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+    document.documentElement.setAttribute("data-theme", theme);
+  })();
+</script>
 <style>
-* { box-sizing: border-box; margin: 0; padding: 0; }
 :root {
-  --bg: #0d1117; --s1: #161b22; --s2: #21262d; --bd: #30363d;
-  --tx: #e6edf3; --dim: #8b949e; --mut: #6e7681;
-  --acc: #58a6ff; --grn: #3fb950; --org: #d29922; --pur: #d2a8ff;
+  color-scheme: light;
+  --cp-bg: #f7f4ef;
+  --cp-bg-elevated: #fcfbf8;
+  --cp-surface: #ffffff;
+  --cp-surface-soft: #f5f5f5;
+  --cp-border: #dedede;
+  --cp-border-strong: #919191;
+  --cp-text: #242424;
+  --cp-text-muted: #5c5c5c;
+  --cp-text-soft: #6f6f6f;
+  --cp-accent: #b11f4b;
+  --cp-accent-hover: #9a1a41;
+  --cp-accent-soft: rgba(177, 31, 75, 0.08);
+  --cp-accent-fg: #ffffff;
+  --cp-success: #16a34a;
+  --cp-danger: #dc2626;
+  --cp-warning: #f59e0b;
+  --cp-link: #0078d4;
+  --cp-shadow: 0 18px 48px rgba(0, 0, 0, 0.12);
+  --cp-overlay: rgba(255, 255, 255, 0.8);
+  --cp-panel: rgba(255, 255, 255, 0.86);
+  --cp-panel-strong: rgba(255, 255, 255, 0.96);
+  --cp-sheen: rgba(255, 255, 255, 0.55);
+  --cp-highlight: rgba(177, 31, 75, 0.12);
 }
-body { font-family: -apple-system, system-ui, sans-serif; background: var(--bg); color: var(--tx); margin: 0; line-height: 1.5; }
-.shell { max-width: 880px; margin: 0 auto; padding: 48px 22px; }
-header h1 { font-size: 1.6rem; margin-bottom: 8px; display: flex; align-items: center; gap: 10px; }
-header .tag { color: var(--dim); margin-bottom: 18px; }
-.rappid-line { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 0.74rem; color: var(--acc); word-break: break-all; background: var(--s1); padding: 10px 14px; border-radius: 8px; border: 1px solid var(--bd); margin-bottom: 24px; }
-.trio { display: grid; gap: 18px; grid-template-columns: 1fr; }
-@media (min-width: 720px) { .trio { grid-template-columns: 1fr 1fr; } }
-@media (min-width: 1000px) { .trio { grid-template-columns: 1fr 1fr 1fr; } }
-.panel { background: var(--s1); border: 1px solid var(--bd); border-radius: 12px; padding: 20px; text-align: center; }
-.panel h2 { font-size: 0.78rem; color: var(--dim); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 14px; }
-#qr-canvas { background: #fff; padding: 8px; border-radius: 8px; }
-.qr-fallback { background: #fff; color: #000; padding: 12px; border-radius: 8px; font-family: monospace; font-size: 0.7rem; word-break: break-all; }
-.holocard { background: linear-gradient(180deg, #161b22, #0d1117); border: 2px solid var(--acc); border-radius: 10px; padding: 14px; font-size: 0.86rem; text-align: left; }
-.holocard.tier-official { border-color: var(--org); }
-.holocard.tier-verified { border-color: var(--grn); }
-.holocard .row { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 4px; }
+html[data-theme="dark"] {
+  color-scheme: dark;
+  --cp-bg: #3d3b3a;
+  --cp-bg-elevated: #343231;
+  --cp-surface: #292929;
+  --cp-surface-soft: #2e2e2e;
+  --cp-border: #474747;
+  --cp-border-strong: #5f5f5f;
+  --cp-text: #dedede;
+  --cp-text-muted: #919191;
+  --cp-text-soft: #b0b0b0;
+  --cp-accent: #fd8ea1;
+  --cp-accent-hover: #fb7b91;
+  --cp-accent-soft: rgba(253, 142, 161, 0.14);
+  --cp-accent-fg: #1a1a1a;
+  --cp-success: #4ade80;
+  --cp-danger: #f87171;
+  --cp-warning: #fbbf24;
+  --cp-link: #4da6ff;
+  --cp-shadow: 0 18px 48px rgba(0, 0, 0, 0.32);
+  --cp-overlay: rgba(41, 41, 41, 0.88);
+  --cp-panel: rgba(41, 41, 41, 0.72);
+  --cp-panel-strong: rgba(41, 41, 41, 0.96);
+  --cp-sheen: rgba(255, 255, 255, 0.04);
+  --cp-highlight: rgba(253, 142, 161, 0.12);
+}
+:root {
+  --cp-card-shadow:
+    0 0 2px color-mix(in srgb, var(--cp-text) 12%, transparent),
+    0 1px 2px color-mix(in srgb, var(--cp-text) 14%, transparent);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { min-height: 100%; }
+body {
+  margin: 0;
+  background: var(--cp-bg);
+  color: var(--cp-text);
+  font-family: "Segoe UI", Aptos, Calibri, -apple-system, BlinkMacSystemFont, sans-serif;
+  line-height: 1.5;
+}
+a { color: var(--cp-link); }
+a:hover { color: var(--cp-accent); }
+a:focus-visible { outline: 2px solid var(--cp-accent); outline-offset: 3px; }
+.shell { max-width: 1040px; margin: 0 auto; padding: clamp(32px, 7vw, 72px) 20px; }
+header {
+  max-width: 720px;
+  margin-bottom: 24px;
+}
+header h1 {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+  font-size: clamp(1.7rem, 5vw, 2.4rem);
+  line-height: 1.15;
+}
+header .tag { color: var(--cp-text-muted); }
+.rappid-line {
+  margin-bottom: 24px;
+  padding: 12px 14px;
+  border: 1px solid var(--cp-border);
+  border-radius: 0.625rem;
+  background: var(--cp-bg-elevated);
+  color: var(--cp-accent);
+  box-shadow: var(--cp-card-shadow);
+  font-family: Consolas, "Courier New", Courier, monospace;
+  font-size: 0.74rem;
+  word-break: break-all;
+  user-select: text;
+}
+.trio {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+.panel {
+  min-width: 0;
+  padding: 22px;
+  border: 1px solid var(--cp-border);
+  border-radius: 16px;
+  background: var(--cp-surface);
+  box-shadow: var(--cp-card-shadow);
+  text-align: center;
+}
+.panel h2 {
+  margin-bottom: 16px;
+  color: var(--cp-text-muted);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+#qr-canvas {
+  max-width: 100%;
+  height: auto;
+  padding: 8px;
+  border: 1px solid var(--cp-border);
+  border-radius: 0.625rem;
+  background: var(--cp-surface);
+}
+.qr-fallback {
+  padding: 12px;
+  border: 1px solid var(--cp-border);
+  border-radius: 0.625rem;
+  background: var(--cp-surface);
+  color: var(--cp-text);
+  font-family: Consolas, "Courier New", Courier, monospace;
+  font-size: 0.7rem;
+  word-break: break-all;
+}
+.holocard {
+  padding: 14px;
+  border: 2px solid var(--cp-accent);
+  border-radius: 0.625rem;
+  background: var(--cp-bg-elevated);
+  font-size: 0.86rem;
+  text-align: left;
+}
+.holocard.tier-official { border-color: var(--cp-warning); }
+.holocard.tier-verified { border-color: var(--cp-success); }
+.holocard .row { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; margin-bottom: 4px; }
 .holocard .name { font-weight: 700; font-size: 1rem; }
-.holocard .tier { font-size: 0.62rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
-.holocard .type-line { font-size: 0.7rem; color: var(--mut); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
-.holocard .stats { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 6px; margin: 8px 0; }
-.holocard .stat { background: rgba(0,0,0,0.3); border-radius: 4px; padding: 4px 6px; font-size: 0.7rem; text-align: center; }
-.holocard .stat .v { font-weight: 700; color: var(--acc); }
-.holocard .stat .k { color: var(--mut); font-size: 0.6rem; }
-.holocard .types { display: flex; gap: 6px; flex-wrap: wrap; margin: 6px 0; }
-.holocard .type { font-size: 0.62rem; font-weight: 700; padding: 2px 7px; border-radius: 999px; background: var(--bd); color: var(--tx); }
-.holocard .flavor { font-style: italic; font-size: 0.74rem; color: var(--dim); margin: 8px 0; padding: 6px 0; border-top: 1px dashed var(--bd); border-bottom: 1px dashed var(--bd); }
-.holocard .meta { font-size: 0.62rem; color: var(--mut); font-family: ui-monospace, monospace; margin-top: 6px; }
-.incantation { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 1.1rem; color: var(--acc); letter-spacing: 0.4px; line-height: 1.6; background: rgba(0,0,0,0.4); padding: 14px; border-radius: 8px; border: 1px dashed var(--acc); margin: 8px 0; word-break: break-word; }
-.hint { font-size: 0.74rem; color: var(--mut); margin-top: 10px; line-height: 1.4; }
-.hint a { color: var(--acc); text-decoration: none; }
-footer { margin-top: 36px; font-size: 0.82rem; color: var(--mut); text-align: center; }
-footer a { color: var(--acc); }
+.holocard .tier { color: var(--cp-text-muted); font-size: 0.62rem; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; }
+.holocard .tier.official { color: var(--cp-warning); }
+.holocard .tier.verified { color: var(--cp-success); }
+.holocard .type-line { margin-bottom: 8px; color: var(--cp-text-soft); font-size: 0.7rem; letter-spacing: 0.05em; text-transform: uppercase; }
+.holocard .stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; margin: 8px 0; }
+.holocard .stat { padding: 5px 6px; border: 1px solid var(--cp-border); border-radius: 0.625rem; background: var(--cp-surface); font-size: 0.7rem; text-align: center; }
+.holocard .stat.hp { grid-column: span 4; border-color: var(--cp-success); background: color-mix(in srgb, var(--cp-success) 8%, var(--cp-surface)); }
+.holocard .stat .v { color: var(--cp-accent); font-weight: 700; }
+.holocard .stat.hp .v { color: var(--cp-success); }
+.holocard .stat .k { color: var(--cp-text-muted); font-size: 0.6rem; }
+.holocard .types { display: flex; flex-wrap: wrap; gap: 6px; margin: 6px 0; }
+.holocard .type { padding: 2px 7px; border: 1px solid var(--cp-border); border-radius: 999px; background: var(--cp-surface); color: var(--cp-text); font-size: 0.62rem; font-weight: 700; }
+.holocard .flavor { margin: 8px 0; padding: 6px 0; border-block: 1px dashed var(--cp-border); color: var(--cp-text-muted); font-size: 0.74rem; font-style: italic; }
+.holocard .meta { margin-top: 6px; color: var(--cp-text-muted); font-family: Consolas, "Courier New", Courier, monospace; font-size: 0.62rem; }
+.incantation {
+  margin: 8px 0;
+  padding: 14px;
+  border: 1px dashed var(--cp-accent);
+  border-radius: 0.625rem;
+  background: var(--cp-accent-soft);
+  color: var(--cp-accent);
+  font-family: Consolas, "Courier New", Courier, monospace;
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  line-height: 1.65;
+  word-break: break-word;
+  user-select: text;
+}
+.hint { margin-top: 12px; color: var(--cp-text-muted); font-size: 0.76rem; line-height: 1.45; }
+.hint a { text-decoration: none; }
+footer { margin-top: 32px; color: var(--cp-text-muted); font-size: 0.82rem; text-align: center; }
+@media (max-width: 860px) { .trio { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 620px) {
+  .shell { padding-inline: 14px; }
+  .trio { grid-template-columns: 1fr; }
+  .panel { padding: 20px 16px; }
+}
 </style>
 </head>
 <body>
@@ -68,22 +224,22 @@ footer a { color: var(--acc); }
 
   <div class="panel">
     <h2>🎴 Holocard</h2>
-    <div id="holocard-target"><div style="color:var(--mut);font-style:italic">loading card.json…</div></div>
+    <div id="holocard-target"><div class="hint"><em>loading card.json…</em></div></div>
     <p class="hint">Visual identity from <code>card.json</code> (rapp-card/1.1.2).</p>
   </div>
 
   <div class="panel">
     <h2>🔮 Incantation</h2>
     <div class="incantation" id="incantation-target">…</div>
-    <p class="hint">Memorize these 7 words. Spin them on any RAPP tether's <a href="https://kody-w.github.io/RAPP/pages/tether.html">Dial wheel</a> to summon this twin — no network needed for the resolution itself.</p>
+    <p class="hint">Memorize these 7 words. Spin them on any RAPP tether's <a href="https://kody-w.github.io/RAPP/pages/tether.html" target="_blank" rel="noopener">Dial wheel</a> to summon this twin — no network needed for the resolution itself.</p>
   </div>
 
 </div>
 
 <footer>
-  <p><a href="index.html">← back to the twin's interactive UI</a> ·
-     <a href="https://github.com/kody-w/twin">source</a> ·
-     <a href="https://kody-w.github.io/RAPP/pages/tether.html">public tether</a></p>
+  <p><a href="index.html" id="back-to-twin">← back to the twin's interactive UI</a> ·
+     <a href="https://github.com/kody-w/twin" target="_blank" rel="noopener">source</a> ·
+     <a href="https://kody-w.github.io/RAPP/pages/tether.html" target="_blank" rel="noopener">public tether</a></p>
 </footer>
 
 </div>
@@ -92,6 +248,13 @@ footer a { color: var(--acc); }
 <script>
 const MNEMONIC_URL = 'https://raw.githubusercontent.com/kody-w/RAR/main/rapp_sdk.py';
 const MNEMONIC_CACHE = 'rapp.mnemonic.words.v1';
+
+if (window.self !== window.top) {
+  document.getElementById('back-to-twin').addEventListener('click', (event) => {
+    event.preventDefault();
+    window.parent.postMessage({ type: 'rapp-front-close' }, '*');
+  });
+}
 
 async function fetchMnemonic() {
   try { const c = localStorage.getItem(MNEMONIC_CACHE); if (c) { const a = JSON.parse(c); if (a.length === 1024) return a; } } catch (e) {}
@@ -121,17 +284,17 @@ function renderHolocard(card) {
   const statBlocks = ['atk','def','spd','int']
     .filter(k => stats[k] !== undefined)
     .map(k => `<div class="stat"><div class="v">${stats[k]}</div><div class="k">${k.toUpperCase()}</div></div>`).join('');
-  const hp = card.hp !== undefined ? `<div class="stat" style="grid-column:span 4;background:rgba(63,185,80,0.15)"><div class="v" style="color:var(--grn)">HP ${card.hp}</div></div>` : '';
+  const hp = card.hp !== undefined ? `<div class="stat hp"><div class="v">HP ${card.hp}</div></div>` : '';
   return `<div class="holocard tier-${tier}">
     <div class="row">
       <span class="name">${card.display_name || card.name || card.title || '?'}</span>
-      <span class="tier" style="color:var(--${tier==='official'?'org':tier==='verified'?'grn':'mut'})">${tier}</span>
+      <span class="tier ${tier}">${tier}</span>
     </div>
     <div class="type-line">${card.type_line || card.category || (card.agent_types||[]).join(' / ') || ''}</div>
     ${types ? `<div class="types">${types}</div>` : ''}
     ${(statBlocks || hp) ? `<div class="stats">${hp}${statBlocks}</div>` : ''}
-    ${card.flavor || card.title ? `<div class="flavor">"${card.flavor || card.title}"</div>` : ''}
-    <div class="meta">seed=${(card.seed||'?').toString().slice(0,16)}… · v${card.version||'?'}</div>
+    ${card.flavor || card.flavor_text || card.title ? `<div class="flavor">"${card.flavor || card.flavor_text || card.title}"</div>` : ''}
+    <div class="meta">seed=${(card.seed||'?').toString().slice(0,16)}… · v${card.version || card.meta?.version || '?'}</div>
   </div>`;
 }
 
@@ -148,7 +311,16 @@ async function boot() {
                   : 'https://kody-w.github.io/twin');
   const url = base + '/.well-known/twin.egg';
   if (typeof QRious !== 'undefined') {
-    new QRious({ element: document.getElementById('qr-canvas'), value: url, size: 200, background: '#ffffff', foreground: '#000000', level: 'M' });
+    const styles = getComputedStyle(document.documentElement);
+    const dark = document.documentElement.getAttribute('data-theme') === 'dark';
+    new QRious({
+      element: document.getElementById('qr-canvas'),
+      value: url,
+      size: 200,
+      background: styles.getPropertyValue(dark ? '--cp-text' : '--cp-accent-fg').trim(),
+      foreground: styles.getPropertyValue(dark ? '--cp-accent-fg' : '--cp-text').trim(),
+      level: 'M'
+    });
   } else {
     const c = document.getElementById('qr-canvas');
     c.outerHTML = `<div class="qr-fallback">QRious offline — paste this:<br><b>${url}</b></div>`;
@@ -160,7 +332,7 @@ async function boot() {
   if (card) {
     document.getElementById('holocard-target').innerHTML = renderHolocard(card);
   } else {
-    document.getElementById('holocard-target').innerHTML = '<div style="color:var(--mut);font-style:italic">card.json missing or unreachable</div>';
+    document.getElementById('holocard-target').innerHTML = '<div class="hint"><em>card.json missing or unreachable</em></div>';
   }
   let incantation = card?.incantation;
   if (!incantation && rappidData?.rappid) {
