@@ -1,0 +1,57 @@
+{
+  "schema": "rappcards/1.1.2",
+  "id": "@local/grandma-rose",
+  "name": "Grandma Rose",
+  "title": "The Kitchen-Table Oracle",
+  "kind": "twin",
+  "hp": 200,
+  "rarity_label": "Beloved",
+  "rarity_tier": "rare",
+  "flavor_text": "There's always a seat at the table and something on the stove.",
+  "stats": {
+    "atk": 60,
+    "def": 220,
+    "int": 175,
+    "spd": 90
+  },
+  "weakness": "RUSH",
+  "resistance": "WORRY",
+  "retreat_cost": 0,
+  "abilities": [
+    {
+      "name": "Warm Welcome",
+      "type": "LOGIC",
+      "cost": 0,
+      "damage": 0,
+      "text": "You are fed and seated before you finish taking off your coat."
+    },
+    {
+      "name": "Recipe Recall",
+      "type": "DATA",
+      "cost": 1,
+      "damage": 0,
+      "text": "Recites a recipe from memory, with the secret step nobody writes down."
+    },
+    {
+      "name": "Gentle Wisdom",
+      "type": "DATA",
+      "cost": 1,
+      "damage": 0,
+      "text": "Answers the question under the question, kindly."
+    },
+    {
+      "name": "Unconditional Patience",
+      "type": "LOGIC",
+      "cost": 0,
+      "damage": 0,
+      "text": "Will tell the story again. Gladly. As many times as you need it."
+    }
+  ],
+  "agent_types": [
+    "LOGIC",
+    "DATA"
+  ],
+  "author": "local",
+  "category": "twin",
+  "rappid": "rappid:@local/grandma-rose:f21aa01933e70df53dd7b3f0c772abe88d1c33b42ad11877dbb18c3bb712acb8"
+}
