@@ -1,5 +1,5 @@
 {
-"count": 39,
+"count": 47,
 "note": "Every frame is an object addressed by its frame_hash. payload_hash and rappid resolve here too. The key is the address.",
 "objects": {
 "0037d641326e6a0bca4c6ff1": {
@@ -19,6 +19,12 @@
 "path": "objects/04/04ce246a7a8e6fdc367c6f9664780335.json",
 "seq": 3,
 "snapshot": "org-aims"
+},
+"060d84530afac0f9e4b163070242392c": {
+"kind": "frame.particle",
+"path": "objects/76/76967f3d9de99e430bd7a4f0fb2d8bac.json",
+"seq": 0,
+"snapshot": "grandma-rose"
 },
 "0925fe1fb60a3912a9f64fc8": {
 "kind": "frame.wave",
@@ -92,11 +98,29 @@
 "seq": 3,
 "snapshot": "org-aims"
 },
+"2563d8d3a6f0311af6c7b78385140515": {
+"kind": "frame.wave",
+"path": "objects/25/2563d8d3a6f0311af6c7b78385140515.json",
+"seq": 6,
+"snapshot": "grandma-rose"
+},
+"26a03e0e9411f5becd9749943d4eeb90": {
+"kind": "frame.wave",
+"path": "objects/26/26a03e0e9411f5becd9749943d4eeb90.json",
+"seq": 5,
+"snapshot": "grandma-rose"
+},
 "2873cc79b1a06487b915f31e": {
 "kind": "frame.wave",
 "path": "objects/28/2873cc79b1a06487b915f31e.json",
 "seq": 3,
 "snapshot": "twin"
+},
+"2dcf14f296e5fe3d584a590f3aab0d6f": {
+"kind": "frame.particle",
+"path": "objects/e2/e23e79c29a09658b0fb425e51ea75cab.json",
+"seq": 7,
+"snapshot": "grandma-rose"
 },
 "2f41b40f8fe8fbeaba1fcc82": {
 "kind": "frame.wave",
@@ -182,11 +206,29 @@
 "seq": 2,
 "snapshot": "self"
 },
+"51759ed8e5cfe919cff5303a64b0c9f3": {
+"kind": "frame.wave",
+"path": "objects/51/51759ed8e5cfe919cff5303a64b0c9f3.json",
+"seq": 3,
+"snapshot": "grandma-rose"
+},
+"571595d036e396036fe12ac410960f7f": {
+"kind": "frame.particle",
+"path": "objects/25/2563d8d3a6f0311af6c7b78385140515.json",
+"seq": 6,
+"snapshot": "grandma-rose"
+},
 "59666ed2c3cda5f18c245e7e66a530cc": {
 "kind": "frame.wave",
 "path": "objects/59/59666ed2c3cda5f18c245e7e66a530cc.json",
 "seq": 6,
 "snapshot": "org-aims"
+},
+"59a5a06e2d96bb42d877088f15851890": {
+"kind": "frame.wave",
+"path": "objects/59/59a5a06e2d96bb42d877088f15851890.json",
+"seq": 4,
+"snapshot": "grandma-rose"
 },
 "5b122452107ab940d55038f5f9caa814": {
 "kind": "frame.particle",
@@ -235,6 +277,12 @@
 "path": "objects/50/508ed342d6e42664bf6ec73a9ea85eca.json",
 "seq": 2,
 "snapshot": "self"
+},
+"76967f3d9de99e430bd7a4f0fb2d8bac": {
+"kind": "frame.wave",
+"path": "objects/76/76967f3d9de99e430bd7a4f0fb2d8bac.json",
+"seq": 0,
+"snapshot": "grandma-rose"
 },
 "7cadb4b209b6a01981b6fec5aff01544": {
 "kind": "frame.particle",
@@ -290,6 +338,12 @@
 "seq": 6,
 "snapshot": "twin"
 },
+"a4fabe40f033afe960a06bb51c95e4c6": {
+"kind": "frame.particle",
+"path": "objects/59/59a5a06e2d96bb42d877088f15851890.json",
+"seq": 4,
+"snapshot": "grandma-rose"
+},
 "a6062691a91fbf92badf6f2f28151aac": {
 "kind": "frame.wave",
 "path": "objects/a6/a6062691a91fbf92badf6f2f28151aac.json",
@@ -320,11 +374,29 @@
 "seq": 7,
 "snapshot": "org-aims"
 },
+"b0d3a5f781f2df20d3396700432a4348": {
+"kind": "frame.wave",
+"path": "objects/b0/b0d3a5f781f2df20d3396700432a4348.json",
+"seq": 1,
+"snapshot": "grandma-rose"
+},
+"b0efb5c4cc81cf2158c3bbdb281c705d": {
+"kind": "frame.particle",
+"path": "objects/bc/bca687caaa0447188e2f196d14e65ee8.json",
+"seq": 2,
+"snapshot": "grandma-rose"
+},
 "b9b57d8572d5d457d126f730319623f1": {
 "kind": "frame.wave",
 "path": "objects/b9/b9b57d8572d5d457d126f730319623f1.json",
 "seq": 2,
 "snapshot": "enders-game"
+},
+"bca687caaa0447188e2f196d14e65ee8": {
+"kind": "frame.wave",
+"path": "objects/bc/bca687caaa0447188e2f196d14e65ee8.json",
+"seq": 2,
+"snapshot": "grandma-rose"
 },
 "bcf4d25bd2da9bc9e4eaec000efee467": {
 "kind": "frame.particle",
@@ -440,6 +512,18 @@
 "seq": 5,
 "snapshot": "twin"
 },
+"e23e79c29a09658b0fb425e51ea75cab": {
+"kind": "frame.wave",
+"path": "objects/e2/e23e79c29a09658b0fb425e51ea75cab.json",
+"seq": 7,
+"snapshot": "grandma-rose"
+},
+"e761bb80acb06ec0af110fb5449a0e7f": {
+"kind": "frame.particle",
+"path": "objects/b0/b0d3a5f781f2df20d3396700432a4348.json",
+"seq": 1,
+"snapshot": "grandma-rose"
+},
 "ea4cc3eac557ae2305314ab271d7721b": {
 "kind": "frame.wave",
 "path": "objects/ea/ea4cc3eac557ae2305314ab271d7721b.json",
@@ -458,6 +542,12 @@
 "seq": 7,
 "snapshot": "enders-game"
 },
+"f43d78e167e2a505d85e06d6c4577480": {
+"kind": "frame.particle",
+"path": "objects/26/26a03e0e9411f5becd9749943d4eeb90.json",
+"seq": 5,
+"snapshot": "grandma-rose"
+},
 "f73b3f6abab7cad9e7dcdf7bae7ae6e6": {
 "kind": "frame.particle",
 "path": "objects/9f/9f77e7da2f299b00d92e38458663503f.json",
@@ -470,6 +560,12 @@
 "seq": 4,
 "snapshot": "self"
 },
+"fdfbd290232b3ca04c6df052eef9daa3": {
+"kind": "frame.particle",
+"path": "objects/51/51759ed8e5cfe919cff5303a64b0c9f3.json",
+"seq": 3,
+"snapshot": "grandma-rose"
+},
 "rappid:@kody-w/twin:5714cdf964b6a6936b44420aa8e8589b2ee9342e10810cdf12fc3c7be7667c30": {
 "kind": "twin.rappid",
 "path": "snapshots/twin/",
@@ -479,6 +575,11 @@
 "kind": "twin.rappid",
 "path": "snapshots/enders-game/",
 "snapshot": "enders-game"
+},
+"rappid:@local/grandma-rose:f21aa01933e70df53dd7b3f0c772abe88d1c33b42ad11877dbb18c3bb712acb8": {
+"kind": "twin.rappid",
+"path": "snapshots/grandma-rose/",
+"snapshot": "grandma-rose"
 },
 "rappid:@local/org-aims:c18a8c85eb274a1ebe87654493f5883db07d40a627056eb2f982dfbf40a1bac8": {
 "kind": "twin.rappid",

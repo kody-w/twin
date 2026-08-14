@@ -1,0 +1,8 @@
+{
+  "schema": "rapp-rappid/2.0",
+  "rappid": "rappid:@local/grandma-rose:f21aa01933e70df53dd7b3f0c772abe88d1c33b42ad11877dbb18c3bb712acb8",
+  "name": "grandma-rose",
+  "kind": "twin",
+  "display_name": "Grandma Rose",
+  "url": "https://raw.githubusercontent.com/kody-w/twin/main/snapshots/grandma-rose/"
+}
