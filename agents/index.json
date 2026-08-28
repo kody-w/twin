@@ -24,6 +24,14 @@
     "download_url": "https://raw.githubusercontent.com/kody-w/twin/main/agents/founder_voice_agent.py"
   },
   {
+    "name": "index.json",
+    "path": "agents/index.json",
+    "sha": "c6de8ef69dd065b6cae6dd14cc5234e978451df1",
+    "size": 1689,
+    "type": "file",
+    "download_url": "https://raw.githubusercontent.com/kody-w/twin/main/agents/index.json"
+  },
+  {
     "name": "operations_agent.py",
     "path": "agents/operations_agent.py",
     "sha": "171d0f2c7d4833567184da1c1db135c9af63b7be",
