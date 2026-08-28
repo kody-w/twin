@@ -1,0 +1,50 @@
+[
+  {
+    "name": "basic_agent.py",
+    "path": "agents/basic_agent.py",
+    "sha": "e55e5054a33e9306430774100a64c049cde22ebc",
+    "size": 2614,
+    "type": "file",
+    "download_url": "https://raw.githubusercontent.com/kody-w/twin/main/agents/basic_agent.py"
+  },
+  {
+    "name": "customer_inquiry_agent.py",
+    "path": "agents/customer_inquiry_agent.py",
+    "sha": "e6c8b33d243a62364be7622535513dd4851b24d9",
+    "size": 3267,
+    "type": "file",
+    "download_url": "https://raw.githubusercontent.com/kody-w/twin/main/agents/customer_inquiry_agent.py"
+  },
+  {
+    "name": "founder_voice_agent.py",
+    "path": "agents/founder_voice_agent.py",
+    "sha": "4dadbf3fcb78075c86506b0e43465258e8f20c17",
+    "size": 2962,
+    "type": "file",
+    "download_url": "https://raw.githubusercontent.com/kody-w/twin/main/agents/founder_voice_agent.py"
+  },
+  {
+    "name": "operations_agent.py",
+    "path": "agents/operations_agent.py",
+    "sha": "171d0f2c7d4833567184da1c1db135c9af63b7be",
+    "size": 2624,
+    "type": "file",
+    "download_url": "https://raw.githubusercontent.com/kody-w/twin/main/agents/operations_agent.py"
+  },
+  {
+    "name": "pitch_agent.py",
+    "path": "agents/pitch_agent.py",
+    "sha": "798649ef258c80dbbb5ad571893275d1b2257bcf",
+    "size": 2733,
+    "type": "file",
+    "download_url": "https://raw.githubusercontent.com/kody-w/twin/main/agents/pitch_agent.py"
+  },
+  {
+    "name": "private_context_agent.py",
+    "path": "agents/private_context_agent.py",
+    "sha": "db860146355e80dff8dfb74af28b6eb01f9ba388",
+    "size": 6270,
+    "type": "file",
+    "download_url": "https://raw.githubusercontent.com/kody-w/twin/main/agents/private_context_agent.py"
+  }
+]

@@ -6833,6 +6833,22 @@ async function onPwaInstalled() {
     return r !== null;
   }
 
+  // Static Data Covenant (RAR CONSTITUTION.md Article XXIV): listing a
+  // summoned twin's agents/ directory used to always call api.github.com,
+  // unauthenticated. Any RAPP twin/rappid repo that publishes its own
+  // agents/index.json (see scripts/harvest-agents-index.mjs — this repo
+  // does) is now read as a static snapshot from raw.githubusercontent.com
+  // instead, in the identical contents-API list shape so the caller's
+  // `.filter(a => a.type === 'file' ...)` logic is unchanged either way.
+  // Summon can target ANY public repo, so a repo that hasn't published that
+  // manifest yet still falls back to the live listing call — a static
+  // snapshot in THIS repo can't pre-harvest another repo's directory.
+  async function listAgentsDir(ref) {
+    const snapshot = await fetchJson(rawUrl(ref, 'agents/index.json'));
+    if (Array.isArray(snapshot)) return snapshot;
+    return fetchJson(`https://api.github.com/repos/${ref}/contents/agents?ref=main`, true);
+  }
+
   // ── Summon orchestrator ──────────────────────────────────────────────
   async function summon() {
     const ref = parseSummon();
@@ -6847,8 +6863,7 @@ async function onPwaInstalled() {
 
     const [soulTxt, agentList] = await Promise.all([
       fetchText(rawUrl(ref, 'soul.md')),
-      // agents/ contents listing — public if repo is public; uses PAT if set
-      fetchJson(`https://api.github.com/repos/${ref}/contents/agents?ref=main`, true),
+      listAgentsDir(ref),
     ]);
 
     const privateCompanion = rappidJson.private_companion || null;
