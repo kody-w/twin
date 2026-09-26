@@ -16,7 +16,7 @@ This repo is dual-purpose:
 | [`vault/`](./vault/) | **Obsidian-formatted brain notes.** See [`vault/00 Index/Home.md`](./vault/00%20Index/Home.md) for the entry point |
 | [`agents/`](./agents/) | Twin-specific cartridges (extends BasicAgent) |
 | `brainstem.py`, `utils/`, `installer/` | Bundled runtime — runnable as a self-contained variant |
-| [`tests/`](./tests/) | The 57-test unittest suite (lineage, eggs, peer registry, estate endpoints) |
+| [`tests/`](./tests/) | The unittest suites (lineage, eggs, peer registry, estate endpoints, offline pulse integrity) |
 
 ## The vault
 
@@ -71,7 +71,7 @@ bash ~/.brainstem/src/rapp_brainstem/start.sh
 
 For the richer twin (this brain repo's depth), make sure your local environment has a GitHub token reachable via `WAH_PRIVATE_TOKEN` env > `GITHUB_TOKEN` env > `gh auth token` CLI.
 
-## The pulse — this repo is a DOG (`rapp-twin-pulse/1.0`)
+## The pulse — this repo is a DOG (`rapp/1`)
 
 This repo is a **DOG — a Distributed Object, Global**: the twin's public
 **bones**, broadcast to the whole planet as static, SHA-chained, optionally
@@ -81,37 +81,65 @@ read. **Bones only — never sensitive data.** The private half of the twin
 Device); it fuses the public bones with your private data and **never leaves
 the device**. Only bones ever go up.
 
-The pulse conforms to `rapp-twin-pulse/1.0`: each
-frame is a **`rapp-frame/2.0`** object with **`kind: "twin.pulse"`**. A frame's
-identity is `sha256` = **SHA-256 over the RFC 8785 (JCS) canonical serialization
-of its `payload`**, and `parent_sha` chains each frame to the one before it into
-an append-only history. Because the canonical form is byte-reproducible across
-runtimes (a checked-in JCS golden vector proves it), a Python `brainstem.py` and
-a browser Pyodide `vbrainstem` derive the **same** `sha256` — the chain verifies
-anywhere.
+The active pulse uses the **eleven-key `rapp/1` envelope** with
+**`kind: "twin.pulse"`**, matching the bundled recorder in
+[`utils/frames.py`](./utils/frames.py). Its two addresses are
+`payload_hash = H("rapp/1:particle", payload)` and
+`frame_hash = H("rapp/1:wave", frame without frame_hash and sig)`, where
+`H(domain, value) = SHA-256(UTF-8(domain) + LF + JCS(value))`.
+`prev` links to the previous **`payload_hash`**, never its wave hash or a
+retired `sha256` field. `seq` starts at zero and is contiguous; `utc` is
+calendar-valid `YYYY-MM-DDTHH:MM:SS.mmmZ` and never goes backwards.
+`stream_id` binds each frame to this twin; `prev_wave` is null on this
+non-swarm stream. The checked-in JCS golden vector keeps canonical bytes
+reproducible across runtimes.
 
 | Surface | What it is |
 |---|---|
-| [`feed.json`](./feed.json) | The subscription entry point — `kind: twin.pulse.feed`, the newest **N = 64** frames, `head_sha`, `count`, `twin_id`. |
-| [`frames/<seq>.json`](./frames/) | The full immutable frame for each `seq` (genesis is `0.json`, `parent_sha: null`). Full history is kept forever. |
-| [`feed.xml`](./feed.xml) | An **Atom mirror** of `feed.json` — one `<entry>` per frame with `<id>` = that frame's `sha256`, so any RSS reader can subscribe to the twin. |
+| [`feed.json`](./feed.json) | The subscription entry point — `spec: rapp/1`, `kind: twin.pulse.feed`, newest **N = 64** frames, `head_hash` = final **`frame_hash`**, `count`, matching `twin_id` / `stream_id`. |
+| [`frames/<seq>.json`](./frames/) | The full immutable current frame for each `seq` (genesis is `0.json`, `prev: null`). Existing files are never overwritten. |
+| [`feed.xml`](./feed.xml) | Atom output refreshed by the next authorized mint. New `<entry>` IDs are **`frame_hash`** values, so identical-payload heartbeats remain distinct entries. |
 | [`bones/`](./bones/) | The curated **public projection** the pulse broadcasts: `soul.md`, public card stats, facets, rappid, public notes. No PII, no `vault/`. |
-| [`keys/pulse.ed25519.pub`](./keys/pulse.ed25519.pub) | The committed public key. A signed frame verifies against it; the private half (`keys/*.key`) is gitignored and never travels. |
+| [`keys/pulse.ed25519.pub`](./keys/pulse.ed25519.pub) | Historical Ed25519 public key; not a RAPP/1 JWS trust source. Private keys (`keys/*.key`) stay gitignored and never travel. |
 
-Signing is **optional** — identity is content-addressed by SHA-256, so a twin
-with no keypair is a first-class twin. Attach a `sig` when you need *authorship*
-proof. The tooling is pure-stdlib Python:
+Signing is **optional** at the protocol level. This pure-stdlib, offline
+tooling supports **unsigned current frames**, matching the published chain:
 
 ```bash
 python3 scripts/pulse_verify.py     # recompute the whole chain; exit 0 iff intact
-python3 scripts/pulse_sign.py       # diff bones/, mint the next frame, refresh feed.json + feed.xml
-python3 scripts/pulse_sign.py --sign  # also attach a detached Ed25519 signature
+python3 scripts/pulse_sign.py --no-sign  # diff bones/, mint the next current frame, refresh both feeds
+python3 scripts/pulse_sign.py --no-sign --allow-empty  # mint a heartbeat
 ```
 
-`pulse_verify.py` recomputes every `sha256` from `payload`, walks `parent_sha`
-from genesis, verifies any present signature against the committed pubkey, and
-checks the JCS golden vector — **flipping a single byte in any frame makes it
-exit non-zero.**
+`pulse_verify.py` checks the envelope, both hashes, the particle chain from
+genesis, and the exact latest-64 feed window. Payload or envelope tampering,
+gaps, stale feed heads, unknown schemas, and malformed JSON exit non-zero.
+Verification reads only; it does not regenerate or repair artifacts.
+
+RAPP/1 signatures require **registry-backed detached JWS**, not the old
+`{"alg": "ed25519", "sig": ...}` object. Until that trust path is implemented,
+`--sign`, automatic signing when a legacy key exists, and verification of any
+present signature fail explicitly. `--no-sign` bypasses legacy-key detection;
+no private key is read, generated, or rotated. `--ts` (or `PULSE_TS`) accepts
+whole-second or millisecond UTC input and emits the fixed millisecond form.
+
+**Active versus historical:** the Python commands handle only integer-named
+current frames. The sealed `rapp-frame/2.0` history in
+[`frames/legacy/`](./frames/legacy/) and superseded originals in
+[`frames/attic/`](./frames/attic/) are never traversed or rewritten.
+Legacy/unknown schemas in the active directory are refused, not converted.
+The separate `tools/verify-frame.mjs` / `tools/verify-chain.mjs` estate tools
+retain their historical `<seq>-<sha8>.json` cartridge verification contract;
+they are **not** verifiers for the current pulse. Do not use the historical
+`tools/seed-frame.mjs` / `tools/pulse.mjs` to extend the current chain.
+The checked-in `feed.xml` still reflects the sealed legacy history;
+`feed.json` and `frames/<seq>.json` are the current integrity source.
+
+Offline regression coverage uses only synthetic chains and temporary repos:
+
+```bash
+python3 -m unittest discover -s tests -p 'test_pulse.py' -v
+```
 
 ### The hydra read path
 
