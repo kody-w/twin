@@ -1,43 +1,52 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""pulse_lib — shared, STDLIB-ONLY core for the rapp-twin-pulse/1.0 DOG.
+"""pulse_lib — shared, STDLIB-ONLY core for the current rapp/1 twin.pulse DOG.
 
-This module is the single source of truth for the two things that MUST be
-byte-reproducible across every runtime (CPython here, Pyodide/JS on the
-vbrainstem carrier):
+The eleven-key envelope and domain-separated particle/wave hashes match
+utils/frames.py. ``prev`` always links to the preceding particle, while the
+feed head and Atom entry IDs identify waves. Sealed legacy schemas are never
+interpreted as current frames.
 
-  1. RFC 8785 JSON Canonicalization Scheme (JCS)  -> the bytes we SHA-256.
-  2. SHA-256 over JCS(payload)                    -> the frame identity.
-
-It also carries a pure-Python Ed25519 (RFC 8032) implementation so the OPTIONAL
-detached signature path needs no third-party dependency, and the frame / feed /
-Atom builders that shape the static DOG broadcast surface.
-
-Spec: 04-SPEC-rapp-twin-pulse.md  (rapp-frame/2.0, kind twin.pulse).
+The retained Ed25519 primitives are not a RAPP/1 signing implementation.
+Current signatures require registry-backed detached JWS; this offline tool
+refuses them rather than trusting the legacy key/signature representation.
 
 Bones rule (load-bearing): payloads MUST NOT contain bare floats. Integers or
 strings only, so no runtime can reformat a number and silently fork the chain.
 `canonicalize()` raises on a float rather than guess an ES number form.
 """
 
+import datetime
 import hashlib
 import json
 import os
 import re
 
 # ---------------------------------------------------------------------------
-# Constants (the wire contract). twin_id + kernel_version are fixed by the
-# order and MUST NOT drift; kernel_version sits OUTSIDE payload so it never
-# affects sha256 (spec 2.2).
+# Constants for the published current pulse; historical archives are read-only.
 # ---------------------------------------------------------------------------
-SPEC = "rapp-frame/2.0"
+SPEC = "rapp/1"
+LEGACY_SPECS = ("rapp-frame/2.0", "rapp-frame/2.1")
 FRAME_KIND = "twin.pulse"
 FEED_KIND = "twin.pulse.feed"
 TWIN_ID = "rappid:@kody-w/twin:5714cdf964b6a6936b44420aa8e8589b2ee9342e10810cdf12fc3c7be7667c30"
-KERNEL_VERSION = "0.6.0"
 N = 64  # feed window: newest N frames live in feed.json; frames/ keeps all.
 
 BASE_RAW = "https://raw.githubusercontent.com/kody-w/twin/main"
+FRAME_KEYS = frozenset((
+    "spec", "kind", "stream_id", "seq", "utc", "payload", "payload_hash",
+    "frame_hash", "prev", "prev_wave", "sig",
+))
+FEED_KEYS = frozenset((
+    "spec", "kind", "twin_id", "stream_id", "head_hash", "count", "frames",
+))
+SIGNATURE_ERROR = (
+    "rapp/1 signatures require registry-backed detached JWS; "
+    "legacy Ed25519 keys/signatures are unsupported by this offline pulse tool"
+)
+_UTC_RE = re.compile(r"[0-9]{4}-[0-9]{2}-[0-9]{2}T"
+                     r"[0-9]{2}:[0-9]{2}:[0-9]{2}\.[0-9]{3}Z")
+_HASH_RE = re.compile(r"[0-9a-f]{64}")
 
 # ===========================================================================
 # 1. RFC 8785 (JCS) canonicalization  -- the canonical form is the contract.
@@ -111,13 +120,141 @@ def canonicalize(obj):
 
 
 def payload_sha256(payload):
-    """Lowercase-hex SHA-256 over JCS(payload). This is the frame identity."""
+    """Plain JCS digest for golden-vector diagnostics, NOT a rapp/1 address."""
     return hashlib.sha256(canonicalize(payload)).hexdigest()
 
 
+def content_hash(domain, value):
+    """The same RAPP/1 H(domain, value) rule as utils/frames.py::_H."""
+    return hashlib.sha256(
+        domain.encode('utf-8') + b'\n' + canonicalize(value)).hexdigest()
+
+
+def frame_hash(frame):
+    return content_hash("rapp/1:wave", {
+        key: value for key, value in frame.items()
+        if key not in ("frame_hash", "sig")
+    })
+
+
+def require_current_schema(value, label="frame"):
+    """Dispatch explicitly: only current frames/feeds enter the active path."""
+    if not isinstance(value, dict):
+        raise ValueError("%s must be a JSON object" % label)
+    spec = value.get("spec")
+    if spec == SPEC:
+        return
+    if spec in LEGACY_SPECS:
+        raise ValueError(
+            "%s: legacy schema %r is sealed, not supported by active pulse "
+            "tooling; keep historical inputs under frames/legacy/" % (label, spec))
+    raise ValueError("%s: unsupported schema %r; expected %r" % (label, spec, SPEC))
+
+
+def validate_utc(utc):
+    if not isinstance(utc, str) or not _UTC_RE.fullmatch(utc):
+        raise ValueError("utc must be YYYY-MM-DDTHH:MM:SS.mmmZ")
+    try:
+        datetime.datetime.strptime(utc, "%Y-%m-%dT%H:%M:%S.%fZ")
+    except ValueError as exc:
+        raise ValueError("utc is not a calendar-valid UTC timestamp: %r" % utc) from exc
+
+
+def normalize_utc(utc):
+    """Accept the old CLI's whole seconds, but emit exact millisecond UTC."""
+    if not isinstance(utc, str):
+        raise ValueError("utc must be a UTC timestamp string")
+    match = re.fullmatch(
+        r"([0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2})"
+        r"(?:\.([0-9]{1,3}))?Z", utc)
+    if not match:
+        raise ValueError("utc must be RFC-3339 UTC with at most millisecond precision")
+    result = match.group(1) + "." + (match.group(2) or "").ljust(3, "0") + "Z"
+    validate_utc(result)
+    return result
+
+
+def validate_frame(frame, stream_id=TWIN_ID):
+    require_current_schema(frame)
+    if set(frame) != FRAME_KEYS:
+        raise ValueError(
+            "expected exactly eleven rapp/1 envelope keys (missing=%s, extra=%s)"
+            % (sorted(FRAME_KEYS - set(frame)), sorted(set(frame) - FRAME_KEYS)))
+    if frame["kind"] != FRAME_KIND:
+        raise ValueError("kind must be %r" % FRAME_KIND)
+    if frame["stream_id"] != stream_id:
+        raise ValueError("stream_id must be %r" % stream_id)
+    seq = frame["seq"]
+    if type(seq) is not int or not 0 <= seq <= 2 ** 53 - 1:
+        raise ValueError("seq must be an integer in 0..2^53-1")
+    validate_utc(frame["utc"])
+    if not isinstance(frame["payload"], dict):
+        raise ValueError("payload must be a JSON object")
+    for key in ("payload_hash", "frame_hash", "prev"):
+        value = frame[key]
+        if key == "prev" and value is None:
+            continue
+        if not isinstance(value, str) or not _HASH_RE.fullmatch(value):
+            raise ValueError("%s must be a lowercase 64-hex hash" % key)
+    if frame["prev_wave"] is not None:
+        raise ValueError("prev_wave must be null for this non-swarm pulse")
+    if content_hash("rapp/1:particle", frame["payload"]) != frame["payload_hash"]:
+        raise ValueError("payload_hash does not match H('rapp/1:particle', payload)")
+    if frame_hash(frame) != frame["frame_hash"]:
+        raise ValueError("frame_hash does not match H('rapp/1:wave', envelope)")
+    verify_frame_sig(frame, None)
+
+
+def validate_chain(frames, stream_id=TWIN_ID):
+    previous = None
+    for seq, frame in enumerate(frames):
+        try:
+            validate_frame(frame, stream_id)
+            if frame["seq"] != seq:
+                raise ValueError("seq gap/mismatch: expected %d, got %r"
+                                 % (seq, frame["seq"]))
+            expected = previous["payload_hash"] if previous else None
+            if frame["prev"] != expected:
+                raise ValueError("prev must link to the preceding payload_hash "
+                                 "(null at genesis)")
+            if previous and frame["utc"] < previous["utc"]:
+                raise ValueError("utc must not precede the previous frame's utc")
+        except ValueError as exc:
+            tag = frame.get("seq", seq) if isinstance(frame, dict) else seq
+            raise ValueError("frames/%s.json: %s" % (tag, exc)) from exc
+        previous = frame
+
+
+def validate_feed(feed, twin_id=TWIN_ID):
+    require_current_schema(feed, "feed")
+    if set(feed) != FEED_KEYS:
+        raise ValueError("feed keys must be %s (head_hash identifies the wave)"
+                         % ", ".join(sorted(FEED_KEYS)))
+    if feed["kind"] != FEED_KIND:
+        raise ValueError("feed.kind must be %r" % FEED_KIND)
+    if feed["twin_id"] != twin_id:
+        raise ValueError("feed.twin_id must be %r" % twin_id)
+    if feed["stream_id"] != twin_id:
+        raise ValueError("feed.stream_id must be %r" % twin_id)
+    frames = feed["frames"]
+    if not isinstance(frames, list):
+        raise ValueError("feed.frames must be an array")
+    if type(feed["count"]) is not int or feed["count"] != len(frames):
+        raise ValueError("feed.count must equal len(frames)")
+    if len(frames) > N:
+        raise ValueError("feed window exceeds N=%d" % N)
+    for frame in frames:
+        validate_frame(frame, twin_id)
+    seqs = [frame["seq"] for frame in frames]
+    if seqs != sorted(set(seqs)):
+        raise ValueError("feed.frames must have unique ascending seq values")
+    expected = frames[-1]["frame_hash"] if frames else None
+    if feed["head_hash"] != expected:
+        raise ValueError("feed.head_hash must equal the last frame_hash")
+
+
 # ===========================================================================
-# 2. Ed25519 (RFC 8032) — pure stdlib. OPTIONAL authorship proof only;
-#    identity is sha-based and never depends on a key (spec 8.3).
+# 2. Legacy Ed25519 (RFC 8032) primitives, not RAPP/1 JWS authentication.
 # ===========================================================================
 _b = 256
 _q = 2 ** 255 - 19
@@ -267,9 +404,11 @@ def load_bones(bones_dir):
         for fn in sorted(files):
             full = os.path.join(root, fn)
             rel = os.path.relpath(full, bones_dir).replace(os.sep, '/')
-            with open(full, 'r', encoding='utf-8') as f:
-                raw = f.read()
-            state[rel] = json.loads(raw) if fn.endswith('.json') else raw
+            if fn.endswith('.json'):
+                state[rel] = load_json(full)
+            else:
+                with open(full, 'r', encoding='utf-8') as f:
+                    state[rel] = f.read()
     return state
 
 
@@ -294,8 +433,16 @@ def replay(frames):
     ``patch`` is intentionally not replayed here."""
     state = {}
     for fr in frames:
-        for path, op in fr['payload']['bones'].items():
+        require_current_schema(fr)
+        payload = fr.get('payload')
+        if not isinstance(payload, dict) or not isinstance(payload.get('bones'), dict):
+            raise ValueError("replay: payload.bones must be an object")
+        for path, op in payload['bones'].items():
+            if not isinstance(op, dict) or 'op' not in op:
+                raise ValueError("replay: invalid bones operation at %s" % path)
             kind = op['op']
+            if kind in ('set', 'merge') and 'value' not in op:
+                raise ValueError("replay: %s operation missing value at %s" % (kind, path))
             if kind == 'set':
                 state[path] = op['value']
             elif kind == 'delete':
@@ -323,53 +470,52 @@ def diff_ops(prev_state, cur_state):
 # ===========================================================================
 # 4. Frame / feed / Atom builders.
 # ===========================================================================
-def build_frame(seq, ops, parent_sha, ts,
-                twin_id=TWIN_ID, kernel_version=KERNEL_VERSION):
+def build_frame(seq, ops, prev, utc, stream_id=TWIN_ID):
     payload = {'bones': ops}
     frame = {
         'spec': SPEC,
         'kind': FRAME_KIND,
+        'stream_id': stream_id,
         'seq': seq,
-        'ts': ts,
-        'twin_id': twin_id,
-        'kernel_version': kernel_version,
+        'utc': utc,
         'payload': payload,
-        'sha256': payload_sha256(payload),
-        'parent_sha': parent_sha,
+        'payload_hash': content_hash("rapp/1:particle", payload),
+        'prev': prev,
+        'prev_wave': None,
         'sig': None,
     }
+    frame['frame_hash'] = frame_hash(frame)
+    validate_frame(frame, stream_id)
     return frame
 
 
 def attach_sig(frame, seed):
-    sig = ed25519_sign(seed, frame['sha256'].encode('ascii'))
-    frame['sig'] = {'alg': 'ed25519', 'sig': sig.hex()}
-    return frame
+    require_current_schema(frame)
+    raise ValueError(SIGNATURE_ERROR)
 
 
 def verify_frame_sig(frame, pubkey):
-    """True if the frame's sig is absent (valid — sig is optional) or a valid
-    Ed25519 signature over its sha256 under ``pubkey``."""
-    sig = frame.get('sig')
-    if sig is None:
+    """Unsigned current frames are valid; never apply legacy key trust to JWS."""
+    require_current_schema(frame)
+    if frame.get('sig') is None:
         return True
-    if not isinstance(sig, dict) or sig.get('alg') != 'ed25519':
-        return False
-    try:
-        sig_bytes = bytes.fromhex(sig['sig'])
-    except Exception:
-        return False
-    return ed25519_verify(pubkey, frame['sha256'].encode('ascii'), sig_bytes)
+    raise ValueError(SIGNATURE_ERROR)
 
 
 def build_feed(frames, n=N, twin_id=TWIN_ID):
+    for frame in frames:
+        require_current_schema(frame)
     ordered = sorted(frames, key=lambda f: f['seq'])
+    validate_chain(ordered, twin_id)
+    if type(n) is not int or not 1 <= n <= N:
+        raise ValueError("feed window must be an integer in 1..%d" % N)
     window = ordered[-n:]
     return {
         'spec': SPEC,
         'kind': FEED_KIND,
         'twin_id': twin_id,
-        'head_sha': window[-1]['sha256'] if window else None,
+        'stream_id': twin_id,
+        'head_hash': window[-1]['frame_hash'] if window else None,
         'count': len(window),
         'frames': window,
     }
@@ -381,12 +527,13 @@ def _xml_escape(s):
 
 
 def build_feed_xml(feed, base_raw=BASE_RAW):
+    validate_feed(feed)
     frames = feed['frames']
-    updated = frames[-1]['ts'] if frames else '1970-01-01T00:00:00Z'
+    updated = frames[-1]['utc'] if frames else '1970-01-01T00:00:00.000Z'
     L = ['<?xml version="1.0" encoding="UTF-8"?>',
          '<feed xmlns="http://www.w3.org/2005/Atom">',
          '  <title>the pulse — @kody-w/twin</title>',
-         '  <subtitle>rapp-twin-pulse/1.0 — a DOG: signed, SHA-chained twin '
+         '  <subtitle>rapp/1 — a DOG: content-addressed, hash-chained twin '
          'bones. Trust the hash, not the host.</subtitle>',
          '  <id>https://kody-w.github.io/twin/feed.xml</id>',
          '  <updated>%s</updated>' % _xml_escape(updated),
@@ -397,20 +544,20 @@ def build_feed_xml(feed, base_raw=BASE_RAW):
          '  <generator uri="https://github.com/kody-w/twin" '
          'version="1.0">scripts/pulse_sign.py</generator>']
     for fr in frames:
-        sha = fr['sha256']
+        sha = fr['frame_hash']
         seq = fr['seq']
         signed = 'signed' if fr.get('sig') else 'unsigned'
         L.append('  <entry>')
-        # done-when: <id> == the frame's sha256, exactly.
+        # Waves distinguish heartbeat frames with identical particle payloads.
         L.append('    <id>%s</id>' % _xml_escape(sha))
         L.append('    <title>twin.pulse seq %d</title>' % seq)
-        L.append('    <updated>%s</updated>' % _xml_escape(fr['ts']))
+        L.append('    <updated>%s</updated>' % _xml_escape(fr['utc']))
         L.append('    <category term="twin.pulse"/>')
         L.append('    <link rel="alternate" type="application/json" '
                  'href="%s/frames/%d.json"/>' % (base_raw, seq))
-        parent = fr['parent_sha'] if fr['parent_sha'] else 'genesis (null)'
+        parent = fr['prev'] if fr['prev'] else 'genesis (null)'
         L.append('    <summary type="text">twin.pulse frame seq %d (%s); '
-                 'sha256=%s; parent_sha=%s</summary>'
+                 'frame_hash=%s; prev=%s</summary>'
                  % (seq, signed, sha, _xml_escape(parent)))
         L.append('  </entry>')
     L.append('</feed>')
@@ -420,7 +567,8 @@ def build_feed_xml(feed, base_raw=BASE_RAW):
 # ===========================================================================
 # 5. Repo I/O.
 # ===========================================================================
-_FRAME_RE = re.compile(r'^(\d+)\.json$')
+_FRAME_RE = re.compile(r'^([0-9]+)\.json$')
+_LEGACY_FRAME_RE = re.compile(r'^[0-9]+-[0-9a-f]{8}\.json$')
 
 
 def frames_dir(repo):
@@ -428,32 +576,64 @@ def frames_dir(repo):
 
 
 def load_all_frames(repo):
-    """Every frames/<seq>.json (pure-integer name only), ascending seq. The
-    legacy hologram-cartridge files (e.g. 0-<sha8>.json, HEAD) are ignored."""
+    """Load current frames only; never traverse legacy/ or attic/ archives."""
     d = frames_dir(repo)
     out = []
     if os.path.isdir(d):
         for fn in os.listdir(d):
+            if _LEGACY_FRAME_RE.fullmatch(fn) or fn == 'HEAD':
+                raise ValueError(
+                    "frames/%s: legacy cartridge input is not a rapp/1 pulse; "
+                    "use the historical tools/ verifier, not active pulse tooling" % fn)
             m = _FRAME_RE.match(fn)
             if not m:
                 continue
-            with open(os.path.join(d, fn), 'r', encoding='utf-8') as f:
-                out.append((int(m.group(1)), json.load(f)))
+            path = os.path.join(d, fn)
+            frame = load_json(path)
+            require_current_schema(frame, "frames/%s" % fn)
+            seq = frame.get('seq')
+            if type(seq) is not int or fn != '%d.json' % seq:
+                raise ValueError("frames/%s: filename does not match integer seq %r"
+                                 % (fn, seq))
+            out.append((int(m.group(1)), frame))
     out.sort(key=lambda t: t[0])
     return [fr for _seq, fr in out]
 
 
-def _dump(path, obj):
-    with open(path, 'w', encoding='utf-8') as f:
+def _json_object(pairs):
+    result = {}
+    for key, value in pairs:
+        if key in result:
+            raise ValueError("duplicate JSON key %r" % key)
+        result[key] = value
+    return result
+
+
+def _reject_constant(value):
+    raise ValueError("non-JSON numeric constant %s" % value)
+
+
+def load_json(path):
+    try:
+        with open(path, 'r', encoding='utf-8') as f:
+            return json.load(f, object_pairs_hook=_json_object,
+                             parse_constant=_reject_constant)
+    except (OSError, ValueError) as exc:
+        raise ValueError("%s: %s" % (path, exc)) from exc
+
+
+def _dump(path, obj, mode='w'):
+    with open(path, mode, encoding='utf-8') as f:
         json.dump(obj, f, ensure_ascii=False, indent=2)
         f.write('\n')
 
 
 def write_frame(repo, frame):
+    validate_frame(frame)
     d = frames_dir(repo)
     os.makedirs(d, exist_ok=True)
     path = os.path.join(d, '%d.json' % frame['seq'])
-    _dump(path, frame)
+    _dump(path, frame, mode='x')
     return path
 
 
