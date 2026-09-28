@@ -11,12 +11,14 @@ The retained Ed25519 primitives are not a RAPP/1 signing implementation.
 Current signatures require registry-backed detached JWS; this offline tool
 refuses them rather than trusting the legacy key/signature representation.
 
-Bones rule (load-bearing): payloads MUST NOT contain bare floats. Integers or
-strings only, so no runtime can reformat a number and silently fork the chain.
-`canonicalize()` raises on a float rather than guess an ES number form.
+Bones rule (load-bearing): the pulse never emits a bare float in a bones
+payload. Integers or strings only; `build_frame()` refuses a float. The
+canonical form itself is the full RAPP/1 rev-17 §4 (RFC 8785) form, so any
+binary64 number verifies; its number layout and I-JSON rules are copied from
+kody-w/rapp-1 rapp.py at f6bafe76735ba73510518810c8bc8cd133dcf527.
 """
 
-import datetime
+import decimal
 import hashlib
 import json
 import os
@@ -47,6 +49,10 @@ SIGNATURE_ERROR = (
 _UTC_RE = re.compile(r"[0-9]{4}-[0-9]{2}-[0-9]{2}T"
                      r"[0-9]{2}:[0-9]{2}:[0-9]{2}\.[0-9]{3}Z")
 _HASH_RE = re.compile(r"[0-9a-f]{64}")
+# RAPP/1 §5 (rev-17 E-7): the only tags H (a value hash) is used with.
+_H_TAGS = frozenset(("rapp/1:particle", "rapp/1:wave", "rapp/1:egg-manifest",
+                     "rapp/1:sealed-aad", "rapp/1:sealed-key-request"))
+MAX_CANONICAL_BYTES = 1024 * 1024
 
 # ===========================================================================
 # 1. RFC 8785 (JCS) canonicalization  -- the canonical form is the contract.
@@ -62,10 +68,73 @@ _STRING_ESCAPES = {
 }
 
 
+# §4 (b), RFC 7493 §2.1: surrogate code points and the 66 noncharacters are outside I-JSON.
+_NOT_IJSON_CHAR = re.compile(
+    "[\ud800-\udfff\ufdd0-\ufdef"
+    + "".join(chr(plane << 16 | 0xFFFE) + chr(plane << 16 | 0xFFFF) for plane in range(17))
+    + "]"
+)
+
+
+def _number_to_string(x):
+    """ECMA-262 Number::toString of a finite binary64 value: the RFC 8785 §3.2.2.3 number form."""
+    if x != x or x in (float("inf"), float("-inf")):
+        raise ValueError("NaN and infinities are outside the §4 domain")
+    if x == 0:
+        return "0"                          # both zeros; -0 serializes as 0
+    # repr() is the shortest digit string that round-trips (nearest, ties to even), the
+    # digits Number::toString picks; only the layout differs, so re-lay it out here.
+    mantissa, _, exponent = repr(abs(x)).partition("e")
+    whole, _, fraction = mantissa.partition(".")
+    digits = (whole + fraction).lstrip("0")
+    n = len(whole) + int(exponent or 0) - (len(whole) + len(fraction) - len(digits))
+    digits = digits.rstrip("0")
+    k = len(digits)                         # value = 0.digits * 10**n
+    if k <= n <= 21:
+        text = digits + "0" * (n - k)
+    elif 0 < n <= 21:
+        text = digits[:n] + "." + digits[n:]
+    elif -6 < n <= 0:
+        text = "0." + "0" * -n + digits
+    else:
+        text = digits[0] + ("." + digits[1:] if k > 1 else "") + "e" + ("+" if n > 0 else "-") + str(abs(n - 1))
+    return ("-" if x < 0 else "") + text
+
+
+def _json_number(token):
+    """§4 (c): parse a number token as its nearest binary64 d; refuse unless d is finite and
+    Number::toString(d) denotes exactly the token's value (so 0.1 passes, 0.10000000000000001 does not)."""
+    d = float(token)                                   # correctly rounded, ties to even; overlong -> +/-inf
+    if d != d or d in (float("inf"), float("-inf")):
+        raise ValueError(f"number token {token[:40]} is not a finite binary64 value (§4 (c))")
+    try:
+        same = decimal.Decimal(token) == decimal.Decimal(_number_to_string(d))
+    except ArithmeticError:
+        # An exponent beyond decimal's range. d is finite, so it is a zero, and the token
+        # denotes the same value iff every digit of its significand is zero.
+        same = not any(c in "123456789" for c in token.lower().partition("e")[0])
+    if not same:
+        raise ValueError(f"number token {token[:40]} does not survive the binary64 round trip (§4 (c))")
+    return d
+
+
+def _json_int(token):
+    if token == "-0":
+        return -0.0          # E-9: -0 is not an integer token a field rule may take for 0; canonical(-0.0) is "0"
+    d = _json_number(token)  # refuses 9007199254740993 and overlong tokens before int() runs
+    value = int(token)
+    # 10**23 passes §4 (c) (its d prints as "1e+23") but is not d; the value parsed is d itself.
+    return value if value == d else int(d)
+
+
 def _ser_string(s):
     # RFC 8785 3.2.2.2: two-char escapes for the named control chars, \u00xx
     # (lowercase) for the remaining C0 controls, everything else verbatim (so
     # non-ASCII is emitted as raw UTF-8, NOT \u-escaped). '/' is NOT escaped.
+    bad = _NOT_IJSON_CHAR.search(s)
+    if bad:
+        raise ValueError("JCS: string holds U+%04X, a surrogate or noncharacter "
+                         "outside I-JSON (RAPP/1 §4 (b))" % ord(bad.group()))
     out = ['"']
     for ch in s:
         esc = _STRING_ESCAPES.get(ch)
@@ -93,11 +162,20 @@ def _ser(o):
     if isinstance(o, bool):  # unreachable (handled above) — defensive
         return 'true' if o else 'false'
     if isinstance(o, int):
-        return str(o)
+        if abs(o) <= 2 ** 53 - 1:
+            return str(o)
+        # RAPP/1 §4 (c): an integer beyond +/-(2^53-1) is admitted only when it
+        # is exactly a binary64 value, and is then serialized as that number.
+        try:
+            as_binary64 = float(o)
+        except OverflowError:
+            as_binary64 = None
+        if as_binary64 != o:
+            raise ValueError("JCS: integer is not exactly representable as "
+                             "binary64 (RAPP/1 §4 (c)); carry it as a string")
+        return _number_to_string(as_binary64)
     if isinstance(o, float):
-        raise ValueError(
-            "JCS: bare float not allowed in a bones payload (%r) — use an "
-            "integer or a string so no runtime can reformat it." % o)
+        return _number_to_string(o)
     if isinstance(o, dict):
         # Keys sorted by UTF-16 code units (RFC 8785 3.2.3). Comparing the
         # UTF-16-BE byte encoding reproduces that ordering exactly, including
@@ -126,6 +204,9 @@ def payload_sha256(payload):
 
 def content_hash(domain, value):
     """The same RAPP/1 H(domain, value) rule as utils/frames.py::_H."""
+    if not isinstance(domain, str) or domain not in _H_TAGS:
+        raise ValueError("RAPP/1 §5: H is used only with the tags %s; refused %r"
+                         % (", ".join(sorted(_H_TAGS)), domain))
     return hashlib.sha256(
         domain.encode('utf-8') + b'\n' + canonicalize(value)).hexdigest()
 
@@ -154,10 +235,13 @@ def require_current_schema(value, label="frame"):
 def validate_utc(utc):
     if not isinstance(utc, str) or not _UTC_RE.fullmatch(utc):
         raise ValueError("utc must be YYYY-MM-DDTHH:MM:SS.mmmZ")
-    try:
-        datetime.datetime.strptime(utc, "%Y-%m-%dT%H:%M:%S.%fZ")
-    except ValueError as exc:
-        raise ValueError("utc is not a calendar-valid UTC timestamp: %r" % utc) from exc
+    # RAPP/1 §7.4 (rev-17 E-1): proleptic Gregorian, years 0000-9999, second 00-59.
+    year, month, day = int(utc[0:4]), int(utc[5:7]), int(utc[8:10])
+    leap = year % 4 == 0 and (year % 100 != 0 or year % 400 == 0)
+    days = (31, 29 if leap else 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31)
+    if not (1 <= month <= 12 and 1 <= day <= days[month - 1] and int(utc[11:13]) <= 23
+            and int(utc[14:16]) <= 59 and int(utc[17:19]) <= 59):
+        raise ValueError("utc is not a calendar-valid UTC timestamp: %r" % utc)
 
 
 def normalize_utc(utc):
@@ -470,7 +554,22 @@ def diff_ops(prev_state, cur_state):
 # ===========================================================================
 # 4. Frame / feed / Atom builders.
 # ===========================================================================
+def _refuse_floats(value):
+    stack = [value]
+    while stack:
+        item = stack.pop()
+        if isinstance(item, float):
+            raise ValueError(
+                "bare float not allowed in a bones payload (%r) — use an "
+                "integer or a string" % item)
+        if isinstance(item, dict):
+            stack.extend(item.values())
+        elif isinstance(item, (list, tuple)):
+            stack.extend(item)
+
+
 def build_frame(seq, ops, prev, utc, stream_id=TWIN_ID):
+    _refuse_floats(ops)
     payload = {'bones': ops}
     frame = {
         'spec': SPEC,
@@ -613,12 +712,29 @@ def _reject_constant(value):
     raise ValueError("non-JSON numeric constant %s" % value)
 
 
+def _check_bounds(value):
+    """RAPP/1 §4 (d): nesting depth at most 64, canonical form at most 1 MiB."""
+    stack = [(value, 1)]
+    while stack:
+        current, depth = stack.pop()
+        if isinstance(current, (dict, list)):
+            if depth > 64:
+                raise ValueError("JSON nesting depth exceeds 64 (RAPP/1 §4 (d))")
+            items = current.values() if isinstance(current, dict) else current
+            stack.extend((item, depth + 1) for item in items)
+    if len(canonicalize(value)) > MAX_CANONICAL_BYTES:
+        raise ValueError("canonical JSON exceeds 1 MiB (RAPP/1 §4 (d))")
+
+
 def load_json(path):
     try:
         with open(path, 'r', encoding='utf-8') as f:
-            return json.load(f, object_pairs_hook=_json_object,
-                             parse_constant=_reject_constant)
-    except (OSError, ValueError) as exc:
+            value = json.load(f, object_pairs_hook=_json_object,
+                              parse_constant=_reject_constant,
+                              parse_float=_json_number, parse_int=_json_int)
+        _check_bounds(value)
+        return value
+    except (OSError, ValueError, RecursionError) as exc:
         raise ValueError("%s: %s" % (path, exc)) from exc
 
 

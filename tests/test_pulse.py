@@ -91,11 +91,18 @@ class TestPulsePrimitives(unittest.TestCase):
 
     def test_jcs_golden_vector_is_unchanged(self):
         fixtures = REPO / "scripts" / "testdata"
-        value = json.loads((fixtures / "jcs_golden_input.json").read_text())
+        value = pl.load_json(str(fixtures / "jcs_golden_input.json"))
         self.assertEqual(pl.canonicalize(value),
                          (fixtures / "jcs_golden_expected.jcs").read_bytes())
+        # RAPP/1 rev-17 §4: every binary64 number has exactly one canonical form.
+        self.assertEqual(pl.canonicalize({"n": [1.5, 1e21, -0.0, 2 ** 53]}),
+                         b'{"n":[1.5,1e+21,0,9007199254740992]}')
         with self.assertRaises(ValueError):
-            pl.canonicalize({"unsupported": 1.5})
+            pl.canonicalize({"unsupported": 2 ** 53 + 1})
+        # The bones rule is the pulse producer's: it never emits a bare float.
+        with self.assertRaisesRegex(ValueError, "float"):
+            pl.build_frame(0, {"n.json": {"op": "set", "value": 1.5}}, None,
+                           "2026-01-01T00:00:00.000Z")
 
     def test_feed_and_atom_use_wave_addresses_not_particle_addresses(self):
         first = current_frame()
