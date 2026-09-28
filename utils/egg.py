@@ -110,6 +110,7 @@ _CANON_RAPPID_RE = re.compile(
 # Legacy pre-RAPP form (rappid:<type>:@pub/slug:<16-hex>). Retained ONLY so a
 # brainstem that already stored a legacy identity is still recognized and NOT
 # re-minted (which would lose its identity). New mints are always canonical.
+_LABEL_RE = re.compile(r"[a-z0-9]+(?:-[a-z0-9]+)*")
 _LEGACY_RAPPID_RE = re.compile(r"^rappid:(twin|rapp|swarm):(@[\w-]+)/([\w-]+):([0-9a-f]{16})$")
 
 
@@ -117,6 +118,17 @@ def _is_known_rappid(s: str) -> bool:
     """True if `s` is a rappid we recognize — canonical (preferred) or a
     legacy stored form we must not clobber."""
     return bool(isinstance(s, str) and (_CANON_RAPPID_RE.match(s) or _LEGACY_RAPPID_RE.match(s)))
+
+
+def _canon_match(s):
+    """The §6.1 match of the WHOLE string `s` (owner 1-39, slug 1-100
+    characters), or None. `re.match` with `$` also accepts a trailing newline."""
+    m = _CANON_RAPPID_RE.fullmatch(s) if isinstance(s, str) else None
+    return m if m and len(m.group(1)) <= 39 and len(m.group(2)) <= 100 else None
+
+
+def _is_label(s, longest: int) -> bool:
+    return isinstance(s, str) and bool(_LABEL_RE.fullmatch(s)) and len(s) <= longest
 
 
 def _read_identity() -> dict:
@@ -140,11 +152,12 @@ def _write_identity(data: dict) -> None:
         json.dump(data, f, indent=2)
 
 
-def _canon_label(s: str, fallback: str) -> str:
+def _canon_label(s: str, fallback: str, longest: int = 100) -> str:
     """Coerce to a canonical §6.1 label: lowercase [a-z0-9] with single
-    internal hyphens, no leading/trailing/double hyphens, no underscores."""
+    internal hyphens, no leading/trailing/double hyphens, no underscores,
+    at most `longest` characters (owner 39, slug 100)."""
     s = re.sub(r"[^a-z0-9]+", "-", (s or "").lower()).strip("-")
-    return re.sub(r"-+", "-", s) or fallback
+    return re.sub(r"-+", "-", s)[:longest].strip("-") or fallback
 
 
 def _make_rappid(type_: str, publisher: str, slug: str) -> str:
@@ -154,9 +167,15 @@ def _make_rappid(type_: str, publisher: str, slug: str) -> str:
     The tail is ``Hb("rapp/1:rappid", uuid4_bytes)`` — 64 hex, domain
     separated — never a hash of the name. ``type_`` (twin/rapp/swarm) is the
     caller's bookkeeping only; an organism's kind lives in its manifest, not
-    inside the rappid string, so it is not encoded here."""
-    pub = _canon_label(publisher.lstrip("@"), "anon")
-    slug = _canon_label(slug, "unnamed")
+    inside the rappid string, so it is not encoded here.
+
+    ``publisher`` ("@owner" or "owner") and ``slug`` must already be §6.1
+    labels (owner 1-39, slug 1-100 characters): anything else is refused,
+    never renamed (rapp.py::mint_rappid). The get_or_create_* entry points
+    derive those labels from free-form names first (``_canon_label``)."""
+    pub = publisher[1:] if isinstance(publisher, str) and publisher.startswith("@") else publisher
+    if not (_is_label(pub, 39) and _is_label(slug, 100)):
+        raise ValueError("owner or slug violates the RAPPID grammar (spec §6.1)")
     tail = hashlib.sha256(b"rapp/1:rappid" + b"\x0a" + uuid.uuid4().bytes).hexdigest()
     return f"rappid:@{pub}/{slug}:{tail}"
 
@@ -167,7 +186,8 @@ def get_or_create_twin_rappid(publisher: str = "@anon",
     ident = _read_identity()
     if ident.get("twin") and _is_known_rappid(ident["twin"]):
         return ident["twin"]
-    new = _make_rappid("twin", publisher, slug)
+    new = _make_rappid("twin", _canon_label(publisher.lstrip("@"), "anon", 39),
+                       _canon_label(slug, "unnamed"))
     ident["twin"] = new
     _write_identity(ident)
     return new
@@ -179,7 +199,8 @@ def get_or_create_rapp_rappid(rapp_id: str, publisher: str = "@anon") -> str:
     rapps = ident.setdefault("rapps", {})
     if rapps.get(rapp_id) and _is_known_rappid(rapps[rapp_id]):
         return rapps[rapp_id]
-    new = _make_rappid("rapp", publisher, rapp_id)
+    new = _make_rappid("rapp", _canon_label(publisher.lstrip("@"), "anon", 39),
+                       _canon_label(rapp_id, "unnamed"))
     rapps[rapp_id] = new
     _write_identity(ident)
     return new
@@ -193,7 +214,7 @@ def parse_rappid(rappid: str) -> Optional[dict]:
     `type` is None for canonical rappids (kind lives in the manifest)."""
     if not isinstance(rappid, str):
         return None
-    m = _CANON_RAPPID_RE.match(rappid)
+    m = _canon_match(rappid)
     if m:
         return {
             "type":      None,
