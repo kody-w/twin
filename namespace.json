@@ -60,6 +60,16 @@
         "payload_hash": "4a140c74458ae928555ce2922f8cc727",
         "frame_hash": "ea4cc3eac557ae2305314ab271d7721b"
       }
+    },
+    {
+      "key": "rappid:@local/grandma-rose:f21aa01933e70df53dd7b3f0c772abe88d1c33b42ad11877dbb18c3bb712acb8",
+      "kind": "twin",
+      "slug": "grandma-rose",
+      "raw": "https://raw.githubusercontent.com/kody-w/twin/main/snapshots/grandma-rose/",
+      "genesis": {
+        "payload_hash": "060d84530afac0f9e4b163070242392c",
+        "frame_hash": "76967f3d9de99e430bd7a4f0fb2d8bac"
+      }
     }
   ],
   "objects_store": {

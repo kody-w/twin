@@ -1,0 +1,11 @@
+{
+  "schema": "rapp-public-notes/1.0",
+  "rappid": "rappid:@local/grandma-rose:f21aa01933e70df53dd7b3f0c772abe88d1c33b42ad11877dbb18c3bb712acb8",
+  "notes": [
+    {
+      "title": "A persona, with love",
+      "body": "Grandma Rose is a comforting archetype — warmth, recipes, and gentle wisdom — not a specific real person. She keeps no private data about you; she just keeps the kettle on.",
+      "ts": "2026-04-01T00:00:00Z"
+    }
+  ]
+}

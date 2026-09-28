@@ -1,0 +1,15 @@
+{
+  "schema": "twin-snapshot/1.0",
+  "rappid": "rappid:@local/grandma-rose:f21aa01933e70df53dd7b3f0c772abe88d1c33b42ad11877dbb18c3bb712acb8",
+  "title": "Grandma Rose",
+  "purpose": "A warm grandmother persona twin. Hot-load her onto a brainstem for a kind voice, a recipe, and a seat at the table. PII-free archetype.",
+  "kind": "twin",
+  "channel_sim": "the kitchen-table channel",
+  "raw_base": "https://raw.githubusercontent.com/kody-w/twin/main/snapshots/grandma-rose/",
+  "egg": "https://raw.githubusercontent.com/kody-w/rapp-egg-hub/main/eggs/grandma-rose.egg",
+  "awaken": {
+    "brainstem": "summon public bones from raw + private local, ignite with a soul LLM",
+    "dog_god": "public bones travel; anything personal stays on your device"
+  },
+  "frames": "frames.jsonl"
+}
